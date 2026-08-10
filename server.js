@@ -148,10 +148,12 @@ app.get('/api/bases/main',auth,async(req,res)=>{const r=await pool.query('SELECT
 app.put('/api/bases/main/:key',auth,master,async(req,res)=>{const key=req.params.key;const p=req.body||{};if(!Array.isArray(p.rows)) return res.status(400).json({error:'Dados da base inválidos.'});await pool.query(`INSERT INTO app_bases(key,rows,file_name,source_sheet,updated_at) VALUES($1,$2,$3,$4,COALESCE($5,NOW())) ON CONFLICT(key) DO UPDATE SET rows=EXCLUDED.rows,file_name=EXCLUDED.file_name,source_sheet=EXCLUDED.source_sheet,updated_at=EXCLUDED.updated_at`,[key,JSON.stringify(p.rows),p.file||null,p.sourceSheet||null,p.updatedAt||null]);res.json({ok:true});});
 app.get('/api/bases/siafe',auth,async(req,res)=>{const r=await pool.query('SELECT rows,updated_at AS "updatedAt" FROM app_bases WHERE key=$1',['__SIAFE__']);res.json(r.rows[0]||{rows:[],updatedAt:null});});
 app.put('/api/bases/siafe',auth,master,async(req,res)=>{const p=req.body||{};if(!Array.isArray(p.rows)) return res.status(400).json({error:'Dados SIAFE inválidos.'});await pool.query(`INSERT INTO app_bases(key,rows,updated_at) VALUES('__SIAFE__',$1,COALESCE($2,NOW())) ON CONFLICT(key) DO UPDATE SET rows=EXCLUDED.rows,updated_at=EXCLUDED.updated_at`,[JSON.stringify(p.rows),p.updatedAt||null]);res.json({ok:true});});
+app.get('/api/bases/lei360',auth,async(req,res)=>{const r=await pool.query('SELECT rows,updated_at AS "updatedAt",file_name AS "file" FROM app_bases WHERE key=$1',['__LEI360__']);res.json(r.rows[0]||{rows:[],updatedAt:null,file:null});});
+app.put('/api/bases/lei360',auth,master,async(req,res)=>{const p=req.body||{};if(!Array.isArray(p.rows)) return res.status(400).json({error:'Dados Lei 360 inválidos.'});await pool.query(`INSERT INTO app_bases(key,rows,file_name,updated_at) VALUES('__LEI360__',$1,$2,COALESCE($3,NOW())) ON CONFLICT(key) DO UPDATE SET rows=EXCLUDED.rows,file_name=EXCLUDED.file_name,updated_at=EXCLUDED.updated_at`,[JSON.stringify(p.rows),p.file||null,p.updatedAt||null]);res.json({ok:true});});
 
-const publicDir=__dirname;
+const publicDir=path.join(__dirname,'public');
 app.use(express.static(publicDir));
-app.get(/.*/,(req,res)=>res.sendFile(path.join(publicDir,'index.html')));
+app.get(/.*/,(req,res)=>res.sendFile(path.join(publicDir,'Painel_Convenios_Corporativo_V44_COMPARTILHADO.html')));
 
 ensureSchema()
   .then(()=>{
