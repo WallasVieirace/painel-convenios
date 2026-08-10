@@ -149,7 +149,7 @@ app.put('/api/bases/main/:key',auth,master,async(req,res)=>{const key=req.params
 app.get('/api/bases/siafe',auth,async(req,res)=>{const r=await pool.query('SELECT rows,updated_at AS "updatedAt" FROM app_bases WHERE key=$1',['__SIAFE__']);res.json(r.rows[0]||{rows:[],updatedAt:null});});
 app.put('/api/bases/siafe',auth,master,async(req,res)=>{const p=req.body||{};if(!Array.isArray(p.rows)) return res.status(400).json({error:'Dados SIAFE inválidos.'});await pool.query(`INSERT INTO app_bases(key,rows,updated_at) VALUES('__SIAFE__',$1,COALESCE($2,NOW())) ON CONFLICT(key) DO UPDATE SET rows=EXCLUDED.rows,updated_at=EXCLUDED.updated_at`,[JSON.stringify(p.rows),p.updatedAt||null]);res.json({ok:true});});
 
-const publicDir=path.join(__dirname,'public');
+const publicDir=__dirname;
 app.use(express.static(publicDir));
 app.get(/.*/,(req,res)=>res.sendFile(path.join(publicDir,'index.html')));
 
