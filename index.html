@@ -6351,10 +6351,15 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
     empenho:['NUMERO EMPENHO'],
     dataPagamento:['DATA PAGAMENTO'],
     areaPA:['AREA P A'],
-    areaRecurso:['AREA RECURSO']
+    areaRecurso:['AREA RECURSO'],
+    idExNome:['ID EX NOME','ID EX. NOME','ID EX']
   };
   const BG_ALIASES={
+    conta:['CONTA'],
+    domicilio:['DOMICILIO'],
+    tipo:['TIPO'],
     fonte:['FONTE'],
+    fonteCompleta:['FONTE COMPLETA'],
     classificacao:['CLASSIFICACAO'],
     tipoReceita:['TIPO RECEITA'],
     blocoGrupo:['BLOCO GRUPO'],
@@ -6398,7 +6403,8 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
         empenho:String(pick(rec,PA_ALIASES.empenho)||'').trim(),
         dataPagamento:pick(rec,PA_ALIASES.dataPagamento),
         areaPA:String(pick(rec,PA_ALIASES.areaPA)||'').trim(),
-        areaRecurso:String(pick(rec,PA_ALIASES.areaRecurso)||'').trim()
+        areaRecurso:String(pick(rec,PA_ALIASES.areaRecurso)||'').trim(),
+        idExNome:String(pick(rec,PA_ALIASES.idExNome)||'').trim()
       };
     }).filter(Boolean);
   }
@@ -6408,7 +6414,11 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
       if(!acao) return null;
       return {
         acaoDetalhada:acao,
+        conta:String(pick(rec,BG_ALIASES.conta)||'').trim(),
+        domicilio:String(pick(rec,BG_ALIASES.domicilio)||'').trim(),
+        tipo:String(pick(rec,BG_ALIASES.tipo)||'').trim(),
         fonte:String(pick(rec,BG_ALIASES.fonte)||'').trim(),
+        fonteCompleta:String(pick(rec,BG_ALIASES.fonteCompleta)||'').trim(),
         classificacao:String(pick(rec,BG_ALIASES.classificacao)||'').trim(),
         tipoReceita:String(pick(rec,BG_ALIASES.tipoReceita)||'').trim(),
         blocoGrupo:String(pick(rec,BG_ALIASES.blocoGrupo)||'').trim(),
@@ -6426,13 +6436,14 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
     const map=new Map();
     state.paRows.forEach(p=>{
       const key=p.acaoDetalhada;
-      if(!map.has(key)) map.set(key,{acao:key,items:[],context:null});
+      if(!map.has(key)) map.set(key,{acao:key,items:[],context:null,allContexts:[]});
       map.get(key).items.push(p);
     });
     state.bgRows.forEach(b=>{
       const key=b.acaoDetalhada;
       if(!map.has(key)) return;
       const g=map.get(key);
+      g.allContexts.push(b);
       if(!g.context||(norm(b.ficha).includes('PRINCIPAL')&&!norm(g.context.ficha).includes('PRINCIPAL'))) g.context=b;
     });
     const groups=Array.from(map.values()).map(g=>{
@@ -6531,19 +6542,29 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
     if(values.includes(old)) el.value=old;
   }
   function populateFilters(){
-    const acaoSel=document.getElementById('sdAcao');
-    if(acaoSel){
-      const old=acaoSel.value;
+    const acaoList=document.getElementById('sdAcaoList');
+    if(acaoList){
       const acoes=state.grouped.map(g=>g.acao).sort((a,b)=>a.localeCompare(b,'pt-BR'));
-      acaoSel.innerHTML=`<option value="">Todas as ações (${acoes.length.toLocaleString('pt-BR')})</option>`+acoes.map(a=>`<option value="${escapeHtml(a)}">${escapeHtml(truncate(a,90))}</option>`).join('');
-      if(acoes.includes(old)) acaoSel.value=old;
+      acaoList.innerHTML=acoes.map(a=>`<option value="${escapeHtml(a)}">`).join('');
     }
+    // V54 FIX: os filtros vindos da Base Geral Ações (Superintendência,
+    // Secretaria, Categoria, Fonte, Fonte do recurso, Conta bancária)
+    // listavam TODOS os valores da planilha, inclusive de ações que não têm
+    // nenhum Plano de Aplicação correspondente — escolher essas opções
+    // sempre retornava zero resultados. Agora os valores vêm só das ações
+    // que já sabemos que têm cruzamento (state.grouped), então toda opção
+    // listada tem garantia de retornar pelo menos um resultado.
+    const allCtx=state.grouped.flatMap(g=>g.allContexts);
     fillSelect('sdStatus',Array.from(new Set(state.paRows.map(p=>p.status).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'pt-BR')),'Todos');
     fillSelect('sdFicha',Array.from(new Set(state.paRows.map(p=>p.ficha).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'pt-BR')),'Todas');
-    fillSelect('sdSuper',Array.from(new Set(state.bgRows.map(b=>b.superintendencia).filter(v=>v&&v!=='-'))).sort((a,b)=>a.localeCompare(b,'pt-BR')),'Todas');
-    fillSelect('sdSecretaria',Array.from(new Set(state.bgRows.map(b=>b.secretaria).filter(v=>v&&v!=='-'))).sort((a,b)=>a.localeCompare(b,'pt-BR')),'Todas');
-    fillSelect('sdCategoria',Array.from(new Set(state.bgRows.map(b=>b.categoria).filter(v=>v&&v!=='-'))).sort((a,b)=>a.localeCompare(b,'pt-BR')),'Todas');
-    fillSelect('sdFonte',Array.from(new Set(state.bgRows.map(b=>b.fonte).filter(v=>v&&v!=='-'))).sort((a,b)=>a.localeCompare(b,'pt-BR')),'Todas');
+    fillSelect('sdIdExNome',Array.from(new Set(state.paRows.map(p=>p.idExNome).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'pt-BR')),'Todos');
+    fillSelect('sdSuper',Array.from(new Set(allCtx.map(b=>b.superintendencia).filter(v=>v&&v!=='-'))).sort((a,b)=>a.localeCompare(b,'pt-BR')),'Todas');
+    fillSelect('sdSecretaria',Array.from(new Set(allCtx.map(b=>b.secretaria).filter(v=>v&&v!=='-'))).sort((a,b)=>a.localeCompare(b,'pt-BR')),'Todas');
+    fillSelect('sdCategoria',Array.from(new Set(allCtx.map(b=>b.categoria).filter(v=>v&&v!=='-'))).sort((a,b)=>a.localeCompare(b,'pt-BR')),'Todas');
+    fillSelect('sdFonte',Array.from(new Set(allCtx.map(b=>b.fonte).filter(v=>v&&v!=='-'))).sort((a,b)=>a.localeCompare(b,'pt-BR')),'Todas');
+    fillSelect('sdFonteCompleta',Array.from(new Set(allCtx.map(b=>b.fonteCompleta).filter(v=>v&&v!=='-'))).sort((a,b)=>a.localeCompare(b,'pt-BR')),'Todas');
+    const contas=Array.from(new Set(allCtx.filter(b=>b.conta).map(b=>b.conta+(b.domicilio?' - '+b.domicilio:'')))).sort((a,b)=>a.localeCompare(b,'pt-BR'));
+    fillSelect('sdConta',contas,'Todas');
   }
 
   function filterItems(items,f){
@@ -6551,6 +6572,8 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
       if(f.numeroPA&&!norm(p.numeroPA).includes(f.numeroPA)) return false;
       if(f.status&&p.status!==f.status) return false;
       if(f.ficha&&p.ficha!==f.ficha) return false;
+      if(f.empenho&&!norm(p.empenho).includes(f.empenho)) return false;
+      if(f.idExNome&&p.idExNome!==f.idExNome) return false;
       if(f.de1){ const d=dateVal(p.dataEmissao); if(!d||d<f.de1) return false; }
       if(f.de2){ const d=dateVal(p.dataEmissao); if(!d||d>f.de2) return false; }
       if(f.dp1){ const d=dateVal(p.dataPagamento); if(!d||d<f.dp1) return false; }
@@ -6559,27 +6582,33 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
     });
   }
   function applyFilters(){
-    const acao=document.getElementById('sdAcao')?.value||'';
+    const acaoQuery=norm(document.getElementById('sdAcao')?.value||'');
     const superi=document.getElementById('sdSuper')?.value||'';
     const secretaria=document.getElementById('sdSecretaria')?.value||'';
     const categoria=document.getElementById('sdCategoria')?.value||'';
     const fonte=document.getElementById('sdFonte')?.value||'';
+    const fonteCompleta=document.getElementById('sdFonteCompleta')?.value||'';
+    const conta=document.getElementById('sdConta')?.value||'';
     const f={
       numeroPA:norm(document.getElementById('sdNumeroPA')?.value||''),
       status:document.getElementById('sdStatus')?.value||'',
       ficha:document.getElementById('sdFicha')?.value||'',
+      empenho:norm(document.getElementById('sdEmpenho')?.value||''),
+      idExNome:document.getElementById('sdIdExNome')?.value||'',
       de1:(v=>v?new Date(v+'T00:00:00'):null)(document.getElementById('sdDataEmissao1')?.value),
       de2:(v=>v?new Date(v+'T23:59:59'):null)(document.getElementById('sdDataEmissao2')?.value),
       dp1:(v=>v?new Date(v+'T00:00:00'):null)(document.getElementById('sdDataPagamento1')?.value),
       dp2:(v=>v?new Date(v+'T23:59:59'):null)(document.getElementById('sdDataPagamento2')?.value)
     };
-    const itemLevel=f.numeroPA||f.status||f.ficha||f.de1||f.de2||f.dp1||f.dp2;
+    const itemLevel=f.numeroPA||f.status||f.ficha||f.empenho||f.idExNome||f.de1||f.de2||f.dp1||f.dp2;
     state.filtered=state.grouped.filter(g=>{
-      if(acao&&g.acao!==acao) return false;
+      if(acaoQuery&&!norm(g.acao).includes(acaoQuery)) return false;
       if(superi&&(!g.context||g.context.superintendencia!==superi)) return false;
       if(secretaria&&(!g.context||g.context.secretaria!==secretaria)) return false;
       if(categoria&&(!g.context||g.context.categoria!==categoria)) return false;
-      if(fonte&&(!g.context||g.context.fonte!==fonte)) return false;
+      if(fonte&&!g.allContexts.some(c=>c.fonte===fonte)) return false;
+      if(fonteCompleta&&!g.allContexts.some(c=>c.fonteCompleta===fonteCompleta)) return false;
+      if(conta&&!g.allContexts.some(c=>(c.conta+(c.domicilio?' - '+c.domicilio:''))===conta)) return false;
       if(itemLevel&&filterItems(g.items,f).length===0) return false;
       return true;
     }).map(g=>{
@@ -6611,7 +6640,10 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
     const pageItems=g.items.slice((page-1)*PAGE_SIZE,page*PAGE_SIZE);
     const contextHtml=ctx?`<div class="sd-context">
         <div class="sd-context-item"><b>Fonte</b><span>${escapeHtml(ctx.fonte||'—')}</span></div>
+        <div class="sd-context-item"><b>Fonte do recurso</b><span>${escapeHtml(ctx.fonteCompleta||'—')}</span></div>
+        <div class="sd-context-item"><b>Conta bancária</b><span>${escapeHtml(ctx.conta?(ctx.conta+(ctx.domicilio?' - '+ctx.domicilio:'')):'—')}</span></div>
         <div class="sd-context-item"><b>Classificação</b><span>${escapeHtml(ctx.classificacao||'—')}</span></div>
+        <div class="sd-context-item"><b>Tipo</b><span>${escapeHtml(ctx.tipo||'—')}</span></div>
         <div class="sd-context-item"><b>Bloco/Grupo</b><span>${escapeHtml(ctx.blocoGrupo||'—')}</span></div>
         <div class="sd-context-item"><b>Secretaria</b><span>${escapeHtml(ctx.secretaria||'—')}</span></div>
         <div class="sd-context-item"><b>Secretário Executivo</b><span>${escapeHtml(ctx.secretarioExecutivo||'—')}</span></div>
@@ -6624,6 +6656,7 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
         <td class="money">${money(p.valor)}</td><td class="money">${money(p.valorPago)}</td><td class="money">${money(p.saldoPagar)}</td>
         <td><span class="sd-status ${statusClass(p.status)}">${escapeHtml(p.status||'—')}</span></td>
         <td>${escapeHtml(p.processo||'—')}</td><td>${escapeHtml(p.empenho||'—')}</td><td>${fmtDate(p.dataPagamento)}</td>
+        <td>${escapeHtml(p.idExNome||'—')}</td>
       </tr>`).join('');
     return `<div class="sd-group ${isOpen?'open':''}" data-acao="${escapeHtml(g.acao)}">
       <div class="sd-group-head" data-toggle="${escapeHtml(g.acao)}">
@@ -6642,7 +6675,7 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
       ${isOpen?`${contextHtml}
       <div class="sd-table-wrap">
         <table class="sd-table">
-          <thead><tr><th>N° PA</th><th>Data emissão</th><th>Ficha</th><th>Valor</th><th>Pago</th><th>Saldo</th><th>Situação</th><th>Processo</th><th>Empenho</th><th>Data pagamento</th></tr></thead>
+          <thead><tr><th>N° PA</th><th>Data emissão</th><th>Ficha</th><th>Valor</th><th>Pago</th><th>Saldo</th><th>Situação</th><th>Processo</th><th>Empenho</th><th>Data pagamento</th><th>Id. Ex. Nome</th></tr></thead>
           <tbody>${rowsHtml}</tbody>
         </table>
       </div>
@@ -6745,14 +6778,18 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
       <div class="sd-panel">
         <div class="sd-panel-head"><div class="sd-panel-title">Filtros de pesquisa</div><button class="sd-btn" id="sdClear">Limpar filtros</button></div>
         <div class="sd-filters">
-          <div class="sd-field wide"><label>Ação detalhada</label><select id="sdAcao"><option value="">Todas as ações</option></select></div>
+          <div class="sd-field wide"><label>Ação detalhada</label><input id="sdAcao" list="sdAcaoList" placeholder="Digite para pesquisar a ação detalhada" autocomplete="off"><datalist id="sdAcaoList"></datalist></div>
           <div class="sd-field"><label>N° PA</label><input id="sdNumeroPA" placeholder="Informe o N° PA"></div>
+          <div class="sd-field"><label>N° Empenho</label><input id="sdEmpenho" placeholder="Informe o nº do empenho"></div>
           <div class="sd-field"><label>Status</label><select id="sdStatus"><option value="">Todos</option></select></div>
           <div class="sd-field"><label>Ficha</label><select id="sdFicha"><option value="">Todas</option></select></div>
+          <div class="sd-field"><label>Id. Ex. Nome</label><select id="sdIdExNome"><option value="">Todos</option></select></div>
+          <div class="sd-field"><label>Conta bancária</label><select id="sdConta"><option value="">Todas</option></select></div>
           <div class="sd-field"><label>Superintendência</label><select id="sdSuper"><option value="">Todas</option></select></div>
           <div class="sd-field"><label>Secretaria</label><select id="sdSecretaria"><option value="">Todas</option></select></div>
           <div class="sd-field"><label>Categoria</label><select id="sdCategoria"><option value="">Todas</option></select></div>
           <div class="sd-field"><label>Fonte</label><select id="sdFonte"><option value="">Todas</option></select></div>
+          <div class="sd-field"><label>Fonte do recurso</label><select id="sdFonteCompleta"><option value="">Todas</option></select></div>
           <div class="sd-field"><label>Data emissão inicial</label><input type="date" id="sdDataEmissao1"></div>
           <div class="sd-field"><label>Data emissão final</label><input type="date" id="sdDataEmissao2"></div>
           <div class="sd-field"><label>Data pagamento inicial</label><input type="date" id="sdDataPagamento1"></div>
@@ -6774,8 +6811,8 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
     document.getElementById('sdFile').addEventListener('change',importFile);
     document.getElementById('sdSearch').onclick=applyFilters;
     document.getElementById('sdClear').onclick=()=>{
-      ['sdNumeroPA','sdDataEmissao1','sdDataEmissao2','sdDataPagamento1','sdDataPagamento2'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
-      ['sdAcao','sdStatus','sdFicha','sdSuper','sdSecretaria','sdCategoria','sdFonte'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
+      ['sdAcao','sdNumeroPA','sdEmpenho','sdDataEmissao1','sdDataEmissao2','sdDataPagamento1','sdDataPagamento2'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
+      ['sdStatus','sdFicha','sdIdExNome','sdConta','sdSuper','sdSecretaria','sdCategoria','sdFonte','sdFonteCompleta'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
       state.filtered=state.grouped; expanded.clear(); pageOf.clear();
       render();
     };
