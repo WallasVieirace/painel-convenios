@@ -156,6 +156,15 @@
     margin-top:6px;
   }
   .gate-btn:hover{background:var(--primary-deep);}
+  .gate-google-divider{
+    display:flex;align-items:center;gap:10px;
+    margin:16px 0 12px;color:var(--ink-faint);font-size:11px;
+    text-transform:uppercase;letter-spacing:.05em;
+  }
+  .gate-google-divider::before,.gate-google-divider::after{
+    content:'';flex:1;height:1px;background:var(--line);
+  }
+  .gate-google-btn-wrap{display:flex;justify-content:center;min-height:40px;}
   .gate-switch{
     text-align:center;
     margin-top:16px;
@@ -2007,6 +2016,7 @@ body:has(#siafeView:not(.hidden)) .v3-main .app{padding-top:0!important;}
 }
 </style>
 
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 <div class="flag-stripe"></div>
@@ -2025,6 +2035,8 @@ body:has(#siafeView:not(.hidden)) .v3-main .app{padding-top:0!important;}
       <div class="field-input"><label>Usuário</label><input id="loginUser" type="text" autocomplete="username"></div>
       <div class="field-input"><label>Senha</label><input id="loginPass" type="password" autocomplete="current-password"></div>
       <button class="gate-btn" id="loginBtn">Entrar</button>
+      <div class="gate-google-divider"><span>ou</span></div>
+      <div id="googleSignInBtn" class="gate-google-btn-wrap"></div>
       <div class="gate-switch">Esqueceu a senha? <a id="showForgot">Esqueci minha senha</a></div>
     </div>
 
@@ -2109,6 +2121,7 @@ body:has(#siafeView:not(.hidden)) .v3-main .app{padding-top:0!important;}
           <div class="field-input"><label>Usuário</label><input id="newUserLogin" type="text" autocomplete="off"></div>
           <div class="field-input"><label>Senha</label><input id="newUserPass" type="password" placeholder="mínimo 4 caracteres"></div>
           <div class="field-input"><label>Confirmar senha</label><input id="newUserPass2" type="password"></div>
+          <div class="field-input full"><label>E-mail corporativo (opcional — permite login com Google)</label><input id="newUserEmail" type="email" placeholder="nome@saude.ce.gov.br" autocomplete="off"></div>
           <div class="field-input full">
             <label>Perfil de acesso</label>
             <select class="field-select" id="newUserRole">
@@ -2331,6 +2344,33 @@ function withFirebaseAuth(url, token){
   return url + sep + 'auth=' + encodeURIComponent(token);
 }
 
+/* =========================================================
+   LOGIN COM GOOGLE (restrito a e-mail corporativo)
+   Caminho de acesso adicional, em paralelo ao login usuário/senha.
+   Fluxo: o botão do Google devolve um token de identidade do Google;
+   esse token é trocado por um login no Firebase (accounts:signInWithIdp);
+   o e-mail retornado precisa terminar em CORPORATE_EMAIL_DOMAIN; e por
+   fim o e-mail precisa já estar vinculado a um usuário cadastrado no
+   painel (o Master vincula o e-mail em Usuários) — login com Google
+   nunca cria conta nova sozinho.
+   ========================================================= */
+const GOOGLE_CLIENT_ID = '137129009770-2eu0sp44kjbpa491nr9nng903nss50ke.apps.googleusercontent.com';
+const CORPORATE_EMAIL_DOMAIN = '@saude.ce.gov.br';
+async function exchangeGoogleIdToken(googleIdToken){
+  const url = 'https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=' + FIREBASE_API_KEY;
+  const body = {
+    postBody: 'id_token=' + encodeURIComponent(googleIdToken) + '&providerId=google.com',
+    requestUri: window.location.origin || 'https://painel-convenios-sesa.netlify.app',
+    returnIdpCredential: true,
+    returnSecureToken: true
+  };
+  const res = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+  const data = await res.json();
+  if(!res.ok) throw new Error(data?.error?.message || 'Falha ao validar login do Google.');
+  if(!data.email) throw new Error('Não foi possível obter o e-mail da conta Google.');
+  return data;
+}
+
 // Base compartilhada (Firebase) para que a lista de usuários — e não só a
 // base Lei 360 — fique visível/consistente para qualquer pessoa que acesse o
 // painel, em qualquer computador, e não apenas no navegador de quem criou a
@@ -2548,6 +2588,37 @@ document.getElementById('loginBtn').addEventListener('click', async ()=>{
   }
 });
 document.getElementById('showForgot').addEventListener('click', ()=> showOnly(forgotForm));
+
+// ---- login com Google (e-mail corporativo) ----
+async function handleGoogleCredentialResponse(response){
+  const errEl = document.getElementById('loginError');
+  errEl.classList.remove('show');
+  try{
+    const fbData = await exchangeGoogleIdToken(response.credential);
+    const email = String(fbData.email || '').toLowerCase().trim();
+    if(!email.endsWith(CORPORATE_EMAIL_DOMAIN)){
+      throw new Error(`Use um e-mail corporativo (${CORPORATE_EMAIL_DOMAIN}) para entrar com o Google.`);
+    }
+    const users = normalizeUserRecords(await loadUsers());
+    const user = users.find(u => String(u.email||'').toLowerCase().trim() === email);
+    if(!user){
+      throw new Error('Este e-mail ainda não foi cadastrado no painel. Peça para o Master vincular seu e-mail em Usuários.');
+    }
+    await saveSession(user.u);
+    await enterApp(user);
+  }catch(e){
+    errEl.textContent = e.message || 'Não foi possível entrar com o Google.';
+    errEl.classList.add('show');
+  }
+}
+function initGoogleSignIn(){
+  if(!window.google?.accounts?.id) { setTimeout(initGoogleSignIn, 300); return; }
+  google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleGoogleCredentialResponse });
+  const holder = document.getElementById('googleSignInBtn');
+  if(holder) google.accounts.id.renderButton(holder, { theme:'outline', size:'large', width:320, text:'signin_with', locale:'pt-BR' });
+}
+initGoogleSignIn();
+
 document.getElementById('showLoginFromForgot').addEventListener('click', ()=> showOnly(loginForm));
 
 // ---- forgot password (self-service with recovery code) ----
@@ -2639,14 +2710,34 @@ async function renderUsersInline(){
     row.innerHTML = `
       <div class="uinfo">
         <div class="uname">${escapeHtml(u.name || u.u)} <span class="role-tag">${u.role==='master'?'Master':'Usuário'}</span></div>
-        <div class="umeta">@${escapeHtml(u.u)} · desde ${new Date(u.createdAt).toLocaleDateString('pt-BR')}</div>
+        <div class="umeta">@${escapeHtml(u.u)} · desde ${new Date(u.createdAt).toLocaleDateString('pt-BR')}${u.email?(' · '+escapeHtml(u.email)):''}</div>
       </div>
       <div class="urow-actions">
+        <button class="email-btn" data-u="${escapeHtml(u.u)}" data-name="${escapeHtml(u.name||u.u)}" data-email="${escapeHtml(u.email||'')}">${u.email?'Alterar e-mail':'Vincular e-mail'}</button>
         <button class="reset-btn" data-u="${escapeHtml(u.u)}" data-name="${escapeHtml(u.name||u.u)}">Redefinir senha</button>
         <button class="del-btn" ${disableDelete?'disabled':''} data-u="${escapeHtml(u.u)}" data-name="${escapeHtml(u.name||u.u)}">Remover</button>
       </div>
     `;
     listEl.appendChild(row);
+  });
+  listEl.querySelectorAll('.email-btn').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      if(!(await assertStillMaster())){ alert('Sua sessão não tem mais permissão de Master. Faça login novamente.'); return; }
+      const uname = btn.getAttribute('data-u');
+      const uDisplayName = btn.getAttribute('data-name');
+      const current = btn.getAttribute('data-email') || '';
+      const input = prompt(`E-mail corporativo de "${uDisplayName}" (@${uname}) — precisa terminar em ${CORPORATE_EMAIL_DOMAIN}. Deixe em branco para remover o vínculo:`, current);
+      if(input === null) return;
+      const email = input.trim().toLowerCase();
+      if(email && !email.endsWith(CORPORATE_EMAIL_DOMAIN)){ alert(`O e-mail precisa terminar em ${CORPORATE_EMAIL_DOMAIN}.`); return; }
+      const users2 = await loadUsers();
+      if(email && users2.find(x=>x.u!==uname && String(x.email||'').toLowerCase()===email)){ alert('Esse e-mail já está vinculado a outro usuário.'); return; }
+      const target = users2.find(x=>x.u === uname);
+      if(!target){ alert('Usuário não encontrado.'); return; }
+      target.email = email || null;
+      await saveUsers(users2);
+      renderUsersInline();
+    });
   });
   listEl.querySelectorAll('.del-btn').forEach(btn=>{
     btn.addEventListener('click', async ()=>{
@@ -2686,6 +2777,7 @@ document.getElementById('createUserBtn').addEventListener('click', async ()=>{
   const pass = document.getElementById('newUserPass').value;
   const pass2 = document.getElementById('newUserPass2').value;
   const role = document.getElementById('newUserRole').value;
+  const email = document.getElementById('newUserEmail').value.trim().toLowerCase();
   const msg = document.getElementById('createUserMsg');
   msg.className = 'form-msg';
 
@@ -2693,14 +2785,16 @@ document.getElementById('createUserBtn').addEventListener('click', async ()=>{
   if(!name || !uname || !pass){ msg.textContent='Preencha todos os campos.'; msg.classList.add('show','err'); return; }
   if(pass.length < 4){ msg.textContent='A senha deve ter ao menos 4 caracteres.'; msg.classList.add('show','err'); return; }
   if(pass !== pass2){ msg.textContent='As senhas não coincidem.'; msg.classList.add('show','err'); return; }
+  if(email && !email.endsWith(CORPORATE_EMAIL_DOMAIN)){ msg.textContent=`O e-mail precisa terminar em ${CORPORATE_EMAIL_DOMAIN}.`; msg.classList.add('show','err'); return; }
 
   const users = await loadUsers();
   if(users.find(u=>u.u === uname)){ msg.textContent='Esse usuário já existe.'; msg.classList.add('show','err'); return; }
+  if(email && users.find(u=>String(u.email||'').toLowerCase()===email)){ msg.textContent='Esse e-mail já está vinculado a outro usuário.'; msg.classList.add('show','err'); return; }
 
   const hash = await sha256(pass);
   const recoveryCode = makeRecoveryCode();
   const recoveryHash = await sha256(recoveryCode);
-  users.push({ u: uname, name, passwordHash: hash, recoveryHash, role, createdAt: new Date().toISOString() });
+  users.push({ u: uname, name, passwordHash: hash, recoveryHash, role, email: email||null, createdAt: new Date().toISOString() });
   await saveUsers(users);
 
   msg.textContent = `Usuário "${name}" criado com sucesso. Código de recuperação: ${recoveryCode}. Anote e entregue ao usuário — ele será necessário para usar "Esqueci minha senha".`;
@@ -2709,6 +2803,7 @@ document.getElementById('createUserBtn').addEventListener('click', async ()=>{
   document.getElementById('newUserLogin').value='';
   document.getElementById('newUserPass').value='';
   document.getElementById('newUserPass2').value='';
+  document.getElementById('newUserEmail').value='';
   document.getElementById('newUserRole').value='user';
   renderUsersInline();
 });
