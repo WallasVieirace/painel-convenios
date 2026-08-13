@@ -6317,11 +6317,18 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
   function dateVal(v){
     if(v instanceof Date) return v;
     const s=String(v??'').trim(); if(!s||s==='-') return null;
+    if(/^\d{4}-\d{2}-\d{2}/.test(s)){ const d=new Date(s.slice(0,10)+'T00:00:00'); return isNaN(d)?null:d; }
     const m=s.match(/(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})/);
     if(m) return new Date(+m[3],+m[2]-1,+m[1]);
     return null;
   }
   function fmtDate(v){const d=dateVal(v);return d?d.toLocaleDateString('pt-BR'):(v&&v!=='-'?String(v):'—');}
+  // V55 FIX: datas vindas do Excel chegam como objeto Date do JavaScript.
+  // Se guardadas assim, JSON.stringify (usado ao salvar no Firebase) as
+  // converte automaticamente para um texto tipo "2026-02-13T11:41:30.000Z"
+  // — ao reabrir essa base depois, a data aparecia errada na tela. Convertendo
+  // para "DD/MM/AAAA" já na importação, a data guarda certo em qualquer lugar.
+  function toDateStr(v){ const d=dateVal(v); return d?d.toLocaleDateString('pt-BR'):''; }
   function truncate(s,n){s=String(s||'');return s.length>n?s.slice(0,n-1)+'…':s;}
   function statusClass(s){
     const n=norm(s);
@@ -6392,7 +6399,7 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
       if(!acao) return null;
       return {
         numeroPA:String(pick(rec,PA_ALIASES.numeroPA)||'').trim(),
-        dataEmissao:pick(rec,PA_ALIASES.dataEmissao),
+        dataEmissao:toDateStr(pick(rec,PA_ALIASES.dataEmissao)),
         acaoDetalhada:acao,
         ficha:String(pick(rec,PA_ALIASES.ficha)||'').trim(),
         valor:num(pick(rec,PA_ALIASES.valor)),
@@ -6401,7 +6408,7 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
         status:String(pick(rec,PA_ALIASES.status)||'').trim(),
         processo:String(pick(rec,PA_ALIASES.processo)||'').trim(),
         empenho:String(pick(rec,PA_ALIASES.empenho)||'').trim(),
-        dataPagamento:pick(rec,PA_ALIASES.dataPagamento),
+        dataPagamento:toDateStr(pick(rec,PA_ALIASES.dataPagamento)),
         areaPA:String(pick(rec,PA_ALIASES.areaPA)||'').trim(),
         areaRecurso:String(pick(rec,PA_ALIASES.areaRecurso)||'').trim(),
         idExNome:String(pick(rec,PA_ALIASES.idExNome)||'').trim()
@@ -6478,6 +6485,14 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
       return res.ok;
     }catch(e){ console.warn('Saúde Digital: falha ao sincronizar com a base compartilhada (Firebase). A atualização ficou disponível apenas neste navegador.',e); return false; }
   }
+  // V55 FIX: se a base carregada (Firebase ou local) for de uma importação
+  // feita antes destes campos existirem no código, os novos campos vêm
+  // vazios — não porque a planilha não tenha a informação, mas porque a
+  // cópia salva é antiga. Detectamos isso e avisamos, em vez de mostrar
+  // "—" silenciosamente como se o dado não existisse na fonte.
+  function isStaleSchema(bgRows){
+    return !bgRows || !bgRows.length || !('conta' in bgRows[0]);
+  }
   async function syncRemoteSD(){
     try{
       const token=await getFirebaseAuthToken();
@@ -6489,6 +6504,10 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
         state.grouped=buildGroups(); state.filtered=state.grouped;
         writeLocalSD();
         refreshUI();
+        if(isStaleSchema(state.bgRows)){
+          const statusEl=document.getElementById('sdImportStatus');
+          if(statusEl) statusEl.innerHTML='⚠️ Esta base foi importada antes da última atualização do painel e não tem todos os campos novos (Conta, Tipo, Fonte do recurso, Id. Ex. Nome). <b>Reimporte a mesma planilha</b> para completar.';
+        }
         return;
       }
     }catch(e){ console.warn('Saúde Digital: não foi possível consultar a base compartilhada (Firebase). Usando a última cópia disponível neste navegador.',e); }
@@ -6497,6 +6516,10 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
       state.paRows=local.paRows; state.bgRows=local.bgRows||[]; state.fileName=local.fileName||''; state.updatedAt=local.updatedAt; state.imported=true;
       state.grouped=buildGroups(); state.filtered=state.grouped;
       refreshUI();
+      if(isStaleSchema(state.bgRows)){
+        const statusEl=document.getElementById('sdImportStatus');
+        if(statusEl) statusEl.innerHTML='⚠️ Esta base foi importada antes da última atualização do painel e não tem todos os campos novos (Conta, Tipo, Fonte do recurso, Id. Ex. Nome). <b>Reimporte a mesma planilha</b> para completar.';
+      }
     }
   }
 
