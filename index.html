@@ -2408,19 +2408,29 @@ const FIREBASE_API_KEY = 'AIzaSyCnY16PnYUZtFm4G9Ny3fJaqltScE2h9hA';
 const FIREBASE_AUTH_SIGNUP_URL = 'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=' + FIREBASE_API_KEY;
 let __fbAuthPromise = null;
 async function getFirebaseAuthToken(){
-  if(!__fbAuthPromise){
-    __fbAuthPromise = (async () => {
-      try{
-        const res = await fetch(FIREBASE_AUTH_SIGNUP_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({returnSecureToken:true})});
-        if(!res.ok) throw new Error('HTTP '+res.status);
-        const data = await res.json();
-        return data.idToken || null;
-      }catch(e){
-        console.warn('Firebase: não foi possível autenticar anonimamente. A sincronização compartilhada pode falhar até isso ser resolvido.', e);
-        return null;
-      }
-    })();
-  }
+  if(__fbAuthPromise) return __fbAuthPromise;
+  __fbAuthPromise = (async () => {
+    // V57 FIX: essa chamada não tinha tempo limite — se travasse (rede lenta
+    // no primeiro acesso de um dispositivo novo), a tentativa ficava presa
+    // e, pior, essa MESMA tentativa falha ficava guardada pro resto da
+    // sessão, então nunca mais tentava de novo. Agora tem tempo limite e,
+    // se falhar, libera para a próxima chamada tentar de novo.
+    const controller = new AbortController();
+    const timer = setTimeout(()=>controller.abort(), 8000);
+    try{
+      const res = await fetch(FIREBASE_AUTH_SIGNUP_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({returnSecureToken:true}), signal: controller.signal});
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      const data = await res.json();
+      if(!data.idToken) throw new Error('Resposta sem idToken');
+      return data.idToken;
+    }catch(e){
+      console.warn('Firebase: não foi possível autenticar anonimamente. A sincronização compartilhada pode falhar até isso ser resolvido.', e);
+      __fbAuthPromise = null;
+      return null;
+    }finally{
+      clearTimeout(timer);
+    }
+  })();
   return __fbAuthPromise;
 }
 function withFirebaseAuth(url, token){
@@ -5013,7 +5023,7 @@ initGate();
 <script id="siafe-dashboard-js">
 (function(){
   const DB_NAME='painelConveniosSiafeDB', STORE='base';
-  const state={rows:[], filtered:[], imported:false, updatedAt:null};
+  const state={rows:[], filtered:[], imported:false, updatedAt:null, syncFailed:false};
   /* Persistência compartilhada (Firebase) — mesmo padrão já usado na aba
      Lei 360, para que uma base SIAFE importada por qualquer pessoa fique
      visível para todo mundo, em qualquer navegador, e não apenas em quem
@@ -5195,23 +5205,47 @@ initGate();
       return false;
     }
   }
+  async function fetchWithTimeoutSiafe(url,options,timeoutMs){
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),timeoutMs||12000);
+    try{ return await fetch(url,{...options,signal:controller.signal}); }
+    finally{ clearTimeout(timer); }
+  }
   async function loadRows(){
     try{
       const data=await api('/api/bases/siafe');
-      if(data?.rows?.length){state.rows=normalizeRows(data.rows);state.updatedAt=data.updatedAt;state.imported=true;writeLocalSiafe(data.rows,data.updatedAt);return;}
+      if(data?.rows?.length){state.rows=normalizeRows(data.rows);state.updatedAt=data.updatedAt;state.imported=true;state.syncFailed=false;writeLocalSiafe(data.rows,data.updatedAt);return;}
     }catch(e){}
-    try{
-      const token=await getFirebaseAuthToken();
-      const res=await fetch(withFirebaseAuth(REMOTE_SIAFE_URL, token),{method:'GET'});
-      if(res.ok){
-        const data=await res.json();
-        if(data && Array.isArray(data.rows) && data.rows.length){
-          state.rows=normalizeRows(data.rows);state.updatedAt=data.updatedAt;state.imported=true;
-          writeLocalSiafe(data.rows,data.updatedAt);
-          return;
+    // V57 FIX: antes, uma única falha de rede/tempo limite ao consultar o
+    // Firebase fazia o painel desistir na hora e mostrar "nenhuma base
+    // importada" — mesmo quando os dados existiam de verdade lá, só não deu
+    // tempo de responder (comum no primeiro acesso de um dispositivo novo,
+    // com autenticação anônima + consulta acontecendo juntas). Agora tenta
+    // de novo automaticamente antes de desistir, e guarda se a sincronização
+    // realmente falhou, para avisar isso claramente na tela.
+    let firebaseFailed=false;
+    for(let attempt=0; attempt<2; attempt++){
+      try{
+        const token=await getFirebaseAuthToken();
+        const res=await fetchWithTimeoutSiafe(withFirebaseAuth(REMOTE_SIAFE_URL, token),{method:'GET'},12000);
+        if(res.ok){
+          const data=await res.json();
+          if(data && Array.isArray(data.rows) && data.rows.length){
+            state.rows=normalizeRows(data.rows);state.updatedAt=data.updatedAt;state.imported=true;state.syncFailed=false;
+            writeLocalSiafe(data.rows,data.updatedAt);
+            return;
+          }
+          firebaseFailed=false;
+          break;
         }
+        firebaseFailed=true;
+      }catch(e){
+        firebaseFailed=true;
+        console.warn(`SIAFE: tentativa ${attempt+1} de consultar a base compartilhada (Firebase) falhou.`,e);
       }
-    }catch(e){ console.warn('SIAFE: não foi possível consultar a base compartilhada (Firebase). Usando a última cópia disponível neste navegador.',e); }
+      if(attempt===0 && firebaseFailed) await new Promise(r=>setTimeout(r,1200));
+    }
+    state.syncFailed=firebaseFailed;
     const local=readLocalSiafe();
     if(local && local.rows && local.rows.length){
       state.rows=normalizeRows(local.rows);state.updatedAt=local.updatedAt;state.imported=true;
@@ -5250,7 +5284,7 @@ initGate();
     window.refreshSiafeView?.();
   };
   if(document.querySelector('.v3-main')) buildView(document.querySelector('.v3-main'));
-  window.refreshSiafeView=async function(){await loadRows();if(!state.filtered.length)state.filtered=state.rows.slice();populateFilters();render();const st=document.getElementById('siafeImportStatus');if(st)st.textContent=state.imported?`Base carregada · ${state.rows.length.toLocaleString('pt-BR')} registros.`:'Base original do sistema. Importe um Excel para atualizar os dados.';const up=document.getElementById('siafeUpdated');if(up&&state.updatedAt)up.textContent='⟳ Última atualização: '+new Date(state.updatedAt).toLocaleString('pt-BR');};
+  window.refreshSiafeView=async function(){await loadRows();if(!state.filtered.length)state.filtered=state.rows.slice();populateFilters();render();const st=document.getElementById('siafeImportStatus');if(st){if(state.imported){st.textContent=`Base carregada · ${state.rows.length.toLocaleString('pt-BR')} registros.`;}else if(state.syncFailed){st.innerHTML='⚠️ Não foi possível confirmar se existe uma base compartilhada (conexão lenta ou instável). <a href="#" id="siafeRetrySync" style="color:#9a5b12;font-weight:700;text-decoration:underline;">Tentar de novo</a>';const retryLink=document.getElementById('siafeRetrySync');if(retryLink)retryLink.onclick=(e)=>{e.preventDefault();window.refreshSiafeView?.();};}else{st.textContent='Base original do sistema. Importe um Excel para atualizar os dados.';}}const up=document.getElementById('siafeUpdated');if(up&&state.updatedAt)up.textContent='⟳ Última atualização: '+new Date(state.updatedAt).toLocaleString('pt-BR');};
   // Usado pela aba Lei 360 para localizar, na base Pagamentos SIAFE, as datas de
   // pagamento referentes a um convênio a partir do número de SACC. Retorna uma
   // lista de datas (strings dd/mm/aaaa, mais recentes primeiro) ou [] se a base
@@ -6662,7 +6696,7 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
     const totalPages=Math.max(1,Math.ceil(g.items.length/PAGE_SIZE));
     const pageItems=g.items.slice((page-1)*PAGE_SIZE,page*PAGE_SIZE);
     const contextHtml=ctx?`<div class="sd-context">
-        <div class="sd-context-item"><b>Fonte</b><span>${escapeHtml(ctx.fonte||'—')}</span></div>
+        <div class="sd-context-item"><b>Superintendência</b><span>${escapeHtml(ctx.superintendencia||'—')}</span></div>
         <div class="sd-context-item"><b>Fonte do recurso</b><span>${escapeHtml(ctx.fonteCompleta||'—')}</span></div>
         <div class="sd-context-item"><b>Conta bancária</b><span>${escapeHtml(ctx.conta?(ctx.conta+(ctx.domicilio?' - '+ctx.domicilio:'')):'—')}</span></div>
         <div class="sd-context-item"><b>Classificação</b><span>${escapeHtml(ctx.classificacao||'—')}</span></div>
