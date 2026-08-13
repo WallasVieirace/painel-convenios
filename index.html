@@ -968,6 +968,9 @@
 .pr-financial-title{padding:7px 10px;border-bottom:1px solid #e5ebf2;background:#f7fafc;color:#102f50;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;}
 .pr-financial-grid{display:grid;grid-template-columns:repeat(4,1fr);}
 .pr-financial-item{padding:7px 9px;border-right:1px solid #e6ebf1;border-bottom:1px solid #e6ebf1;min-height:36px;}
+.pr-siafe-inline{padding:7px 10px;border-top:1px solid #e6ebf1;font-size:9px;color:#334a63;background:#fbfdff;}
+.pr-siafe-inline b{color:#102f50;font-weight:800;margin-right:5px;}
+.pr-siafe-inline span.empty{color:#8a97a8;font-style:italic;}
 .pr-financial-item:nth-child(4n){border-right:0;}
 .pr-financial-item b{display:block;font-size:6.8px;color:#65748a;text-transform:uppercase;letter-spacing:.03em;margin-bottom:2px;}
 .pr-financial-item span{display:block;font-size:9px;font-weight:800;color:#102f50;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -5155,12 +5158,17 @@ initGate();
   // lista de datas (strings dd/mm/aaaa, mais recentes primeiro) ou [] se a base
   // SIAFE ainda não foi importada ou não há correspondência para o SACC informado.
   window.getSiafePaymentDatesBySacc=function(saccValue){
+    // V52 FIX: a base real do SIAFE não tem coluna "SACC" — o campo
+    // equivalente lá se chama "Convênio Registro". Confirmado com os dados
+    // reais: 100 dos 115 SACC do Lei 360 batem com "Convênio Registro" no
+    // SIAFE (nem todo SACC tem lançamento no SIAFE ainda, e vice-versa —
+    // por isso a lista pode vir vazia para alguns convênios, normalmente).
     const target=norm(String(saccValue||'').trim());
     if(!target||!state.rows.length) return [];
     const dates=[];
     state.rows.forEach(r=>{
       const x=r.__siafe; if(!x) return;
-      if(norm(x.sacc)!==target) return;
+      if(norm(x.convenioRegistro)!==target) return;
       const d=dateVal(x.data);
       if(d) dates.push(d);
     });
@@ -5726,7 +5734,7 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
         const key=rowKey(r);
         const isOpen=expanded.has(key);
         return `<tr class="data-row l360-row" data-key="${escapeHtml(key)}">
-          <td><div class="id-main">MAPP ${escapeHtml(r.mapp)}</div><div class="id-sub">Convênio ${escapeHtml(r.convenio||'—')}</div></td>
+          <td><div class="id-main">MAPP ${escapeHtml(r.mapp)}</div><div class="id-sub">Convênio ${escapeHtml(r.convenio||'—')}</div><div class="id-sub">SACC ${escapeHtml(r.sacc||'—')}</div></td>
           <td><div class="id-main">${escapeHtml(r.convenente||'—')}</div></td>
           <td>${escapeHtml(r.municipio||'—')}</td>
           <td><div class="id-sub">${escapeHtml(r.gestor||'—')}</div><div class="id-sub">${escapeHtml(r.fiscal||'—')}</div></td>
@@ -5855,20 +5863,18 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
       const percent = totalGeral ? (totalPago/totalGeral*100) : 0;
       const programadas=(r.parcelas||[]).length;
       const parcelasRows=(r.parcelas||[]).map(p=>`<tr><td>${p.n}</td><td>${money(p.valor)}</td><td>${escapeHtml(p.data||'—')}</td><td><span class="pp-pill ${isPago(p.status)?'pago':'apagar'}">${isPago(p.status)?'Pago':'A pagar'}</span></td></tr>`).join('');
-      // Cruzamento pela base Pagamentos SIAFE: usa o N° SACC do convênio para localizar
-      // as datas de pagamento efetivamente registradas no SIAFE. Só é possível quando a
-      // base SIAFE já foi importada nesta sessão; caso contrário, informa isso no relatório
-      // em vez de omitir o campo silenciosamente.
+      // Cruzamento pela base Pagamentos SIAFE: o SIAFE não tem uma coluna
+      // "SACC" — o campo equivalente lá se chama "Convênio Registro" (mesmo
+      // número, nome diferente). Nem todo SACC do Lei 360 tem lançamento no
+      // SIAFE ainda, e vice-versa — por isso a ausência de data aqui é
+      // informação real (convênio ainda não pago/lançado), não um erro.
       const siafeAvailable = typeof window.getSiafePaymentDatesBySacc === 'function';
       const siafeDates = siafeAvailable && r.sacc ? window.getSiafePaymentDatesBySacc(r.sacc) : [];
       let siafeText;
       if(!siafeAvailable || !r.sacc) siafeText = 'SACC não informado para cruzamento.';
-      else if(!siafeDates.length) siafeText = 'Nenhum pagamento localizado no SIAFE para este SACC (importe a base Pagamentos SIAFE para atualizar).';
+      else if(!siafeDates.length) siafeText = 'Nenhum pagamento localizado no SIAFE (Convênio Registro '+escapeHtml(r.sacc)+') até o momento.';
       else siafeText = siafeDates.join(', ');
-      const siafeBlock = `<div class="pr-siafe-block">
-        <div class="pr-siafe-title">Data de pagamento identificada no SIAFE (SACC ${escapeHtml(r.sacc||'—')})</div>
-        <div class="pr-siafe-value${siafeDates.length?'':' pr-siafe-empty'}">${escapeHtml(siafeText)}</div>
-      </div>`;
+      const siafeInline = `<div class="pr-siafe-inline"><b>Data de pagamento (SIAFE):</b><span${siafeDates.length?'':' class="empty"'}>${siafeText}</span></div>`;
       return `<div class="pr-mapp-group">
         <div class="pr-result-head"><span>MAPP ${escapeHtml(r.mapp)} — Convênio ${escapeHtml(r.convenio||'—')}</span><span class="right">${programadas} de 12 parcelas programadas</span></div>
         <div class="pr-ident-row l360-ident">
@@ -5887,8 +5893,8 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
             <div class="pr-financial-item saldo"><b>Saldo</b><span>${money(totalGeral-totalPago)}</span></div>
             <div class="pr-financial-item percent"><b>% pago</b><span>${pct(percent)}</span></div>
           </div>
+          ${siafeInline}
         </div>
-        ${siafeBlock}
         <div class="pr-parcelas-block">
           <div class="pr-parcelas-title"><span>Cronograma de parcelas</span><span>${programadas} programadas de 12</span></div>
           <table class="pr-parcelas-table"><thead><tr><th>Parcela</th><th>Valor</th><th>Data APDA</th><th>Situação</th></tr></thead><tbody>${parcelasRows||'<tr><td colspan="4">Sem parcelas lançadas.</td></tr>'}</tbody></table>
