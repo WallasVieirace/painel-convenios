@@ -4941,31 +4941,62 @@ initGate();
     catch(e){ console.warn('SIAFE: falha ao salvar cópia local de segurança', e); }
   }
   const aliases={
-    empenhado:['TOTAL EMPENHADO','VALOR EMPENHADO','EMPENHADO','EMPENHO','VALOR DO EMPENHO','VALOR EMPENHADO (R$)','EMPENHADO (R$)','VALOR EMPENHO'],
-    liquidado:['TOTAL LIQUIDADO','VALOR LIQUIDADO','LIQUIDADO','LIQUIDAÇÃO','VALOR LIQUIDADO (R$)','LIQUIDADO (R$)','VALOR DA LIQUIDAÇÃO'],
-    pago:['TOTAL PAGO','VALOR PAGO','PAGO','PAGAMENTO','VALOR PAGO (R$)','VALOR DO PAGAMENTO','VALOR PAGAMENTO','VALOR DA PAGAMENTO','DESPESAS ORCAMENTARIAS PAGAS','DESPESA ORCAMENTARIA PAGA','DESPESA ORÇAMENTÁRIA PAGA','DESPESAS ORÇAMENTÁRIAS PAGAS','PAGAMENTOS REALIZADOS','VALOR DA ORDEM BANCARIA','VALOR DA ORDEM BANCÁRIA','ORDEM BANCARIA','ORDEM BANCÁRIA'],
-    saldo:['SALDO A PAGAR','SALDO A PAGAR (R$)','SALDO','A PAGAR','SALDO (R$)','VALOR A PAGAR'],
-    data:['DATA PAGAMENTO','DATA DO PAGAMENTO','DATA','DATA PAGTO','DATA LIQUIDAÇÃO','DATA EMPENHO'],
-    fonte:['FONTE DE RECURSO','FONTE RECURSO','FONTE','CODIGO FONTE','CÓDIGO DA FONTE'],
-    ug:['UNIDADE GESTORA','UG','UNID GESTORA','UNIDADE'],
-    unidadeOrcamentaria:['UNIDADE ORÇAMENTÁRIA','UNIDADE ORCAMENTARIA','UNID ORÇAMENTÁRIA','UNID ORCAMENTARIA','UNIDADE ORÇAMENTARIA'],
+    empenhado:['TOTAL EMPENHADO','VALOR EMPENHADO','EMPENHADO','VALOR DO EMPENHO','VALOR EMPENHADO (R$)','EMPENHADO (R$)'],
+    liquidado:['TOTAL LIQUIDADO','VALOR LIQUIDADO','LIQUIDADO','VALOR LIQUIDADO (R$)','LIQUIDADO (R$)','VALOR DA LIQUIDAÇÃO'],
+    // V49 FIX: "ORDEM BANCÁRIA"/"VALOR DA ORDEM BANCÁRIA" foram removidos
+    // daqui — a Ordem Bancária é um campo de texto (ex.: "2026OB018903 -
+    // 08/05/2026"), não um valor monetário; deixá-lo aqui arriscava puxar
+    // esse texto para um campo de dinheiro em bases sem coluna de "pago".
+    pago:['TOTAL PAGO','VALOR PAGO','PAGO','VALOR PAGO (R$)','VALOR DO PAGAMENTO','VALOR PAGAMENTO','DESPESAS ORCAMENTARIAS PAGAS','DESPESA ORCAMENTARIA PAGA','DESPESA ORÇAMENTÁRIA PAGA','DESPESAS ORÇAMENTÁRIAS PAGAS','PAGAMENTOS REALIZADOS'],
+    saldo:['SALDO A PAGAR','SALDO A PAGAR (R$)','SALDO','VALOR A PAGAR'],
+    data:['DATA PAGAMENTO','DATA DO PAGAMENTO','DATA','DATA PAGTO'],
+    fonte:['FONTE DE RECURSO','FONTE RECURSO','FONTE','CÓDIGO DA FONTE'],
+    // V49 FIX: "UNIDADE" sozinho foi removido — era genérico demais e
+    // acabava capturando a coluna "Unidade Gestora / Credor" (que na base
+    // real do SIAFE guarda o CNPJ/nome do convenente, não uma UG).
+    ug:['UNIDADE GESTORA','UG','UNID GESTORA'],
+    unidadeOrcamentaria:['UNIDADE ORÇAMENTÁRIA','UNIDADE ORCAMENTARIA','UNID ORÇAMENTÁRIA','UNID ORCAMENTARIA'],
     mapp:['MAPP','Nº MAPP','NUMERO MAPP'],
-    convenente:['CONVENENTE','BENEFICIÁRIO','BENEFICIARIO','ENTIDADE'],
-    convenio:['CONVÊNIO','CONVENIO','Nº CONVÊNIO','NUMERO CONVENIO'],
-    categoria:['CATEGORIA DE GASTO','CATEGORIA','NATUREZA DA DESPESA'],
-    despesaNatureza:['DESPESA NATUREZA','DESPESA NATUREZA DA DESPESA','NATUREZA DA DESPESA','NATUREZA DESPESA','DESPESA / NATUREZA'],
+    // V49 FIX: "CREDOR" adicionado — na base real do SIAFE, o convenente
+    // aparece na coluna "Unidade Gestora / Credor" (CNPJ + nome).
+    convenente:['CONVENENTE','BENEFICIÁRIO','BENEFICIARIO','ENTIDADE','CREDOR','UNIDADE GESTORA CREDOR'],
+    convenio:['Nº CONVÊNIO','NUMERO CONVENIO'],
+    // V49 FIX: a base real só tem UM campo de natureza da despesa (não uma
+    // "categoria de gasto" separada) — os dois conceitos antigos foram
+    // unificados aqui para não duplicar a mesma informação em dois lugares.
+    naturezaDespesa:['NATUREZA DESPESA','NATUREZA DA DESPESA','CATEGORIA DE GASTO','CATEGORIA','DESPESA NATUREZA'],
     itemPatrimonial:['ITEM PATRIMONIAL','ITEM PATRIMONIAL / MATERIAL','ITEM PATRIMONIAL MATERIAL'],
-    convenioRegistro:['CONVÊNIO REGISTRO','CONVENIO REGISTRO','REGISTRO DO CONVÊNIO','REGISTRO DO CONVENIO','CONVÊNIO REGISTRADO','CONVENIO REGISTRADO'],
+    convenioRegistro:['CONVÊNIO REGISTRO','CONVENIO REGISTRO','REGISTRO DO CONVÊNIO','REGISTRO DO CONVENIO'],
     processo:['PROCESSO','Nº PROCESSO','NUMERO PROCESSO','NÚMERO DO PROCESSO','PROCESSO SEI'],
-    acao:['AÇÃO','ACAO','CÓDIGO DA AÇÃO','CODIGO DA ACAO','AÇÃO ORÇAMENTÁRIA','ACAO ORCAMENTARIA'],
-    notaEmpenho:['NOTA DE EMPENHO','Nº NOTA DE EMPENHO','NUMERO NOTA DE EMPENHO','NÚMERO DA NOTA DE EMPENHO','NOTA EMPENHO','NE'],
-    elemento:['ELEMENTO DE DESPESA','ELEMENTO','DESPESA'],
+    acao:['AÇÃO','AÇÃO ORÇAMENTÁRIA','ACAO ORCAMENTARIA'],
+    // V49 FIX: novo campo — existe na base real ("4 - MAPP", por exemplo) e
+    // não era capturado antes.
+    classificacaoAcao:['CLASSIFICAÇÃO AÇÃO','CLASSIFICACAO ACAO'],
+    // V49 FIX: novo campo — existe na base real ("0000000000 - SEM
+    // CONTRATO") e não era capturado antes.
+    contrato:['CONTRATO','Nº CONTRATO','NUMERO CONTRATO'],
+    notaEmpenho:['NOTA DE EMPENHO','Nº NOTA DE EMPENHO','NUMERO NOTA DE EMPENHO','NÚMERO DA NOTA DE EMPENHO','NOTA EMPENHO'],
+    // V49 FIX: "DESPESA" sozinho foi removido — capturava por engano a
+    // coluna "Natureza Despesa" em bases sem "Elemento de Despesa" próprio.
+    elemento:['ELEMENTO DE DESPESA','ELEMENTO'],
     modalidade:['MODALIDADE','MODALIDADE DE APLICAÇÃO'],
-    situacao:['SITUAÇÃO','SITUACAO','STATUS','SITUAÇÃO DO PAGAMENTO','SITUACAO DO PAGAMENTO'],
-    ordemBancaria:['ORDEM BANCÁRIA','ORDEM BANCARIA','ORDEM BANCÁRIA / DATA','ORDEM BANCARIA DATA','ORDEM BANCÁRIA DATA'],
-    sacc:['SACC','Nº SACC','N° SACC','NUMERO SACC','SACC Nº','SACC N°','INSTRUMENTO (SACC)','INSTRUMENTO']
+    situacao:['SITUAÇÃO','STATUS','SITUAÇÃO DO PAGAMENTO','SITUACAO DO PAGAMENTO'],
+    ordemBancaria:['ORDEM BANCÁRIA','ORDEM BANCARIA'],
+    sacc:['SACC','Nº SACC','N° SACC','NUMERO SACC','INSTRUMENTO (SACC)']
   };
   const norm=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]+/g,' ').trim();
+  // Compara por palavra inteira, não por trecho de texto solto. Antes, um
+  // apelido como "DATA LIQUIDAÇÃO" podia bater sem querer com a coluna
+  // "Ação", porque "LIQUIDAÇÃO" termina com as mesmas letras de "AÇÃO" —
+  // um "includes()" de texto pega esse tipo de coincidência por acidente.
+  // Comparando por palavras inteiras, isso não acontece mais.
+  const wordsOf=s=>s.split(' ').filter(Boolean);
+  const fuzzyHeaderMatch=(headerNorm,aliasNorm)=>{
+    const hw=wordsOf(headerNorm), aw=wordsOf(aliasNorm);
+    if(!hw.length||!aw.length) return false;
+    const [short,long]=hw.length<=aw.length?[hw,aw]:[aw,hw];
+    return short.every(w=>long.includes(w));
+  };
   const key=(row,names)=>{
     const ks=Object.keys(row);
     const clean=v=>String(v??'').trim();
@@ -4974,12 +5005,12 @@ initGate();
       const k=ks.find(x=>norm(x)===nn);
       if(k&&clean(row[k])!=='')return row[k];
     }
-    // Fallback robusto: reconhece cabeçalhos que contenham o conceito,
-    // sem depender de coincidência literal do nome da coluna.
+    // Fallback robusto: reconhece cabeçalhos que contenham o conceito como
+    // palavra inteira, sem depender de coincidência literal do nome da coluna.
     for(const n of names){
       const nn=norm(n);
       if(!nn) continue;
-      const k=ks.find(x=>{const nx=norm(x);return (nx.includes(nn)||nn.includes(nx))&&clean(row[x])!=='';});
+      const k=ks.find(x=>{const nx=norm(x);return fuzzyHeaderMatch(nx,nn)&&clean(row[x])!=='';});
       if(k)return row[k];
     }
     return '';
@@ -5012,11 +5043,30 @@ initGate();
   function normalizeRows(rows){return rows.filter(r=>r&&typeof r==='object').map(r=>{
     const ordem=String(get(r,'ordemBancaria')||'').trim();
     const dataPagamento=paymentDate(r);
+    const empenhadoV=num(get(r,'empenhado'));
+    const liquidadoV=num(get(r,'liquidado'));
+    const pagoV=num(get(r,'pago'));
+    // V49 FIX: nem toda base SIAFE traz colunas prontas de "Saldo a pagar" e
+    // "Situação" — a base real usada aqui não tem nenhuma das duas. Em vez
+    // de deixar em branco ou (pior, como antes) presumir "Pago" para tudo
+    // que não tinha essa coluna, calculamos os dois a partir dos valores
+    // que realmente existem (Empenhado/Liquidado/Pago), e só usamos uma
+    // coluna explícita da planilha quando ela de fato existir.
+    const saldoExplicito=get(r,'saldo');
+    const saldoV=saldoExplicito!==''?num(saldoExplicito):Math.max(empenhadoV-pagoV,0);
+    const situacaoExplicita=get(r,'situacao');
+    let situacaoV=situacaoExplicita;
+    if(!situacaoV){
+      if(empenhadoV<=0) situacaoV='Sem empenho';
+      else if(pagoV<=0) situacaoV='Aguardando pagamento';
+      else if(pagoV>=empenhadoV) situacaoV='Pago integralmente';
+      else situacaoV='Pago parcialmente';
+    }
     return {...r,__siafe:{
-      empenhado:num(get(r,'empenhado')),
-      liquidado:num(get(r,'liquidado')),
-      pago:num(get(r,'pago')),
-      saldo:num(get(r,'saldo')),
+      empenhado:empenhadoV,
+      liquidado:liquidadoV,
+      pago:pagoV,
+      saldo:saldoV,
       data:dataPagamento,
       ordemBancaria:ordem,
       fonte:String(get(r,'fonte')||'—'),
@@ -5025,17 +5075,18 @@ initGate();
       mapp:String(get(r,'mapp')||'—'),
       convenente:String(get(r,'convenente')||'—'),
       convenio:String(get(r,'convenio')||'—'),
-      categoria:String(get(r,'categoria')||'—'),
-      despesaNatureza:String(get(r,'despesaNatureza')||'—'),
+      naturezaDespesa:String(get(r,'naturezaDespesa')||'—'),
       itemPatrimonial:String(get(r,'itemPatrimonial')||'—'),
       convenioRegistro:String(get(r,'convenioRegistro')||'—'),
       processo:String(get(r,'processo')||'—'),
       acao:String(get(r,'acao')||'—'),
+      classificacaoAcao:String(get(r,'classificacaoAcao')||'—'),
+      contrato:String(get(r,'contrato')||'—'),
       notaEmpenho:String(get(r,'notaEmpenho')||'—'),
       elemento:String(get(r,'elemento')||'—'),
       modalidade:String(get(r,'modalidade')||'—'),
       sacc:String(get(r,'sacc')||'—'),
-      situacao:String(get(r,'situacao')||'Pago')
+      situacao:situacaoV
     }};
   });}
   function openDB(){return new Promise((resolve,reject)=>{if(!window.indexedDB)return resolve(null);const r=indexedDB.open(DB_NAME,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(STORE))r.result.createObjectStore(STORE);};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}
@@ -5081,27 +5132,27 @@ initGate();
   function buildView(main){if(document.getElementById('siafeView'))return;const v=document.createElement('section');v.id='siafeView';v.className='siafe-view hidden';v.innerHTML=`
     <div class="siafe-head"><div><div class="siafe-kicker">Execução Orçamentária e Financeira</div><h1 class="siafe-title">Pagamentos SIAFE</h1><p class="siafe-subtitle">Acompanhe os pagamentos realizados através do SIAFE, visualizando valores empenhados, liquidados e pagos.</p></div><div class="siafe-head-actions"><div class="siafe-import-status" id="siafeImportStatus">Base original do sistema. Importe um Excel para atualizar os dados.</div><button class="siafe-btn gold" id="siafeImportBtn">↥ Importar dados</button><input class="siafe-import" id="siafeFile" type="file" accept=".xlsx,.xls,.csv"><div class="siafe-update" id="siafeUpdated">⟳ Última atualização: —</div></div></div>
     <div class="siafe-kpis" id="siafeKpis"></div>
-    <div class="siafe-panel"><div class="siafe-panel-head"><div class="siafe-panel-title">Filtros de pesquisa</div><button class="siafe-btn" id="siafeClear">Limpar filtros</button></div><div class="siafe-filters"><div class="siafe-field"><label>Data inicial</label><input type="date" id="sfDate1"></div><div class="siafe-field"><label>Data final</label><input type="date" id="sfDate2"></div><div class="siafe-field"><label>Fonte de recurso</label><select id="sfFonte"><option value="">Selecione a fonte</option></select></div><div class="siafe-field"><label>Unidade gestora</label><select id="sfUg"><option value="">Selecione a UG</option></select></div><div class="siafe-field"><label>Unidade orçamentária</label><select id="sfUnidadeOrcamentaria"><option value="">Selecione a unidade</option></select></div><div class="siafe-field"><label>MAPP</label><input id="sfMapp" placeholder="Informe o MAPP"></div><div class="siafe-field"><label>Convenente</label><select id="sfConvenente"><option value="">Selecione o convenente</option></select></div><div class="siafe-field"><label>Categoria de gasto</label><select id="sfCategoria"><option value="">Selecione a categoria</option></select></div><div class="siafe-field"><label>Despesa Natureza</label><select id="sfDespesaNatureza"><option value="">Selecione a natureza</option></select></div><div class="siafe-field"><label>Item Patrimonial</label><select id="sfItemPatrimonial"><option value="">Selecione o item</option></select></div><div class="siafe-field"><label>Convênio Registro</label><select id="sfConvenioRegistro"><option value="">Selecione o registro</option></select></div><div class="siafe-field"><label>Processo</label><input id="sfProcesso" placeholder="Digite o processo"></div><div class="siafe-field"><label>Ação</label><select id="sfAcao"><option value="">Selecione a ação</option></select></div><div class="siafe-field"><label>Nota de Empenho</label><input id="sfNotaEmpenho" placeholder="Digite o nº da nota" inputmode="numeric"></div><div class="siafe-filter-actions"><button class="siafe-btn primary" id="siafeSearch">⌕ Pesquisar</button></div></div></div>
-    <div class="siafe-charts"><div class="siafe-chart"><div class="siafe-chart-title">Pagamentos por fonte de recurso</div><div class="siafe-chart-body" id="siafeSourceChart"></div></div><div class="siafe-chart"><div class="siafe-chart-title">Pagamentos por categoria de gasto</div><div class="siafe-chart-body" id="siafeCategoryChart"></div></div><div class="siafe-chart"><div class="siafe-chart-title">Pagamentos por mês (ano atual)</div><div class="siafe-chart-body" id="siafeMonthChart"></div></div></div>
-    <div class="siafe-panel"><div class="siafe-panel-head"><div class="siafe-panel-title">Detalhamento dos pagamentos</div><button class="siafe-btn" id="siafeExport">⇩ Exportar Excel</button></div><div class="siafe-table-wrap"><table class="siafe-table"><thead><tr><th>Data pagamento</th><th>UG</th><th>MAPP</th><th>Convenente</th><th>Fonte recurso</th><th>Categoria gasto</th><th>Elemento despesa</th><th>Modalidade</th><th>Empenhado (R$)</th><th>Liquidado (R$)</th><th>Pago (R$)</th><th>Situação</th></tr></thead><tbody id="siafeTbody"></tbody></table></div><div class="siafe-footer"><span id="siafeCount">Mostrando 0 registros</span><button class="siafe-btn" id="siafeBack">← Voltar para Pesquisa</button></div></div>`;main.appendChild(v);bindView();}
-  function bindView(){document.getElementById('siafeImportBtn').onclick=()=>document.getElementById('siafeFile').click();document.getElementById('siafeFile').addEventListener('change',importFile);document.getElementById('siafeSearch').onclick=applyFilters;document.getElementById('siafeClear').onclick=()=>{['sfDate1','sfDate2','sfMapp','sfProcesso','sfNotaEmpenho'].forEach(id=>document.getElementById(id).value='');['sfFonte','sfUg','sfUnidadeOrcamentaria','sfConvenente','sfCategoria','sfDespesaNatureza','sfItemPatrimonial','sfConvenioRegistro','sfAcao'].forEach(id=>document.getElementById(id).value='');applyFilters();};document.getElementById('siafeBack').onclick=()=>{document.querySelector('.v3-nav button[data-v3="search"]')?.click();};document.getElementById('siafeExport').onclick=exportXlsx;}
+    <div class="siafe-panel"><div class="siafe-panel-head"><div class="siafe-panel-title">Filtros de pesquisa</div><button class="siafe-btn" id="siafeClear">Limpar filtros</button></div><div class="siafe-filters"><div class="siafe-field"><label>Data inicial</label><input type="date" id="sfDate1"></div><div class="siafe-field"><label>Data final</label><input type="date" id="sfDate2"></div><div class="siafe-field"><label>Unidade orçamentária</label><select id="sfUnidadeOrcamentaria"><option value="">Selecione a unidade</option></select></div><div class="siafe-field"><label>Convenente</label><select id="sfConvenente"><option value="">Selecione o convenente</option></select></div><div class="siafe-field"><label>Natureza da despesa</label><select id="sfNaturezaDespesa"><option value="">Selecione a natureza</option></select></div><div class="siafe-field"><label>Item Patrimonial</label><select id="sfItemPatrimonial"><option value="">Selecione o item</option></select></div><div class="siafe-field"><label>Convênio Registro</label><select id="sfConvenioRegistro"><option value="">Selecione o registro</option></select></div><div class="siafe-field"><label>Processo</label><input id="sfProcesso" placeholder="Digite o processo"></div><div class="siafe-field"><label>Ação</label><select id="sfAcao"><option value="">Selecione a ação</option></select></div><div class="siafe-field"><label>Classificação da ação</label><select id="sfClassificacaoAcao"><option value="">Selecione a classificação</option></select></div><div class="siafe-field"><label>Situação</label><select id="sfSituacao"><option value="">Selecione a situação</option></select></div><div class="siafe-field"><label>Nota de Empenho</label><input id="sfNotaEmpenho" placeholder="Digite o nº da nota" inputmode="numeric"></div><div class="siafe-filter-actions"><button class="siafe-btn primary" id="siafeSearch">⌕ Pesquisar</button></div></div></div>
+    <div class="siafe-charts"><div class="siafe-chart"><div class="siafe-chart-title">Pagamentos por unidade orçamentária</div><div class="siafe-chart-body" id="siafeSourceChart"></div></div><div class="siafe-chart"><div class="siafe-chart-title">Pagamentos por natureza da despesa</div><div class="siafe-chart-body" id="siafeCategoryChart"></div></div><div class="siafe-chart"><div class="siafe-chart-title">Pagamentos por mês (ano atual)</div><div class="siafe-chart-body" id="siafeMonthChart"></div></div></div>
+    <div class="siafe-panel"><div class="siafe-panel-head"><div class="siafe-panel-title">Detalhamento dos pagamentos</div><button class="siafe-btn" id="siafeExport">⇩ Exportar Excel</button></div><div class="siafe-table-wrap"><table class="siafe-table"><thead><tr><th>Data pagamento</th><th>Convenente</th><th>Unidade orçamentária</th><th>Natureza despesa</th><th>Ação</th><th>Processo</th><th>Empenhado (R$)</th><th>Liquidado (R$)</th><th>Pago (R$)</th><th>Saldo a pagar (R$)</th><th>Situação</th></tr></thead><tbody id="siafeTbody"></tbody></table></div><div class="siafe-footer"><span id="siafeCount">Mostrando 0 registros</span><button class="siafe-btn" id="siafeBack">← Voltar para Pesquisa</button></div></div>`;main.appendChild(v);bindView();}
+  function bindView(){document.getElementById('siafeImportBtn').onclick=()=>document.getElementById('siafeFile').click();document.getElementById('siafeFile').addEventListener('change',importFile);document.getElementById('siafeSearch').onclick=applyFilters;document.getElementById('siafeClear').onclick=()=>{['sfDate1','sfDate2','sfProcesso','sfNotaEmpenho'].forEach(id=>document.getElementById(id).value='');['sfUnidadeOrcamentaria','sfConvenente','sfNaturezaDespesa','sfItemPatrimonial','sfConvenioRegistro','sfAcao','sfClassificacaoAcao','sfSituacao'].forEach(id=>document.getElementById(id).value='');applyFilters();};document.getElementById('siafeBack').onclick=()=>{document.querySelector('.v3-nav button[data-v3="search"]')?.click();};document.getElementById('siafeExport').onclick=exportXlsx;}
   async function importFile(ev){const file=ev.target.files?.[0];if(!file)return;const status=document.getElementById('siafeImportStatus');status.textContent='Lendo a planilha…';try{if(!window.XLSX)throw new Error('Leitor Excel indisponível.');const buf=await file.arrayBuffer();const wb=XLSX.read(buf,{type:'array',cellDates:true});const ws=wb.Sheets[wb.SheetNames[0]];const rows=XLSX.utils.sheet_to_json(ws,{defval:'',raw:true});if(!rows.length)throw new Error('A primeira aba não contém registros.');state.rows=normalizeRows(rows);state.filtered=state.rows.slice();state.imported=true;state.updatedAt=new Date().toISOString();await saveRows(rows);populateFilters();render();status.textContent=`Base carregada: ${file.name} · ${rows.length.toLocaleString('pt-BR')} registros.`;document.getElementById('siafeUpdated').textContent='⟳ Última atualização: '+new Date().toLocaleString('pt-BR');ev.target.value='';}catch(e){status.textContent='Erro ao importar: '+e.message;alert('Não foi possível importar a base SIAFE.\n\n'+e.message);}}
-  function populateFilters(){const map={sfFonte:'fonte',sfUg:'ug',sfUnidadeOrcamentaria:'unidadeOrcamentaria',sfConvenente:'convenente',sfCategoria:'categoria',sfDespesaNatureza:'despesaNatureza',sfItemPatrimonial:'itemPatrimonial',sfConvenioRegistro:'convenioRegistro',sfAcao:'acao'};const labels={fonte:'Selecione a fonte',ug:'Selecione a UG',unidadeOrcamentaria:'Selecione a unidade',convenente:'Selecione o convenente',categoria:'Selecione a categoria',despesaNatureza:'Selecione a natureza',itemPatrimonial:'Selecione o item',convenioRegistro:'Selecione o registro',acao:'Selecione a ação'};for(const [id,field] of Object.entries(map)){const el=document.getElementById(id);if(!el)continue;const old=el.value;const values=opts(state.rows,field);el.innerHTML='<option value="">'+labels[field]+'</option>'+values.map(v=>`<option value="${String(v).replace(/"/g,'&quot;')}">${String(v)}</option>`).join('');if(values.includes(old))el.value=old;else el.value='';}}
-  function applyFilters(){const d1=document.getElementById('sfDate1').value,d2=document.getElementById('sfDate2').value,f=document.getElementById('sfFonte').value,ug=document.getElementById('sfUg').value,uo=document.getElementById('sfUnidadeOrcamentaria').value,m=norm(document.getElementById('sfMapp').value),c=document.getElementById('sfConvenente').value,cat=document.getElementById('sfCategoria').value,dn=document.getElementById('sfDespesaNatureza').value,ip=document.getElementById('sfItemPatrimonial').value,cr=document.getElementById('sfConvenioRegistro').value,p=norm(document.getElementById('sfProcesso').value),a=document.getElementById('sfAcao').value,ne=norm(document.getElementById('sfNotaEmpenho').value);state.filtered=state.rows.filter(r=>{const x=r.__siafe,d=dateVal(x.data);if(d1&&(!d||d<new Date(d1+'T00:00:00')))return false;if(d2&&(!d||d>new Date(d2+'T23:59:59')))return false;if(f&&x.fonte!==f)return false;if(ug&&x.ug!==ug)return false;if(uo&&x.unidadeOrcamentaria!==uo)return false;if(m&&!norm(x.mapp).includes(m))return false;if(c&&x.convenente!==c)return false;if(cat&&x.categoria!==cat)return false;if(dn&&x.despesaNatureza!==dn)return false;if(ip&&x.itemPatrimonial!==ip)return false;if(cr&&x.convenioRegistro!==cr)return false;if(p&&!norm(x.processo).includes(p))return false;if(a&&x.acao!==a)return false;if(ne&&!norm(x.notaEmpenho).includes(ne))return false;return true;});render();}
+  function populateFilters(){const map={sfUnidadeOrcamentaria:'unidadeOrcamentaria',sfConvenente:'convenente',sfNaturezaDespesa:'naturezaDespesa',sfItemPatrimonial:'itemPatrimonial',sfConvenioRegistro:'convenioRegistro',sfAcao:'acao',sfClassificacaoAcao:'classificacaoAcao',sfSituacao:'situacao'};const labels={unidadeOrcamentaria:'Selecione a unidade',convenente:'Selecione o convenente',naturezaDespesa:'Selecione a natureza',itemPatrimonial:'Selecione o item',convenioRegistro:'Selecione o registro',acao:'Selecione a ação',classificacaoAcao:'Selecione a classificação',situacao:'Selecione a situação'};for(const [id,field] of Object.entries(map)){const el=document.getElementById(id);if(!el)continue;const old=el.value;const values=opts(state.rows,field);el.innerHTML='<option value="">'+labels[field]+'</option>'+values.map(v=>`<option value="${String(v).replace(/"/g,'&quot;')}">${String(v)}</option>`).join('');if(values.includes(old))el.value=old;else el.value='';}}
+  function applyFilters(){const d1=document.getElementById('sfDate1').value,d2=document.getElementById('sfDate2').value,uo=document.getElementById('sfUnidadeOrcamentaria').value,c=document.getElementById('sfConvenente').value,nd=document.getElementById('sfNaturezaDespesa').value,ip=document.getElementById('sfItemPatrimonial').value,cr=document.getElementById('sfConvenioRegistro').value,p=norm(document.getElementById('sfProcesso').value),a=document.getElementById('sfAcao').value,ca=document.getElementById('sfClassificacaoAcao').value,st=document.getElementById('sfSituacao').value,ne=norm(document.getElementById('sfNotaEmpenho').value);state.filtered=state.rows.filter(r=>{const x=r.__siafe,d=dateVal(x.data);if(d1&&(!d||d<new Date(d1+'T00:00:00')))return false;if(d2&&(!d||d>new Date(d2+'T23:59:59')))return false;if(uo&&x.unidadeOrcamentaria!==uo)return false;if(c&&x.convenente!==c)return false;if(nd&&x.naturezaDespesa!==nd)return false;if(ip&&x.itemPatrimonial!==ip)return false;if(cr&&x.convenioRegistro!==cr)return false;if(p&&!norm(x.processo).includes(p))return false;if(a&&x.acao!==a)return false;if(ca&&x.classificacaoAcao!==ca)return false;if(st&&x.situacao!==st)return false;if(ne&&!norm(x.notaEmpenho).includes(ne))return false;return true;});render();}
   function render(){
     const rows=state.filtered;const totalE=rows.reduce((a,r)=>a+r.__siafe.empenhado,0),totalL=rows.reduce((a,r)=>a+r.__siafe.liquidado,0),totalP=rows.reduce((a,r)=>a+r.__siafe.pago,0),saldo=rows.reduce((a,r)=>a+(r.__siafe.saldo||Math.max(r.__siafe.empenhado-r.__siafe.pago,0)),0);const k=document.getElementById('siafeKpis');k.innerHTML=`<div class="siafe-card siafe-kpi"><div class="siafe-kpi-icon">▣</div><div><div class="siafe-kpi-label">Total empenhado</div><div class="siafe-kpi-value">${money(totalE)}</div><div class="siafe-kpi-note">100% do total</div></div></div><div class="siafe-card siafe-kpi"><div class="siafe-kpi-icon">✓</div><div><div class="siafe-kpi-label">Total liquidado</div><div class="siafe-kpi-value">${money(totalL)}</div><div class="siafe-kpi-note">${totalE?(totalL/totalE*100).toFixed(2).replace('.',','):'0,00'}% do empenhado</div></div></div><div class="siafe-card siafe-kpi"><div class="siafe-kpi-icon">▤</div><div><div class="siafe-kpi-label">Total pago</div><div class="siafe-kpi-value">${money(totalP)}</div><div class="siafe-kpi-note">${totalE?(totalP/totalE*100).toFixed(2).replace('.',','):'0,00'}% do empenhado</div></div></div><div class="siafe-card siafe-kpi"><div class="siafe-kpi-icon">$</div><div><div class="siafe-kpi-label">Saldo a pagar</div><div class="siafe-kpi-value">${money(saldo)}</div><div class="siafe-kpi-note">${totalE?(saldo/totalE*100).toFixed(2).replace('.',','):'0,00'}% do empenhado</div></div></div><div class="siafe-card siafe-kpi"><div class="siafe-kpi-icon">▥</div><div><div class="siafe-kpi-label">Quantidade de pagamentos</div><div class="siafe-kpi-value">${rows.length.toLocaleString('pt-BR')}</div><div class="siafe-kpi-note">Registros</div></div></div>`;renderCharts(rows);renderTable(rows);}
   function renderCharts(rows){
-    const source={},cat={},month={};
-    rows.forEach(r=>{const x=r.__siafe;source[x.fonte]=(source[x.fonte]||0)+x.pago;cat[x.categoria]=(cat[x.categoria]||0)+x.pago;const mk=monthKey(x.data);if(mk)month[mk]=(month[mk]||0)+x.pago;});
+    const unidade={},natureza={},month={};
+    rows.forEach(r=>{const x=r.__siafe;unidade[x.unidadeOrcamentaria]=(unidade[x.unidadeOrcamentaria]||0)+x.pago;natureza[x.naturezaDespesa]=(natureza[x.naturezaDespesa]||0)+x.pago;const mk=monthKey(x.data);if(mk)month[mk]=(month[mk]||0)+x.pago;});
     const paidTotal=rows.reduce((a,r)=>a+r.__siafe.pago,0);
     if(paidTotal===0){
       document.getElementById('siafeSourceChart').innerHTML='<div class="siafe-empty"><strong>Valor pago não identificado</strong>Verifique o nome da coluna de pagamentos na planilha SIAFE.</div>';
       document.getElementById('siafeCategoryChart').innerHTML='<div class="siafe-empty"><strong>Valor pago não identificado</strong>O gráfico será preenchido quando a coluna de pagamento for reconhecida.</div>';
       document.getElementById('siafeMonthChart').innerHTML='<div class="siafe-empty"><strong>Sem valores pagos</strong>Não há valores de pagamento reconhecidos para o período.</div>';
       return;
-    }const topS=Object.entries(source).sort((a,b)=>b[1]-a[1]).slice(0,5),maxS=topS[0]?.[1]||1;document.getElementById('siafeSourceChart').innerHTML='<div class="siafe-source-list">'+(topS.length?topS.map(([n,v])=>`<div class="siafe-source-row"><div class="siafe-source-name" title="${n}">${n}</div><div class="siafe-source-track"><div class="siafe-source-fill" style="width:${v/maxS*100}%"></div></div><div class="siafe-source-val">${shortMoney(v)}</div></div>`).join(''):'<div class="siafe-empty">Sem dados</div>')+'</div>';const topC=Object.entries(cat).sort((a,b)=>b[1]-a[1]).slice(0,5),maxC=topC[0]?.[1]||1;document.getElementById('siafeCategoryChart').innerHTML=topC.length?topC.map(([n,v])=>`<div style="display:grid;grid-template-columns:150px 1fr 82px;gap:8px;align-items:center;margin:13px 0;font-size:9px;color:#52657b"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${n}">${n}</span><span style="height:14px;background:#edf2f6;border-radius:7px;overflow:hidden"><i style="display:block;height:100%;width:${v/maxC*100}%;background:#173f66;border-radius:7px"></i></span><b style="font-size:9px;color:#173a5c;text-align:right">${shortMoney(v)}</b></div>`).join(''):'<div class="siafe-empty">Sem dados</div>';const now=new Date().getFullYear();const months=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];const vals=months.map((_,i)=>month[`${now}-${String(i+1).padStart(2,'0')}`]||0),mx=Math.max(...vals,1);document.getElementById('siafeMonthChart').innerHTML='<div class="siafe-bars">'+vals.map((v,i)=>`<div class="siafe-bar-wrap"><span class="siafe-bar-value" style="--h:${Math.max(v/mx*160,3)}px">${v?shortMoney(v):''}</span><span class="siafe-bar" style="height:${Math.max(v/mx*160,3)}px"></span><span class="siafe-bar-label">${months[i]}</span></div>`).join('')+'</div>';}
-  function renderTable(rows){const body=document.getElementById('siafeTbody');const page=rows.slice(0,8);body.innerHTML=page.length?page.map(r=>{const x=r.__siafe;const st=norm(x.situacao);const cls=st.includes('CANCEL')?'cancel':(st.includes('PARCIAL')?'partial':'');return `<tr title="${x.ordemBancaria?('Ordem Bancária: '+String(x.ordemBancaria).replace(/\"/g,'&quot;')):''}"><td>${fmtDate(x.data)}</td><td>${x.ug}</td><td>${x.mapp}</td><td>${x.convenente}</td><td>${x.fonte}</td><td>${x.categoria}</td><td>${x.elemento}</td><td>${x.modalidade}</td><td>${money(x.empenhado)}</td><td>${money(x.liquidado)}</td><td>${money(x.pago)}</td><td><span class="siafe-status ${cls}">${x.situacao}</span></td></tr>`;}).join(''):`<tr><td colspan="12"><div class="siafe-empty"><strong>Nenhum registro encontrado</strong>Importe a base SIAFE ou ajuste os filtros.</div></td></tr>`;document.getElementById('siafeCount').textContent=`Mostrando ${Math.min(page.length,rows.length).toLocaleString('pt-BR')} de ${rows.length.toLocaleString('pt-BR')} registros`;}
-  function exportXlsx(){if(!state.filtered.length&&!state.rows.length){alert('Não há dados para exportar.');return;}if(!window.XLSX){alert('Leitor Excel indisponível.');return;}const rows=(state.filtered.length?state.filtered:state.rows).map(r=>{const x=r.__siafe;return {'DATA PAGAMENTO':fmtDate(x.data),'UG':x.ug,'UNIDADE ORÇAMENTÁRIA':x.unidadeOrcamentaria,'MAPP':x.mapp,'CONVENENTE':x.convenente,'FONTE DE RECURSO':x.fonte,'CATEGORIA DE GASTO':x.categoria,'ELEMENTO DE DESPESA':x.elemento,'MODALIDADE':x.modalidade,'EMPENHADO':x.empenhado,'LIQUIDADO':x.liquidado,'PAGO':x.pago,'SITUAÇÃO':x.situacao};});const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),'SIAFE');XLSX.writeFile(wb,'pagamentos_siafe_exportacao.xlsx');}
+    }const topU=Object.entries(unidade).sort((a,b)=>b[1]-a[1]).slice(0,5),maxU=topU[0]?.[1]||1;document.getElementById('siafeSourceChart').innerHTML='<div class="siafe-source-list">'+(topU.length?topU.map(([n,v])=>`<div class="siafe-source-row"><div class="siafe-source-name" title="${n}">${n}</div><div class="siafe-source-track"><div class="siafe-source-fill" style="width:${v/maxU*100}%"></div></div><div class="siafe-source-val">${shortMoney(v)}</div></div>`).join(''):'<div class="siafe-empty">Sem dados</div>')+'</div>';const topN=Object.entries(natureza).sort((a,b)=>b[1]-a[1]).slice(0,5),maxN=topN[0]?.[1]||1;document.getElementById('siafeCategoryChart').innerHTML=topN.length?topN.map(([n,v])=>`<div style="display:grid;grid-template-columns:150px 1fr 82px;gap:8px;align-items:center;margin:13px 0;font-size:9px;color:#52657b"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${n}">${n}</span><span style="height:14px;background:#edf2f6;border-radius:7px;overflow:hidden"><i style="display:block;height:100%;width:${v/maxN*100}%;background:#173f66;border-radius:7px"></i></span><b style="font-size:9px;color:#173a5c;text-align:right">${shortMoney(v)}</b></div>`).join(''):'<div class="siafe-empty">Sem dados</div>';const now=new Date().getFullYear();const months=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];const vals=months.map((_,i)=>month[`${now}-${String(i+1).padStart(2,'0')}`]||0),mx=Math.max(...vals,1);document.getElementById('siafeMonthChart').innerHTML='<div class="siafe-bars">'+vals.map((v,i)=>`<div class="siafe-bar-wrap"><span class="siafe-bar-value" style="--h:${Math.max(v/mx*160,3)}px">${v?shortMoney(v):''}</span><span class="siafe-bar" style="height:${Math.max(v/mx*160,3)}px"></span><span class="siafe-bar-label">${months[i]}</span></div>`).join('')+'</div>';}
+  function renderTable(rows){const body=document.getElementById('siafeTbody');const page=rows.slice(0,8);body.innerHTML=page.length?page.map(r=>{const x=r.__siafe;const st=norm(x.situacao);const cls=st.includes('AGUARDANDO')||st.includes('SEM EMPENHO')?'':(st.includes('PARCIAL')?'partial':(st.includes('CANCEL')?'cancel':''));return `<tr title="${x.ordemBancaria?('Ordem Bancária: '+String(x.ordemBancaria).replace(/\"/g,'&quot;')):''}"><td>${x.data?fmtDate(x.data):'—'}</td><td>${x.convenente}</td><td>${x.unidadeOrcamentaria}</td><td>${x.naturezaDespesa}</td><td title="${x.acao}">${x.acao}</td><td>${x.processo}</td><td>${money(x.empenhado)}</td><td>${money(x.liquidado)}</td><td>${money(x.pago)}</td><td>${money(x.saldo)}</td><td><span class="siafe-status ${cls}">${x.situacao}</span></td></tr>`;}).join(''):`<tr><td colspan="11"><div class="siafe-empty"><strong>Nenhum registro encontrado</strong>Importe a base SIAFE ou ajuste os filtros.</div></td></tr>`;document.getElementById('siafeCount').textContent=`Mostrando ${Math.min(page.length,rows.length).toLocaleString('pt-BR')} de ${rows.length.toLocaleString('pt-BR')} registros`;}
+  function exportXlsx(){if(!state.filtered.length&&!state.rows.length){alert('Não há dados para exportar.');return;}if(!window.XLSX){alert('Leitor Excel indisponível.');return;}const rows=(state.filtered.length?state.filtered:state.rows).map(r=>{const x=r.__siafe;return {'DATA PAGAMENTO':x.data?fmtDate(x.data):'','CONVENENTE':x.convenente,'UNIDADE ORÇAMENTÁRIA':x.unidadeOrcamentaria,'NATUREZA DESPESA':x.naturezaDespesa,'AÇÃO':x.acao,'CLASSIFICAÇÃO AÇÃO':x.classificacaoAcao,'CONTRATO':x.contrato,'PROCESSO':x.processo,'CONVÊNIO REGISTRO':x.convenioRegistro,'NOTA DE EMPENHO':x.notaEmpenho,'EMPENHADO':x.empenhado,'LIQUIDADO':x.liquidado,'PAGO':x.pago,'SALDO A PAGAR':x.saldo,'SITUAÇÃO':x.situacao};});const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),'SIAFE');XLSX.writeFile(wb,'pagamentos_siafe_exportacao.xlsx');}
   window.mountSiafeView=function(main){
     buildView(main);
     // Sincroniza com a base compartilhada assim que a view é montada (logo
