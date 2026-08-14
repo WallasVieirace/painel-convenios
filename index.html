@@ -1222,6 +1222,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.18;b
 .v3-main .legend-chip .lg-count{font-size:9px;color:var(--v3-muted);}
 .v3-main .results-meta{background:#fff;border:1px solid var(--v3-line);border-bottom:0;border-radius:9px 9px 0 0;margin-top:2px;padding:12px 15px;display:flex;justify-content:space-between;align-items:center;}
 .v3-main .results-meta .rm-label{font-size:10px;color:var(--v3-muted);text-transform:uppercase;letter-spacing:.04em;}
+.v3-main .results-meta .rm-breakdown{display:inline-block;margin-top:3px;font-size:10.5px;color:#52657b;font-weight:600;}
 .v3-main .results-meta b{font-size:11px;color:var(--v3-navy);}
 .v3-main .print-btn{background:#fff;border:1px solid #cbd6e2;color:var(--v3-navy);border-radius:5px;padding:7px 11px;font-size:10.5px;cursor:pointer;}
 .v3-main #resultsWrap{background:#fff;border:1px solid var(--v3-line);border-radius:9px;overflow:hidden;box-shadow:0 2px 9px rgba(15,39,64,.03);}
@@ -3243,7 +3244,13 @@ function runSearch(){
   resultsMeta.innerHTML = '';
   resultsMeta.style.display='flex';
   const countSpan = document.createElement('span');
-  countSpan.innerHTML = `<span class="rm-label">Resultados da pesquisa</span><b>${matches.length.toLocaleString('pt-BR')}</b> resultado(s) encontrado(s) para <b>“${escapeHtml(lastQuery)}”</b>`;
+  // V61 FIX: além do total geral, mostra quantos registros foram
+  // encontrados em CADA base (ex.: "Celebração (01), Execução (01),
+  // Prestação de Contas (01)"), para o usuário já ver de onde veio cada
+  // resultado sem precisar rolar até os grupos abaixo.
+  const bySourceCount={};matches.forEach(m=>{bySourceCount[m.sheet]=(bySourceCount[m.sheet]||0)+1;});
+  const breakdown=Object.entries(bySourceCount).sort((a,b)=>b[1]-a[1]).map(([sheet,n])=>`${escapeHtml(dLabel(sheet))} (${String(n).padStart(2,'0')})`).join(', ');
+  countSpan.innerHTML = `<span class="rm-label">Resultados da pesquisa</span><b>${matches.length.toLocaleString('pt-BR')}</b> resultado(s) encontrado(s) para <b>“${escapeHtml(lastQuery)}”</b>${breakdown?`<br><span class="rm-breakdown">Localizado na base ${breakdown}</span>`:''}`;
   resultsMeta.appendChild(countSpan);
   if(matches.length > 0){
     const printBtn = document.createElement('button');
@@ -3582,10 +3589,10 @@ function printCurrentResults(selectedSheets, reportType){
     'Em Celebração 2026':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12.5 10.5 15 16 9.5"/><path d="M4 10.5 7.5 7 11 10.5 7.5 14zM13 10.5 16.5 7 20 10.5 16.5 14z"/><path d="M7.5 14 10.5 17l3-3M13 10.5 16.5 14 13 17 10 14"/></svg>'
   };
   const sourceCardHtml = `<div class="pr-source-heading">Fontes selecionadas para este relatório</div><div class="pr-source-cards">${sourceCounts.map(x=>`
-    <div class="pr-source-card">
+    <div class="pr-source-card ${x.found?'is-found':''}">
       <div class="psc-icon">${sourceSvg[x.sheet]||sourceSvg['Fiscalização']}</div>
       <strong>${escapeHtml(dLabel(x.sheet))}</strong>
-      <span>${x.total.toLocaleString('pt-BR')} registros</span>
+      <span>${x.found?`${String(x.found).padStart(2,'0')} encontrado(s)`:'0 encontrado'}</span>
       <div class="psc-check ${x.found?'is-found':''}">${x.found?'✓':''}</div>
     </div>`).join('')}</div>`;
 
@@ -3597,6 +3604,7 @@ function printCurrentResults(selectedSheets, reportType){
           <div class="pr-kv"><b>Tipo de pesquisa</b><span>${escapeHtml(reportType==='executivo'?'Relatório Executivo':'Número exato')}</span></div>
           <div class="pr-kv"><b>Bases consultadas</b><span>${selected.size} base(s) de dados</span></div>
           <div class="pr-kv"><b>Registros encontrados</b><span>${matchesToPrint.length} resultado(s)</span></div>
+          <div class="pr-kv" style="grid-column:1/-1"><b>Localizado por base</b><span>${sourceCounts.filter(x=>x.found).map(x=>`${escapeHtml(dLabel(x.sheet))} (${String(x.found).padStart(2,'0')})`).join(', ')||'—'}</span></div>
           <div class="pr-kv" style="grid-column:1/-1"><b>Filtros aplicados</b><span>${escapeHtml(lastQuery ? `${(typeof searchField!=='undefined'&&searchField)?searchField:'Pesquisa'}: ${lastQuery}` : '—')}</span></div>
         </div>
       </div>
@@ -3900,7 +3908,14 @@ initGate();
     if(q){matches=matches.filter(item=>qField==='all'?matchesText(item.hay,q):matchesText(fieldHay(item,qField),q));}
     for(const [f,v] of Object.entries(adv)) matches=matches.filter(item=>matchesText(fieldHay(item,f),v));
     lastMatches=matches;lastQuery=q||Object.entries(adv).map(([k,v])=>k+': '+v).join(' · ');
-    const meta=document.getElementById('resultsMeta');meta.style.display='flex';meta.innerHTML=`<span><span class="rm-label">Resultados da pesquisa</span> <b>${matches.length.toLocaleString('pt-BR')}</b> registro(s) encontrado(s)</span>`;
+    const meta=document.getElementById('resultsMeta');meta.style.display='flex';
+    // V61 FIX: além do total geral, mostra quantos registros foram
+    // encontrados em CADA base (ex.: "Celebração (1), Execução (1),
+    // Prestação de Contas (1)"), para o usuário já ver de onde veio cada
+    // resultado sem precisar rolar até os grupos abaixo.
+    const bySourceCount={};matches.forEach(m=>{bySourceCount[m.sheet]=(bySourceCount[m.sheet]||0)+1;});
+    const breakdown=Object.entries(bySourceCount).sort((a,b)=>b[1]-a[1]).map(([sheet,n])=>`${escapeHtml(dLabel(sheet))} (${String(n).padStart(2,'0')})`).join(', ');
+    meta.innerHTML=`<span><span class="rm-label">Resultados da pesquisa</span> <b>${matches.length.toLocaleString('pt-BR')}</b> registro(s) encontrado(s)${breakdown?`<br><span class="rm-breakdown">Localizado na base ${breakdown}</span>`:''}</span>`;
     if(matches.length){const p=document.createElement('button');p.className='print-btn';p.innerHTML='Imprimir / PDF';p.onclick=openPrintSelectionModal;meta.appendChild(p);}
     const wrap=document.getElementById('resultsWrap');wrap.innerHTML='';
     if(!matches.length){wrap.innerHTML='<div class="empty"><div class="big">Nenhum resultado encontrado</div>Revise os filtros ou amplie as fontes de dados selecionadas.</div>';return;}
@@ -4268,7 +4283,13 @@ initGate();
     if(q){matches=matches.filter(item=>field==='all'?norm(item.hay).includes(norm(q)):norm(fv(item.rec,field)).includes(norm(q)));}
     for(const [f,v] of Object.entries(adv)){if(f==='NUP') continue; matches=matches.filter(item=>norm(fv(item.rec,f)).includes(norm(v)));}
     lastMatches=matches; lastQuery=q||Object.entries(adv).map(([k,v])=>k+': '+v).join(' · ');
-    meta.style.display='flex'; meta.innerHTML=`<span><span class="rm-label">Resultados da pesquisa</span> <b>${matches.length.toLocaleString('pt-BR')}</b> registro(s) encontrado(s)${q?` para <b>${escapeHtml(field==='MAPP'?'MAPP '+q:q)}</b>`:''}</span>`;
+    // V61 FIX: além do total geral, mostra quantos registros foram
+    // encontrados em CADA base (ex.: "Celebração (01), Execução (01),
+    // Prestação de Contas (01)"), para o usuário já ver de onde veio cada
+    // resultado sem precisar rolar até os grupos abaixo.
+    const bySourceCount={};matches.forEach(m=>{bySourceCount[m.sheet]=(bySourceCount[m.sheet]||0)+1;});
+    const breakdown=Object.entries(bySourceCount).sort((a,b)=>b[1]-a[1]).map(([sheet,n])=>`${escapeHtml(dLabel(sheet))} (${String(n).padStart(2,'0')})`).join(', ');
+    meta.style.display='flex'; meta.innerHTML=`<span><span class="rm-label">Resultados da pesquisa</span> <b>${matches.length.toLocaleString('pt-BR')}</b> registro(s) encontrado(s)${q?` para <b>${escapeHtml(field==='MAPP'?'MAPP '+q:q)}</b>`:''}${breakdown?`<br><span class="rm-breakdown">Localizado na base ${breakdown}</span>`:''}</span>`;
     if(matches.length){const p=document.createElement('button');p.className='print-btn';p.textContent='Imprimir / PDF';p.onclick=openPrintSelectionModal;meta.appendChild(p);}
     if(!matches.length){wrap.innerHTML='<div class="empty"><div class="big">Nenhum resultado encontrado</div>Revise os filtros ou amplie as fontes de dados selecionadas.</div>';return;}
     const by={}; const order=[];
@@ -5360,9 +5381,21 @@ initGate();
     try{const v=JSON.parse(localStorage.getItem(LOCAL_BASES_KEY)||'{}');return v&&typeof v==='object'?v:{};}catch(e){return {};}
   }
   function writeLocalBase(key,payload){
-    const all=readLocalBases();
-    all[key]=payload;
-    localStorage.setItem(LOCAL_BASES_KEY,JSON.stringify(all));
+    // V58 FIX: as 5 bases principais juntas passam facilmente de alguns MB —
+    // em navegadores com pouca cota de armazenamento sobrando (ou já usada
+    // por outras abas/sites), salvar isso localmente podia estourar o limite
+    // do localStorage e travar a importação inteira com um erro técnico
+    // ("Setting the value of ... exceeded the quota"). A cópia local é só
+    // uma segurança para o mesmo navegador — a base compartilhada (Firebase)
+    // é o que realmente importa para todo mundo ver — então, se essa cópia
+    // local falhar, a importação continua normalmente em vez de travar.
+    try{
+      const all=readLocalBases();
+      all[key]=payload;
+      localStorage.setItem(LOCAL_BASES_KEY,JSON.stringify(all));
+    }catch(e){
+      console.warn('Bases principais: não foi possível salvar uma cópia local (armazenamento do navegador cheio). A importação continua normalmente; os dados ficam disponíveis via base compartilhada (Firebase).',e);
+    }
   }
   /* Persistência compartilhada (Firebase) — mesmo padrão da Lei 360, do SIAFE
      e de Usuários, para que uma importação das 5 bases principais feita por
@@ -6677,6 +6710,7 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
       return {...g,items,totals:{valor,pago,saldo,pct:valor?pago/valor*100:0}};
     });
     expanded.clear(); pageOf.clear();
+    renderKPIs();
     render();
   }
 
@@ -6763,32 +6797,47 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
   function render(){
     const wrap=document.getElementById('sdResultsBody');
     const metaEl=document.getElementById('sdResultsMeta');
+    const printBtn=document.getElementById('sdPrintBtn');
     if(!wrap) return;
     if(!state.imported){
       if(metaEl) metaEl.textContent='Importe a base para começar.';
       wrap.innerHTML='<div class="sd-empty">Nenhuma base importada ainda. Clique em "Importar dados" para carregar a planilha de Planos de Aplicação e Base Geral Ações.</div>';
+      if(printBtn) printBtn.style.display='none';
       return;
     }
     const totalItems=state.filtered.reduce((a,g)=>a+g.items.length,0);
     if(metaEl) metaEl.textContent=`${state.filtered.length.toLocaleString('pt-BR')} ação(ões) detalhada(s) encontrada(s) · ${totalItems.toLocaleString('pt-BR')} planos de aplicação`;
+    // V60 FIX: o botão de impressão/PDF só aparece depois que algum filtro
+    // for aplicado — imprimir as 235 ações inteiras de uma vez (sem
+    // nenhum filtro) não faz sentido como relatório.
+    const totalPaAll=state.paRows.length;
+    const isFiltered=state.filtered.length!==state.grouped.length || totalItems!==totalPaAll;
+    if(printBtn) printBtn.style.display=(isFiltered && state.filtered.length)?'inline-flex':'none';
     if(!state.filtered.length){ wrap.innerHTML='<div class="sd-empty">Nenhum resultado encontrado. Ajuste os filtros.</div>'; return; }
     wrap.innerHTML=state.filtered.map(renderGroup).join('');
     bindGroupEvents();
   }
   function renderKPIs(){
     const el=document.getElementById('sdKpis'); if(!el) return;
-    const totalPA=state.paRows.length;
-    const totalAcoes=state.grouped.length;
-    const totalValor=state.paRows.reduce((a,p)=>a+p.valor,0);
-    const totalPago=state.paRows.reduce((a,p)=>a+p.valorPago,0);
-    const totalSaldo=state.paRows.reduce((a,p)=>a+p.saldoPagar,0);
+    // V59 FIX: os cards de KPI agora refletem o resultado FILTRADO
+    // (state.filtered), não mais o total geral da base inteira — assim,
+    // ao aplicar qualquer filtro, os valores mudam junto com a lista de
+    // resultados abaixo.
+    const filteredItems=state.filtered.flatMap(g=>g.items);
+    const isFiltered=state.filtered.length!==state.grouped.length || filteredItems.length!==state.paRows.length;
+    const totalPA=filteredItems.length;
+    const totalAcoes=state.filtered.length;
+    const totalValor=filteredItems.reduce((a,p)=>a+p.valor,0);
+    const totalPago=filteredItems.reduce((a,p)=>a+p.valorPago,0);
+    const totalSaldo=filteredItems.reduce((a,p)=>a+p.saldoPagar,0);
     const pct=totalValor?totalPago/totalValor*100:0;
+    const noteSuffix=isFiltered?' (filtrado)':'';
     el.innerHTML=`
-      <div class="sd-kpi"><div class="sd-kpi-icon">📋</div><div class="sd-kpi-label">Planos de aplicação</div><div class="sd-kpi-value">${totalPA.toLocaleString('pt-BR')}</div><div class="sd-kpi-note">registros importados</div></div>
-      <div class="sd-kpi"><div class="sd-kpi-icon">🏷️</div><div class="sd-kpi-label">Ações detalhadas</div><div class="sd-kpi-value">${totalAcoes.toLocaleString('pt-BR')}</div><div class="sd-kpi-note">distintas, cruzadas com a Base Geral</div></div>
-      <div class="sd-kpi"><div class="sd-kpi-icon">💰</div><div class="sd-kpi-label">Valor total</div><div class="sd-kpi-value">${shortMoney(totalValor)}</div><div class="sd-kpi-note">${money(totalValor)}</div></div>
-      <div class="sd-kpi"><div class="sd-kpi-icon">✅</div><div class="sd-kpi-label">Valor pago</div><div class="sd-kpi-value">${shortMoney(totalPago)}</div><div class="sd-kpi-note">${pct.toLocaleString('pt-BR',{maximumFractionDigits:2})}% do total</div></div>
-      <div class="sd-kpi"><div class="sd-kpi-icon">🕒</div><div class="sd-kpi-label">Saldo a pagar</div><div class="sd-kpi-value">${shortMoney(totalSaldo)}</div><div class="sd-kpi-note">${(totalValor?totalSaldo/totalValor*100:0).toLocaleString('pt-BR',{maximumFractionDigits:2})}% do total</div></div>
+      <div class="sd-kpi"><div class="sd-kpi-icon">📋</div><div class="sd-kpi-label">Planos de aplicação</div><div class="sd-kpi-value">${totalPA.toLocaleString('pt-BR')}</div><div class="sd-kpi-note">${isFiltered?'registros no filtro atual':'registros importados'}</div></div>
+      <div class="sd-kpi"><div class="sd-kpi-icon">🏷️</div><div class="sd-kpi-label">Ações detalhadas</div><div class="sd-kpi-value">${totalAcoes.toLocaleString('pt-BR')}</div><div class="sd-kpi-note">${isFiltered?'no filtro atual':'distintas, cruzadas com a Base Geral'}</div></div>
+      <div class="sd-kpi"><div class="sd-kpi-icon">💰</div><div class="sd-kpi-label">Valor total${noteSuffix}</div><div class="sd-kpi-value">${shortMoney(totalValor)}</div><div class="sd-kpi-note">${money(totalValor)}</div></div>
+      <div class="sd-kpi"><div class="sd-kpi-icon">✅</div><div class="sd-kpi-label">Valor pago${noteSuffix}</div><div class="sd-kpi-value">${shortMoney(totalPago)}</div><div class="sd-kpi-note">${pct.toLocaleString('pt-BR',{maximumFractionDigits:2})}% do total</div></div>
+      <div class="sd-kpi"><div class="sd-kpi-icon">🕒</div><div class="sd-kpi-label">Saldo a pagar${noteSuffix}</div><div class="sd-kpi-value">${shortMoney(totalSaldo)}</div><div class="sd-kpi-note">${(totalValor?totalSaldo/totalValor*100:0).toLocaleString('pt-BR',{maximumFractionDigits:2})}% do total</div></div>
     `;
   }
   function refreshUI(){ renderKPIs(); populateFilters(); render(); }
@@ -6855,7 +6904,7 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
         </div>
       </div>
       <div class="sd-panel">
-        <div class="sd-results-meta"><b id="sdResultsMeta" style="font-size:11.5px;color:#102f50;">Importe a base para começar.</b><button class="sd-btn" id="sdExport">⇩ Exportar Excel</button></div>
+        <div class="sd-results-meta"><b id="sdResultsMeta" style="font-size:11.5px;color:#102f50;">Importe a base para começar.</b><div style="display:flex;gap:8px;"><button class="sd-btn primary" id="sdPrintBtn" style="display:none;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v7H6z"/></svg>Imprimir / PDF</button><button class="sd-btn" id="sdExport">⇩ Exportar Excel</button></div></div>
         <div id="sdResultsBody"></div>
       </div>
     `;
@@ -6871,9 +6920,112 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
       ['sdAcao','sdNumeroPA','sdEmpenho','sdDataEmissao1','sdDataEmissao2','sdDataPagamento1','sdDataPagamento2'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
       ['sdStatus','sdFicha','sdIdExNome','sdConta','sdSuper','sdSecretaria','sdCategoria','sdFonte','sdFonteCompleta'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
       state.filtered=state.grouped; expanded.clear(); pageOf.clear();
+      renderKPIs();
       render();
     };
     document.getElementById('sdExport').onclick=exportXlsx;
+    document.getElementById('sdPrintBtn').onclick=printSaudeDigitalReport;
+  }
+
+  function pct(n){ return n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%'; }
+
+  // V60 — Relatório de impressão/PDF, seguindo o mesmo padrão visual do
+  // relatório da aba Lei 360 (reaproveita as mesmas classes pr-* já usadas
+  // lá), mas com os dados da Saúde Digital: agrupado por Ação Detalhada,
+  // com o contexto da Base Geral Ações e a lista de Planos de Aplicação.
+  function printSaudeDigitalReport(){
+    const groups=state.filtered;
+    if(!groups.length){ alert('Não há resultados para incluir no relatório. Aplique um filtro antes de imprimir.'); return; }
+    const now=new Date();
+    const reportCode=`REL-${now.toLocaleDateString('pt-BR').replace(/\//g,'')}-SDIGITAL`;
+    const who=(typeof CURRENT_USER!=='undefined' && CURRENT_USER) ? (CURRENT_USER.name||CURRENT_USER.u) : '';
+    const logoSrc=document.querySelector('#printReport .pr-brasao')?.getAttribute('src') || document.querySelector('.page-header-logo')?.getAttribute('src') || '';
+    const totalPA=groups.reduce((a,g)=>a+g.items.length,0);
+    const totalValor=groups.reduce((a,g)=>a+g.totals.valor,0);
+    const totalPago=groups.reduce((a,g)=>a+g.totals.pago,0);
+    const totalSaldo=groups.reduce((a,g)=>a+g.totals.saldo,0);
+    const pctPago=totalValor?(totalPago/totalValor*100):0;
+    const body=groups.map(g=>{
+      const ctx=g.context;
+      const itemsRows=g.items.map(p=>`<tr><td>${escapeHtml(p.numeroPA)}</td><td>${fmtDate(p.dataEmissao)}</td><td>${escapeHtml(p.ficha||'—')}</td><td>${money(p.valor)}</td><td>${money(p.valorPago)}</td><td>${money(p.saldoPagar)}</td><td><span class="pp-pill ${statusClass(p.status)==='pago'?'pago':'apagar'}">${escapeHtml(p.status||'—')}</span></td><td>${escapeHtml(p.processo||'—')}</td><td>${escapeHtml(p.empenho||'—')}</td><td>${fmtDate(p.dataPagamento)}</td></tr>`).join('');
+      return `<div class="pr-mapp-group">
+        <div class="pr-result-head"><span>${escapeHtml(g.acao)}</span><span class="right">${g.items.length.toLocaleString('pt-BR')} plano(s) de aplicação</span></div>
+        <div class="pr-ident-row">
+          <div class="pr-ident-item"><b>Fonte</b><span>${escapeHtml(ctx?.fonte||'—')}</span></div>
+          <div class="pr-ident-item"><b>Fonte do recurso</b><span>${escapeHtml(ctx?.fonteCompleta||'—')}</span></div>
+          <div class="pr-ident-item"><b>Conta bancária</b><span>${escapeHtml(ctx?.conta?(ctx.conta+(ctx.domicilio?' - '+ctx.domicilio:'')):'—')}</span></div>
+          <div class="pr-ident-item"><b>Classificação</b><span>${escapeHtml(ctx?.classificacao||'—')}</span></div>
+          <div class="pr-ident-item"><b>Tipo</b><span>${escapeHtml(ctx?.tipo||'—')}</span></div>
+          <div class="pr-ident-item"><b>Superintendência</b><span>${escapeHtml(ctx?.superintendencia||'—')}</span></div>
+          <div class="pr-ident-item"><b>Secretaria</b><span>${escapeHtml(ctx?.secretaria||'—')}</span></div>
+          <div class="pr-ident-item"><b>Área responsável</b><span>${escapeHtml(ctx?.areaResponsavel||'—')}</span></div>
+        </div>
+        <div class="pr-financial-block">
+          <div class="pr-financial-title">Situação financeira e pagamentos</div>
+          <div class="pr-financial-grid">
+            <div class="pr-financial-item"><b>Valor total</b><span>${money(g.totals.valor)}</span></div>
+            <div class="pr-financial-item paid"><b>Total pago</b><span>${money(g.totals.pago)}</span></div>
+            <div class="pr-financial-item saldo"><b>Saldo</b><span>${money(g.totals.saldo)}</span></div>
+            <div class="pr-financial-item percent"><b>% pago</b><span>${pct(g.totals.pct)}</span></div>
+          </div>
+        </div>
+        <div class="pr-parcelas-block">
+          <div class="pr-parcelas-title"><span>Planos de aplicação</span><span>${g.items.length.toLocaleString('pt-BR')} registro(s)</span></div>
+          <table class="pr-parcelas-table"><thead><tr><th>N° PA</th><th>Emissão</th><th>Ficha</th><th>Valor</th><th>Pago</th><th>Saldo</th><th>Situação</th><th>Processo</th><th>Empenho</th><th>Pagamento</th></tr></thead><tbody>${itemsRows||'<tr><td colspan="10">Sem planos de aplicação.</td></tr>'}</tbody></table>
+        </div>
+      </div>`;
+    }).join('');
+    const html=`<div class="pr-page">
+      <div class="pr-header">
+        <div class="pr-brand">${logoSrc?`<img class="pr-brasao" src="${logoSrc}" alt="SESA">`:''}</div>
+        <div class="pr-titles">
+          <span class="pr-eyebrow">Planos de Aplicação 2026 · Base Geral Ações</span>
+          <h2>Relatório — Saúde Digital</h2>
+          <p>Relatório de Planos de Aplicação por Ação Detalhada</p>
+          <div class="pr-sub">Cruzamento entre Planos de Aplicação e Base Geral Ações</div>
+        </div>
+        <div class="pr-side-meta">
+          <div class="pr-side-item"><div class="pr-side-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 9h18"/></svg></div><div><b>Data da consulta</b><span>${now.toLocaleDateString('pt-BR')} ${now.toLocaleTimeString('pt-BR')}</span></div></div>
+          <div class="pr-side-item"><div class="pr-side-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 21a7 7 0 0 1 14 0"/></svg></div><div><b>Usuário</b><span>${escapeHtml(who||'—')}</span></div></div>
+          <div class="pr-side-item"><div class="pr-side-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v7H6z"/></svg></div><div><b>Relatório gerado em</b><span>${now.toLocaleDateString('pt-BR')} ${now.toLocaleTimeString('pt-BR')}</span></div></div>
+        </div>
+      </div>
+      <div class="pr-section-title">Resumo do relatório</div>
+      <div class="pr-summary">
+        <div class="pr-summary-left">
+          <div class="pr-summary-grid">
+            <div class="pr-kv"><b>Ações incluídas</b><span>${groups.length.toLocaleString('pt-BR')} ação(ões)</span></div>
+            <div class="pr-kv"><b>Total de planos</b><span>${totalPA.toLocaleString('pt-BR')}</span></div>
+            <div class="pr-kv"><b>Total pago</b><span>${money(totalPago)}</span></div>
+            <div class="pr-kv"><b>Saldo a pagar</b><span>${money(totalSaldo)}</span></div>
+            <div class="pr-kv" style="grid-column:1/-1"><b>Filtros aplicados</b><span>Base: Planos de Aplicação 2026 · Filtros de pesquisa ativos</span></div>
+          </div>
+        </div>
+        <div class="pr-summary-right">
+          <div class="pr-source-heading">Panorama financeiro do relatório</div>
+          <div class="pr-source-cards">
+            <div class="pr-source-card"><div class="psc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h4M9 12h6M9 16h6"/></svg></div><strong>Total pactuado</strong><span>${money(totalValor)}</span></div>
+            <div class="pr-source-card"><div class="psc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div><strong>Pago</strong><span>${money(totalPago)}</span></div>
+            <div class="pr-source-card"><div class="psc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div><strong>A pagar</strong><span>${money(totalSaldo)}</span></div>
+          </div>
+          <div style="margin-top:7px;font-size:8px;color:#65748a;text-align:right"><b style="font-size:7.5px;text-transform:uppercase;color:#63758c">Percentual pago:</b> ${pct(pctPago)}</div>
+        </div>
+      </div>
+      <div class="pr-section-title">Ações detalhadas e planos de aplicação</div>
+      ${body}
+      <div class="pr-bottom">
+        <div class="pr-auth"><div class="pr-auth-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M8 7h8M8 11h8M8 15h5"/><path d="M16 18h.01"/></svg></div><div><b>Identificação do relatório</b><strong>${reportCode}</strong><div class="auth-meta">Documento gerado pelo Painel de Pesquisa de Convênios.<br>Relatório emitido automaticamente a partir dos dados selecionados — Saúde Digital.</div></div></div>
+        <div class="pr-legend"><div class="pr-legend-title">Legenda de situação</div><div class="pr-legend-grid">
+          <div class="pr-legend-item"><span class="pill" style="background:#e8f3ed;color:#187245">Pago</span><span>Plano quitado</span></div>
+          <div class="pr-legend-item"><span class="pill" style="background:#fff2cf;color:#956d12">A pagar</span><span>Empenhado, ainda não pago</span></div>
+        </div></div>
+      </div>
+      <div class="pr-footer"><span>GOVERNO DO ESTADO DO CEARÁ</span><span class="center">Painel de Pesquisa de Convênios &amp; PCF | <strong>Projeto idealizado e desenvolvido por José Vieira</strong></span><span class="right">Página <span id="prPageNo">1</span> · Versão 1.0.0</span></div>
+    </div>`;
+    const container=document.getElementById('printReport');
+    if(!container){ alert('Não foi possível localizar o contêiner de impressão.'); return; }
+    container.innerHTML=html;
+    window.print();
   }
 
   window.mountSaudeDigitalView=function(main){
