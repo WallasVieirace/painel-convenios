@@ -5736,11 +5736,20 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
       const m=normHeader(h).match(/^(\d{1,2}) PARCELA$/);
       if(m) cols.push({n:+m[1], idx:i});
     });
-    cols.sort((a,b)=>a.n-b.n);
-    return cols.map(pc=>{
+    cols.sort((a,b)=>a.idx-b.idx);
+    const withOffsets = cols.map((pc,i)=>{
+      // V64 FIX: antes a varredura ia até 8 colunas à frente pra achar os
+      // rótulos (VALOR APDA/VALOR PAGO/DATA APDA/DATA PAGAMENTO/STATUS) —
+      // mas cada bloco de parcela tem só 5 colunas, então essa varredura
+      // "vazava" para dentro do bloco da PRÓXIMA parcela e sobrescrevia os
+      // deslocamentos certos pelos da parcela seguinte. Agora a varredura
+      // para exatamente na largura real deste bloco (distância até o
+      // próximo "N Parcela"), nunca ultrapassando para o bloco vizinho.
+      const nextIdx = cols[i+1] ? cols[i+1].idx : pc.idx+6;
+      const width = Math.max(1, Math.min(nextIdx-pc.idx, 6));
       const offsets={valor:0};
       if(subHeaderRow){
-        for(let o=0;o<8;o++){
+        for(let o=0;o<width;o++){
           const label=normHeader(subHeaderRow[pc.idx+o]);
           if(!label) continue;
           if(label==='VALOR APDA') offsets.valor=o;
@@ -5756,12 +5765,23 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
       if(offsets.status===undefined) offsets.status=(offsets.dataPagamento!==undefined?4:2);
       return {...pc, offsets};
     });
+    withOffsets.sort((a,b)=>a.n-b.n);
+    return withOffsets;
   }
   function daysBetween(dateStrA, dateStrB){
     const toDate=s=>{ const m=String(s||'').match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/); return m?new Date(+m[3],+m[2]-1,+m[1]):null; };
     const a=toDate(dateStrA), b=toDate(dateStrB);
     if(!a||!b) return null;
     return Math.round((b-a)/86400000);
+  }
+  // V64 — agora que a planilha traz o valor REALMENTE pago por parcela
+  // (que pode ser menor que o valor total da parcela, em caso de pagamento
+  // parcial), usamos esse valor real para calcular quanto foi pago. Bases
+  // antigas (sem essa coluna) continuam calculando como antes: valor cheio
+  // da parcela quando a situação está "Pago".
+  function parcelaPagoValor(p){
+    if(p.valorPago!==null && p.valorPago!==undefined) return p.valorPago;
+    return isPago(p.status) ? (p.valor||0) : 0;
   }
   function buildRecordsFromSheetRows(aoa){
     if(!aoa || aoa.length<2) throw new Error('A planilha não contém dados reconhecíveis.');
@@ -5856,8 +5876,8 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
     rows.forEach(r=>{
       (r.parcelas||[]).forEach(p=>{
         totalParcelas += p.valor||0;
-        if(isPago(p.status)) totalPago += p.valor||0;
-        else{
+        totalPago += parcelaPagoValor(p);
+        if(!isPago(p.status)){
           const d=parseDateBR(p.data);
           if(d && d<=cutoff) totalAteDez += p.valor||0;
         }
@@ -6008,7 +6028,7 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
     wrap.innerHTML = order.map(g=>{
       const grows=groups[g];
       const trs = grows.map(r=>{
-        const totalPago = (r.parcelas||[]).filter(p=>isPago(p.status)).reduce((a,p)=>a+(p.valor||0),0);
+        const totalPago = (r.parcelas||[]).reduce((a,p)=>a+parcelaPagoValor(p),0);
         const totalGeral = (r.parcelas||[]).reduce((a,p)=>a+(p.valor||0),0) || r.valorTotal || 0;
         const progresso = totalGeral ? Math.min(100, Math.round(totalPago/totalGeral*100)) : 0;
         const np = nextParcela(r);
@@ -6139,7 +6159,7 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
     const who = (typeof CURRENT_USER!=='undefined' && CURRENT_USER) ? (CURRENT_USER.name||CURRENT_USER.u) : '';
     const logoSrc = document.querySelector('#printReport .pr-brasao')?.getAttribute('src') || document.querySelector('.brand img.logo')?.getAttribute('src') || '';
     const body = rows.map(r=>{
-      const totalPago=(r.parcelas||[]).filter(p=>isPago(p.status)).reduce((a,p)=>a+(p.valor||0),0);
+      const totalPago=(r.parcelas||[]).reduce((a,p)=>a+parcelaPagoValor(p),0);
       const totalGeral=(r.parcelas||[]).reduce((a,p)=>a+(p.valor||0),0) || r.valorTotal || 0;
       const percent = totalGeral ? (totalPago/totalGeral*100) : 0;
       const programadas=(r.parcelas||[]).length;
