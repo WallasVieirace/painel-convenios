@@ -1859,6 +1859,13 @@ body:has(#siafeView:not(.hidden)) .v3-main .app{padding-top:0!important;}
 .l360-chip.pago{border-color:#bfe0cd;background:#f2faf6;}
 .l360-chip.pago .cs{background:#e8f3ed;color:#286846;}
 .l360-chip.apagar .cs{background:#f7efdf;color:#8b611e;}
+.l360-chip{min-width:150px;}
+.l360-chip .cp-pago{margin-top:7px;padding-top:7px;border-top:1px dashed #cfe4d7;}
+.l360-chip .cp-row{display:flex;justify-content:space-between;gap:10px;font-size:9.5px;color:#4c6b5b;margin-bottom:3px;}
+.l360-chip .cp-row:last-child{margin-bottom:0;}
+.l360-chip .cp-row b{color:#1f4a34;font-weight:750;}
+.l360-chip .cp-row.prazo b.atraso{color:#a1442f;}
+.l360-chip .cp-row.prazo b.pontual{color:#1f7a45;}
 .v3-main .l360-view .v3-filters{margin-bottom:12px;}
 .v3-main .l360-view .l360-toolbar{display:flex;justify-content:flex-end;margin-bottom:10px;gap:8px;}
 .v3-main .l360-view .l360-print-btn{background:#fff;border:1px solid #cbd6e2;color:var(--v3-navy);border-radius:5px;padding:8px 13px;font-size:11px;font-weight:650;cursor:pointer;display:flex;align-items:center;gap:6px;}
@@ -5717,21 +5724,51 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
     });
     return idx;
   }
-  function findParcelaColumns(headerRow){
+  // V63 FIX: cada bloco de parcela passou a ter 5 colunas (Valor APDA, Valor
+  // Pago, Data APDA, Data Pagamento, Situação) em vez de 3 (Valor, Data,
+  // Situação). Em vez de presumir a posição fixa de cada informação dentro
+  // do bloco, lemos os rótulos de verdade na linha de sub-cabeçalho — assim
+  // funciona tanto com a planilha nova quanto com uma base antiga (3
+  // colunas), sem quebrar nenhuma das duas.
+  function findParcelaColumns(headerRow, subHeaderRow){
     const cols=[];
     headerRow.forEach((h,i)=>{
       const m=normHeader(h).match(/^(\d{1,2}) PARCELA$/);
       if(m) cols.push({n:+m[1], idx:i});
     });
     cols.sort((a,b)=>a.n-b.n);
-    return cols;
+    return cols.map(pc=>{
+      const offsets={valor:0};
+      if(subHeaderRow){
+        for(let o=0;o<8;o++){
+          const label=normHeader(subHeaderRow[pc.idx+o]);
+          if(!label) continue;
+          if(label==='VALOR APDA') offsets.valor=o;
+          else if(label==='VALOR PAGO') offsets.valorPago=o;
+          else if(label==='DATA APDA') offsets.data=o;
+          else if(label==='DATA PAGAMENTO') offsets.dataPagamento=o;
+          else if(label==='STATUS') offsets.status=o;
+        }
+      }
+      // Base antiga (sem os rótulos novos reconhecidos): mantém o layout de
+      // 3 colunas já usado antes, para não quebrar bases já importadas.
+      if(offsets.data===undefined) offsets.data=1;
+      if(offsets.status===undefined) offsets.status=(offsets.dataPagamento!==undefined?4:2);
+      return {...pc, offsets};
+    });
+  }
+  function daysBetween(dateStrA, dateStrB){
+    const toDate=s=>{ const m=String(s||'').match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/); return m?new Date(+m[3],+m[2]-1,+m[1]):null; };
+    const a=toDate(dateStrA), b=toDate(dateStrB);
+    if(!a||!b) return null;
+    return Math.round((b-a)/86400000);
   }
   function buildRecordsFromSheetRows(aoa){
     if(!aoa || aoa.length<2) throw new Error('A planilha não contém dados reconhecíveis.');
     const headerRow=aoa[0];
     const fIdx=buildFieldIndex(headerRow);
     if(fIdx.mapp===undefined) throw new Error('Não foi possível localizar a coluna MAPP na planilha. Verifique se o layout é o mesmo da base original da Lei 360.');
-    const parcelaCols=findParcelaColumns(headerRow);
+    const parcelaCols=findParcelaColumns(headerRow, aoa[1]);
     const get=(row,field)=>{ const i=fIdx[field]; return i===undefined ? '' : row[i]; };
     const records=[];
     for(let r=1;r<aoa.length;r++){
@@ -5739,9 +5776,17 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
       const mappVal=cleanStr(get(row,'mapp')); if(!mappVal) continue;
       const parcelas=[];
       parcelaCols.forEach(pc=>{
-        const valorRaw=row[pc.idx];
+        const valorRaw=row[pc.idx+pc.offsets.valor];
         if(valorRaw===undefined || valorRaw===null || String(valorRaw).trim()==='') return;
-        parcelas.push({n:pc.n, valor:parseNum(valorRaw), data:parseExcelDate(row[pc.idx+1]), status:cleanStr(row[pc.idx+2])||'A PAGAR'});
+        const dataApda=parseExcelDate(row[pc.idx+pc.offsets.data]);
+        const dataPagamento=pc.offsets.dataPagamento!==undefined ? parseExcelDate(row[pc.idx+pc.offsets.dataPagamento]) : null;
+        const valorPagoParcela=pc.offsets.valorPago!==undefined ? parseNum(row[pc.idx+pc.offsets.valorPago]) : null;
+        const status=cleanStr(row[pc.idx+pc.offsets.status])||'A PAGAR';
+        // Prazo para pagamento: intervalo em dias entre a Data APDA (prevista)
+        // e a Data de Pagamento (realizada). Positivo = pago depois do prazo
+        // (atraso); negativo/zero = pago dentro do prazo ou adiantado.
+        const prazoDias = daysBetween(dataApda, dataPagamento);
+        parcelas.push({n:pc.n, valor:parseNum(valorRaw), data:dataApda, dataPagamento, valorPago:valorPagoParcela, status, prazoDias});
       });
       records.push({
         gestor:cleanStr(get(row,'gestor')), fiscal:cleanStr(get(row,'fiscal')),
@@ -5929,7 +5974,23 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
   function renderTimeline(r){
     const chips=(r.parcelas||[]).map(p=>{
       const cls = isPago(p.status) ? 'pago' : 'apagar';
-      return `<div class="l360-chip ${cls}"><div class="cn">Parcela ${p.n}</div><div class="cv">${money(p.valor)}</div><div class="cd">${escapeHtml(p.data||'—')}</div><span class="cs">${isPago(p.status)?'Pago':'A pagar'}</span></div>`;
+      // V63 FIX: novos campos da planilha (Valor Pago e Data Pagamento por
+      // parcela) e o prazo calculado entre a Data APDA (prevista) e a Data
+      // de Pagamento (realizada). Só mostra esse bloco quando a parcela
+      // realmente tem uma data de pagamento lançada.
+      let pagoInfo='';
+      if(p.dataPagamento){
+        const prazoTxt = p.prazoDias===null ? '—'
+          : p.prazoDias>0 ? `<b class="atraso">${p.prazoDias} dia(s) de atraso</b>`
+          : p.prazoDias<0 ? `<b class="pontual">${Math.abs(p.prazoDias)} dia(s) de antecedência</b>`
+          : `<b class="pontual">Pago na data prevista</b>`;
+        pagoInfo = `<div class="cp-pago">
+          <div class="cp-row"><span>Pago em</span><b>${escapeHtml(p.dataPagamento)}</b></div>
+          ${p.valorPago!==null?`<div class="cp-row"><span>Valor pago</span><b>${money(p.valorPago)}</b></div>`:''}
+          <div class="cp-row prazo"><span>Prazo</span>${prazoTxt}</div>
+        </div>`;
+      }
+      return `<div class="l360-chip ${cls}"><div class="cn">Parcela ${p.n}</div><div class="cv">${money(p.valor)}</div><div class="cd">Venc.: ${escapeHtml(p.data||'—')}</div><span class="cs">${isPago(p.status)?'Pago':'A pagar'}</span>${pagoInfo}</div>`;
     }).join('');
     return `<div class="l360-detail-head">Cronograma de parcelas — MAPP ${escapeHtml(r.mapp)} / Convênio ${escapeHtml(r.convenio||'—')}</div><div class="l360-timeline">${chips||'<span style="font-size:10.5px;color:#8a97a8">Sem parcelas lançadas.</span>'}</div>`;
   }
@@ -6082,7 +6143,10 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
       const totalGeral=(r.parcelas||[]).reduce((a,p)=>a+(p.valor||0),0) || r.valorTotal || 0;
       const percent = totalGeral ? (totalPago/totalGeral*100) : 0;
       const programadas=(r.parcelas||[]).length;
-      const parcelasRows=(r.parcelas||[]).map(p=>`<tr><td>${p.n}</td><td>${money(p.valor)}</td><td>${escapeHtml(p.data||'—')}</td><td><span class="pp-pill ${isPago(p.status)?'pago':'apagar'}">${isPago(p.status)?'Pago':'A pagar'}</span></td></tr>`).join('');
+      const parcelasRows=(r.parcelas||[]).map(p=>{
+        const prazoTxt = p.prazoDias===null ? '—' : p.prazoDias>0 ? `${p.prazoDias}d atraso` : p.prazoDias<0 ? `${Math.abs(p.prazoDias)}d antes` : 'No prazo';
+        return `<tr><td>${p.n}</td><td>${money(p.valor)}</td><td>${escapeHtml(p.data||'—')}</td><td>${p.dataPagamento?escapeHtml(p.dataPagamento):'—'}</td><td>${p.valorPago!==null&&p.valorPago!==undefined?money(p.valorPago):'—'}</td><td>${prazoTxt}</td><td><span class="pp-pill ${isPago(p.status)?'pago':'apagar'}">${isPago(p.status)?'Pago':'A pagar'}</span></td></tr>`;
+      }).join('');
       // Cruzamento pela base Pagamentos SIAFE: o SIAFE não tem uma coluna
       // "SACC" — o campo equivalente lá se chama "Convênio Registro" (mesmo
       // número, nome diferente). Nem todo SACC do Lei 360 tem lançamento no
@@ -6117,7 +6181,7 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
         </div>
         <div class="pr-parcelas-block">
           <div class="pr-parcelas-title"><span>Cronograma de parcelas</span><span>${programadas} programadas de 12</span></div>
-          <table class="pr-parcelas-table"><thead><tr><th>Parcela</th><th>Valor</th><th>Data APDA</th><th>Situação</th></tr></thead><tbody>${parcelasRows||'<tr><td colspan="4">Sem parcelas lançadas.</td></tr>'}</tbody></table>
+          <table class="pr-parcelas-table"><thead><tr><th>Parcela</th><th>Valor</th><th>Data APDA</th><th>Data pagamento</th><th>Valor pago</th><th>Prazo</th><th>Situação</th></tr></thead><tbody>${parcelasRows||'<tr><td colspan="7">Sem parcelas lançadas.</td></tr>'}</tbody></table>
         </div>
       </div>`;
     }).join('');
