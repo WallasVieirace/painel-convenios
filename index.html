@@ -1098,6 +1098,16 @@
     #printReport .pr-result-head *{
       color:#102f50!important;
     }
+    /* Correção: a regra acima força fundo branco em TUDO dentro do
+       relatório — inclusive no selo de "fonte encontrada" (quadradinho
+       azul-marinho com ✓ branco), que ficava sem preenchimento na
+       impressão/PDF real mesmo aparecendo certo na tela normal (o
+       @media print só entra em vigor na hora de imprimir de verdade). */
+    #printReport .psc-check.is-found{
+      background:#102f50!important;
+      background-color:#102f50!important;
+      color:#fff!important;
+    }
     #printReport::before,
     #printReport::after,
     #printReport .pr-page::before,
@@ -2954,16 +2964,61 @@ function renderChips(){
 
   const q = (document.getElementById('searchInput')?.value || '').trim().toLowerCase();
   const terms = q ? q.split(/\s+/).filter(Boolean) : [];
+  // V62 FIX: antes, os cartões de "Fontes de dados" só reconheciam pesquisa
+  // feita pela caixa de busca rápida — se a pessoa pesquisasse usando os
+  // "Filtros de pesquisa" avançados (ex.: campo MAPP dentro de
+  // "Identificação"), os cartões continuavam mostrando o total da base
+  // inteira, como se nenhuma pesquisa tivesse sido feita. Agora qualquer
+  // filtro avançado preenchido também conta como pesquisa ativa.
+  const advFilters=[];
+  document.querySelectorAll('[data-filter]').forEach(el=>{
+    const v=(el.value||'').trim();
+    if(v) advFilters.push({field:el.dataset.filter, value:v.toLowerCase()});
+  });
+  const hasSearch = terms.length>0 || advFilters.length>0;
 
-  // Quando há pesquisa, cada card passa a mostrar quantos registros
-  // daquela fonte realmente correspondem ao termo pesquisado.
-  // Sem pesquisa, mantém a quantidade total da base.
+  // Quando há pesquisa (rápida ou por filtro avançado), cada card passa a
+  // mostrar quantos registros daquela fonte realmente correspondem aos
+  // critérios pesquisados. Sem pesquisa, mantém a quantidade total da base.
+  // V62 FIX: "fieldHay" (usada abaixo) mora dentro de outro bloco de código
+  // interno e não é visível aqui — chamá-la direto falha silenciosamente
+  // (sempre retorna vazio), fazendo a contagem por filtro avançado dar
+  // sempre zero. Esta versão própria replica os mesmos apelidos de campo,
+  // sem depender de nada inacessível.
+  function localVal(rec,names){
+    const keys=Object.keys(rec);
+    for(const name of names){
+      const k=keys.find(x=>x.toLowerCase()===name.toLowerCase());
+      if(k&&rec[k]!==undefined&&rec[k]!==null&&String(rec[k]).trim()!=='') return String(rec[k]);
+    }
+    return '';
+  }
+  function localFieldHay(item,field){
+    const r=item.rec;
+    if(field==='MAPP') return localVal(r,['MAPP']);
+    if(field==='SACC') return localVal(r,['SACC','N° SACC','Nº CONVÊNIO','INSTRUMENTO (SACC)']);
+    if(field==='CNPJ') return localVal(r,['CNPJ','CPF/CNPJ','CNPJ/CPF']);
+    if(field==='MUNICIPIO') return localVal(r,['MUNICIPIO','Município','Municipio','MUNICÍPIO/ INSTITUIÇÃO']);
+    if(field==='CONVENENTE') return localVal(r,['CONVENENTE','Convenente','MUNICÍPIO/ INSTITUIÇÃO']);
+    if(field==='PROCESSO'||field==='NUP') return localVal(r,['PROCESSO','Nº DO PROCESSO','NUP','NUP/PROCESSO']);
+    if(field==='STATUS') return Object.entries(r).filter(([k])=>/status|situa/i.test(k)).map(([,v])=>v||'').join(' ');
+    if(field==='TIPO') return localVal(r,['TIPO','TIPO DE INSTRUMENTO','Tipo objeto','Classificação','SUBTIPO']);
+    if(field==='REGIAO') return localVal(r,['REGIÃO','REGIAO']);
+    if(field==='ANO') return localVal(r,['ANO','ANO ORÇAMENTÁRIO']);
+    return '';
+  }
   const countForSheet = sheet => {
-    if(!terms.length) return DATASETS[sheet].length;
-
+    if(!hasSearch) return DATASETS[sheet].length;
     return ALL.filter(item=>{
       if(item.sheet !== sheet) return false;
-      return terms.every(t => item.hay.includes(t));
+      if(terms.length && !terms.every(t => item.hay.includes(t))) return false;
+      if(advFilters.length){
+        for(const {field,value} of advFilters){
+          const hay=String(localFieldHay(item,field)||'').toLowerCase();
+          if(!hay.includes(value)) return false;
+        }
+      }
+      return true;
     }).length;
   };
 
@@ -2976,7 +3031,7 @@ function renderChips(){
     chip.className = 'legend-chip' + (isActive ? ' active' : '');
     chip.style.setProperty('--accent', dColor(sheet));
 
-    const countText = q
+    const countText = hasSearch
       ? `${String(found).padStart(2,'0')} encontrado${found === 1 ? '' : 's'}`
       : `${total.toLocaleString('pt-BR')} registro(s)`;
 
