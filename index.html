@@ -1283,6 +1283,61 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.18;b
 .v3-main .empty .big{font-size:16px;color:var(--v3-navy);margin-bottom:5px;}
 .v3-main #usersView{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .v3-main .panel-card{background:#fff;border:1px solid var(--v3-line);border-radius:9px;box-shadow:none;}
+/* ===== CONTROLE DE ACESSOS — interface visual, sem alterar regras existentes ===== */
+.v3-main #accessView{display:block;}
+.v3-main #accessView.hidden{display:none!important;}
+.access-head{background:#fff;border:1px solid var(--v3-line);border-radius:9px;padding:18px 20px;margin-bottom:12px;}
+.access-head h2{margin:0;color:var(--v3-navy);font-size:18px;font-weight:800;}
+.access-head p{margin:5px 0 0;color:#6c7b8f;font-size:11px;}
+.access-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:12px;}
+.access-card{background:#fff;border:1px solid var(--v3-line);border-radius:9px;padding:16px 18px;}
+.access-card .ac-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px;}
+.access-card h3{margin:0;color:var(--v3-navy);font-size:13px;}
+.access-badge{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:4px 8px;border-radius:12px;background:#e9f5ef;color:#23704d;}
+.access-badge.master{background:#eaf0f8;color:#16456f;}
+.access-card p{margin:0 0 12px;color:#718096;font-size:10.5px;line-height:1.4;}
+.access-card button{border:1px solid #cbd6e2;background:#fff;color:var(--v3-navy);border-radius:5px;padding:7px 11px;font-size:10px;font-weight:700;cursor:pointer;}
+.access-card button:hover{background:#f7f9fc;}
+.access-panel{background:#fff;border:1px solid var(--v3-line);border-radius:9px;overflow:hidden;}
+.access-panel-head{padding:13px 16px;border-bottom:1px solid var(--v3-line);display:flex;align-items:center;justify-content:space-between;}
+.access-panel-head strong{font-size:11px;color:var(--v3-navy);}
+.access-panel-head span{font-size:9.5px;color:#7a8798;}
+.access-table{width:100%;border-collapse:collapse;font-size:10.5px;}
+.access-table th{background:#f7f9fc;color:#66758a;text-transform:uppercase;letter-spacing:.04em;font-size:8.5px;padding:9px 12px;text-align:left;border-bottom:1px solid var(--v3-line);}
+.access-table td{padding:10px 12px;border-bottom:1px solid #edf1f5;color:#34475d;}
+.access-table tr:last-child td{border-bottom:0;}
+.access-table td:not(:first-child){text-align:center;width:18%;}
+.access-users-panel{margin-top:12px;}
+.access-user-row{display:grid;grid-template-columns:minmax(180px,1fr) 190px auto;align-items:center;gap:14px;padding:11px 12px;border-bottom:1px solid #edf1f5;}
+.access-user-row:last-child{border-bottom:0;}
+.access-user-name{color:var(--v3-navy);font-weight:700;font-size:11px;}
+.access-user-meta{margin-top:3px;color:#718096;font-size:9px;}
+.access-role-select{width:100%;height:32px;border:1px solid #cbd6e2;border-radius:6px;background:#fff;color:var(--v3-navy);padding:0 9px;font-size:10px;font-weight:600;outline:none;}
+.access-role-select:focus{border-color:#178f83;box-shadow:0 0 0 2px rgba(23,143,131,.10);}
+.access-role-save{height:32px;border:1px solid #173f66;border-radius:6px;background:#173f66;color:#fff;padding:0 13px;font-size:10px;font-weight:700;cursor:pointer;}
+.access-role-save:hover{filter:brightness(1.05);}
+.access-role-save:disabled{opacity:.5;cursor:not-allowed;}
+.access-role-current{font-size:8px;color:#718096;margin-left:6px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
+.access-empty{padding:14px 12px;color:#718096;font-size:10px;}
+@media(max-width:760px){.access-user-row{grid-template-columns:1fr;gap:8px}.access-role-save{width:100%;}}
+
+.access-check{display:inline-flex;width:18px;height:18px;border-radius:50%;align-items:center;justify-content:center;font-size:11px;font-weight:900;background:#e8f3ed;color:#24714d;}
+.access-lock{display:inline-flex;width:18px;height:18px;border-radius:50%;align-items:center;justify-content:center;font-size:10px;background:#f1f3f6;color:#8a96a5;}
+ .access-note{margin-top:9px;font-size:9px;color:#7c8999;}
+.access-perm-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:12px;}
+.access-perm-item{display:flex;align-items:center;gap:8px;border:1px solid #e1e7ee;border-radius:7px;padding:9px 10px;background:#fbfcfe;cursor:pointer;}
+.access-perm-item:hover{background:#f6f9fc;border-color:#cbd8e5;}
+.access-perm-item input{width:15px;height:15px;accent-color:#178f83;cursor:pointer;}
+.access-perm-item input:disabled{cursor:not-allowed;opacity:.7;}
+.access-perm-item span{font-size:10px;font-weight:700;color:#31465d;}
+.access-perm-item small{display:block;font-size:8px;color:#7a8798;font-weight:500;margin-top:2px;}
+.access-perm-actions{display:flex;align-items:center;justify-content:space-between;padding:0 12px 12px;gap:10px;}
+.access-perm-actions .access-role-save{margin-left:auto;}
+.access-perm-master-note{font-size:9px;color:#718096;}
+@media(max-width:900px){.access-perm-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:600px){.access-perm-grid{grid-template-columns:1fr;}}
+@media(max-width:760px){.access-grid{grid-template-columns:1fr}.access-table{min-width:620px}.access-panel{overflow:auto}}
+
 @media(max-width:1100px){.v3-shell{grid-template-columns:175px 1fr}.v3-main .stat-strip{min-width:360px}.v3-filter-grid{grid-template-columns:repeat(3,1fr)}.v3-filter.wide{grid-column:span 1}.v3-quick{grid-template-columns:135px minmax(0,1fr) 105px 105px}.v3-main .legend-strip{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:760px){html,body{overflow-x:hidden;max-width:100vw}.v3-shell{display:block;max-width:100vw;overflow-x:hidden}.v3-sidebar{position:relative;height:auto;min-height:0}.v3-brand img{width:130px}.v3-nav{flex-direction:row;overflow:auto}.v3-nav button{white-space:nowrap}.v3-sidebar-spacer,.v3-userbox{display:none}.v3-main .app{padding:0 12px 25px}.v3-main header.top{flex-direction:column}.v3-main .stat-strip{width:100%;min-width:0;grid-template-columns:1fr 1fr}.v3-quick{grid-template-columns:1fr 1fr}.v3-quick input{grid-column:1/-1}.v3-filter-grid{grid-template-columns:1fr 1fr}.v3-main .legend-strip{grid-template-columns:1fr}.v3-table{min-width:850px}.v3-main #resultsWrap{overflow:auto}.v3-detail{grid-template-columns:1fr 1fr}.v3-main #usersView{grid-template-columns:1fr}}
 
@@ -1901,6 +1956,14 @@ body:has(#siafeView:not(.hidden)) .v3-main .app{padding-top:0!important;}
 @media(max-width:900px){.v30-main-import-status{display:none!important}}
 </style>
 
+<style id="lei360-expand-collapse-restore">
+.l360-group-head{display:flex!important;align-items:center!important;}
+.l360-group-toggle{width:100%!important;display:flex!important;align-items:center!important;gap:8px!important;padding:0!important;margin:0!important;border:0!important;background:transparent!important;color:inherit!important;text-align:left!important;cursor:pointer!important;font:inherit!important;}
+.l360-group-toggle h2{margin:0!important;flex:0 0 auto!important;}
+.l360-group-toggle .gc{margin-left:4px!important;}
+.l360-group-chevron{margin-left:auto!important;min-width:86px!important;width:auto!important;height:28px!important;padding:0 10px!important;box-sizing:border-box!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;border:1px solid #d9e3ec!important;border-radius:6px!important;background:#fff!important;color:#173d5e!important;font-size:11px!important;font-weight:800!important;line-height:1!important;white-space:nowrap!important;}
+.l360-group-toggle:hover .l360-group-chevron{background:#f5f9fc!important;border-color:#b9ccdc!important;}
+</style>
 <style id="lei360-styles">
 /* =========================================================
    LEI 360 — aba de acompanhamento de parcelas (Lei Complementar 360/2025)
@@ -2752,243 +2815,55 @@ body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-bell .dot:afte
 </style>
 
 
-<style id="lei360-visual-grid-fix">
-/* LEI 360 — ajuste exclusivamente visual.
-   Não altera HTML estrutural, JavaScript, eventos, dados, Supabase, GitHub,
-   filtros, importação, cálculos ou regras de negócio. */
-@media (min-width:851px){
-  /* 1) Cabeçalho: título e ações ficam em duas áreas independentes,
-        evitando que botão/status invadam o bloco institucional. */
-  body:has(#lei360View.active) .v3-main .l360-view > header.top{
-    min-height:96px!important;
-    height:96px!important;
-    margin:0 0 12px!important;
-    padding:12px 16px!important;
-    overflow:hidden!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > header.top .brand{
-    display:grid!important;
-    grid-template-columns:minmax(0,1fr) auto!important;
-    align-items:center!important;
-    gap:22px!important;
-    width:100%!important;
-    height:100%!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > header.top .brand-text{
-    min-width:0!important;
-    align-self:center!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > header.top .l360-head-actions{
-    display:grid!important;
-    grid-template-columns:auto auto auto!important;
-    align-items:center!important;
-    justify-content:end!important;
-    gap:10px!important;
+<style id="users-view-header-isolation-final">
+/* Isola a tela de Usuários do cabeçalho global das demais abas.
+   Nenhuma lógica, autenticação, filtro ou integração é alterada. */
+body:has(#usersView:not(.hidden)) .v3-main > .app > header.top{
+  display:none !important;
+}
+body:has(#usersView:not(.hidden)) .v3-main > .app > footer{
+  display:none !important;
+}
+</style>
+
+<style id="lei360-results-white-panel">
+/* Lei 360 — somente acabamento visual do bloco de resultados.
+   Mantém intactas as regras de dados, filtros, eventos e expandir/recolher. */
+@media(min-width:851px){
+  body:has(#lei360View.active) .v3-main .l360-view #l360ResultsMeta{
+    background:#fff!important;
+    border:1px solid #d8e1eb!important;
+    border-bottom:0!important;
+    border-radius:9px 9px 0 0!important;
     margin:0!important;
-    flex:none!important;
-    min-width:0!important;
-    white-space:nowrap!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > header.top .l360-import-status{
-    max-width:235px!important;
-    text-align:right!important;
-    overflow:hidden!important;
-    text-overflow:ellipsis!important;
-    white-space:nowrap!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > header.top .l360-import-btn{
-    height:34px!important;
-    min-width:112px!important;
-    padding:0 13px!important;
-    display:inline-flex!important;
+    box-sizing:border-box!important;
+    min-height:56px!important;
+    padding:0 18px!important;
+    display:flex!important;
     align-items:center!important;
-    justify-content:center!important;
+    justify-content:space-between!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view #l360ResultsWrap{
+    background:#fff!important;
+    border:1px solid #d8e1eb!important;
+    border-top:0!important;
+    border-radius:0 0 9px 9px!important;
     box-sizing:border-box!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > header.top .l360-updated{
-    min-width:142px!important;
-    text-align:left!important;
-  }
-
-  /* 2) Indicadores: cinco cards com a mesma largura, altura e alinhamento.
-        O conteúdo interno não pode empurrar o card nem atravessar a borda. */
-  body:has(#lei360View.active) .v3-main .l360-view .l360-kpis{
-    display:grid!important;
-    grid-template-columns:repeat(5,minmax(0,1fr))!important;
-    gap:10px!important;
-    width:100%!important;
-    margin:0 0 12px!important;
-    align-items:stretch!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view .l360-kpi{
-    box-sizing:border-box!important;
-    min-width:0!important;
-    height:92px!important;
-    padding:12px 13px!important;
-    gap:10px!important;
-    align-items:flex-start!important;
     overflow:hidden!important;
+    box-shadow:0 2px 8px rgba(15,39,64,.03)!important;
+    margin:0!important;
   }
-  body:has(#lei360View.active) .v3-main .l360-view .l360-kpi > div:last-child{
-    min-width:0!important;
-    flex:1 1 auto!important;
-    overflow:hidden!important;
+  body:has(#lei360View.active) .v3-main .l360-view #l360ResultsWrap .group{
+    background:#fff!important;
   }
-  body:has(#lei360View.active) .v3-main .l360-view .l360-kpi-icon{
-    width:34px!important;
-    height:34px!important;
-    flex:0 0 34px!important;
-    font-size:14px!important;
+  body:has(#lei360View.active) .v3-main .l360-view #l360ResultsWrap .group + .group{
+    border-top:1px solid #e4ebf2!important;
   }
-  body:has(#lei360View.active) .v3-main .l360-view .l360-kpi-label{
-    margin:0 0 4px!important;
-    line-height:1.15!important;
-    white-space:nowrap!important;
-    overflow:hidden!important;
-    text-overflow:ellipsis!important;
+  body:has(#lei360View.active) .v3-main .l360-view #l360ResultsWrap .group-head{
+    background:#fff!important;
   }
-  body:has(#lei360View.active) .v3-main .l360-view .l360-kpi-value{
-    font-size:16px!important;
-    line-height:1.15!important;
-    white-space:nowrap!important;
-    overflow:hidden!important;
-    text-overflow:ellipsis!important;
-    max-width:100%!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view .l360-kpi-note{
-    margin-top:3px!important;
-    line-height:1.15!important;
-    white-space:nowrap!important;
-    overflow:hidden!important;
-    text-overflow:ellipsis!important;
-  }
-
-  /* 3) Quadro de filtros: os grupos respeitam a largura do quadro branco.
-        Identificação ocupa duas frações; os demais grupos ficam nivelados. */
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters{
-    box-sizing:border-box!important;
-    width:100%!important;
-    padding:13px 16px 14px!important;
-    margin:0 0 12px!important;
-    overflow:hidden!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-section-head{
-    min-height:27px!important;
-    box-sizing:border-box!important;
-    margin:0 0 11px!important;
-    padding:3px 0 9px!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter-layout{
-    display:grid!important;
-    grid-template-columns:minmax(0,2.25fr) minmax(0,1fr) minmax(0,1.45fr) minmax(0,2fr)!important;
-    gap:12px!important;
-    align-items:start!important;
-    width:100%!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter-group{
-    box-sizing:border-box!important;
-    min-width:0!important;
-    padding-left:9px!important;
-    border-left:2px solid #e3edf6!important;
-    overflow:hidden!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter-group:first-child{
-    border-left-color:#2a8ac4!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-group-title{
-    margin:0 0 7px!important;
-    line-height:1.15!important;
-    white-space:nowrap!important;
-    overflow:hidden!important;
-    text-overflow:ellipsis!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-group-fields{
-    display:grid!important;
-    gap:7px!important;
-    min-width:0!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-group-fields.five{
-    grid-template-columns:repeat(5,minmax(0,1fr))!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-group-fields.two{
-    grid-template-columns:repeat(2,minmax(0,1fr))!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-group-fields.three{
-    grid-template-columns:repeat(3,minmax(0,1fr))!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter{
-    min-width:0!important;
-    overflow:hidden!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter label{
-    display:block!important;
-    margin:0 0 4px!important;
-    white-space:nowrap!important;
-    overflow:hidden!important;
-    text-overflow:ellipsis!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter input,
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter select{
-    width:100%!important;
-    min-width:0!important;
-    box-sizing:border-box!important;
-  }
-
-  /* 4) Evita que a barra de ações fique solta fora do quadro branco. */
-  body:has(#lei360View.active) .v3-main .l360-view .l360-toolbar{
-    min-height:34px!important;
-    margin:0 0 10px!important;
-    display:flex!important;
-    justify-content:flex-end!important;
-    align-items:center!important;
-  }
-}
-
-@media (max-width:1100px) and (min-width:851px){
-  body:has(#lei360View.active) .v3-main .l360-view > header.top .l360-head-actions{
-    gap:7px!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > header.top .l360-import-status{display:none!important;}
-  body:has(#lei360View.active) .v3-main .l360-view .l360-kpi{padding:11px!important;}
-  body:has(#lei360View.active) .v3-main .l360-view .l360-kpi-value{font-size:14.5px!important;}
-}
-
-@media (max-width:850px){
-  body:has(#lei360View.active) .v3-main .l360-view > header.top{
-    height:auto!important;
-    min-height:0!important;
-    overflow:visible!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > header.top .brand{
-    display:flex!important;
-    flex-direction:column!important;
-    align-items:stretch!important;
-    gap:10px!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > header.top .l360-head-actions{
-    display:flex!important;
-    justify-content:flex-start!important;
-    flex-wrap:wrap!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view .l360-kpis{
-    grid-template-columns:repeat(2,minmax(0,1fr))!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter-layout{
-    grid-template-columns:1fr 1fr!important;
-  }
-}
-
-@media (max-width:520px){
-  body:has(#lei360View.active) .v3-main .l360-view .l360-kpis{
-    grid-template-columns:1fr!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter-layout{
-    grid-template-columns:1fr!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-group-fields.five,
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-group-fields.two,
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-group-fields.three{
-    grid-template-columns:1fr!important;
+  body:has(#lei360View.active) .v3-main .l360-view #l360ResultsWrap .l360-table{
+    background:#fff!important;
   }
 }
 </style>
@@ -3149,6 +3024,44 @@ body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-bell .dot:afte
 
       <div class="results-meta" id="resultsMeta" style="display:none;"></div>
       <div id="resultsWrap"></div>
+    </div>
+
+    <div id="accessView" class="hidden">
+      <div class="access-head">
+        <h2>Controle de Acessos</h2>
+        <p>Visualização dos perfis e das permissões atualmente definidas no sistema.</p>
+      </div>
+      <div class="access-grid">
+        <div class="access-card">
+          <div class="ac-top"><h3>Usuário</h3><span class="access-badge">Acesso restrito</span></div>
+          <p>Perfil destinado à consulta. A configuração existente mantém o acesso do usuário à busca de convênios.</p>
+          <button type="button" id="accessManageUsersBtn">Ver usuários cadastrados</button>
+        </div>
+        <div class="access-card">
+          <div class="ac-top"><h3>Master</h3><span class="access-badge master">Acesso total</span></div>
+          <p>Perfil administrativo já existente no projeto, com acesso total e gerenciamento dos usuários.</p>
+          <button type="button" id="accessManageUsersMasterBtn">Gerenciar usuários</button>
+        </div>
+      </div>
+      <div class="access-panel">
+        <div class="access-panel-head"><strong>Matriz de permissões atual</strong><span>Gerenciamento de perfis disponível para Master</span></div>
+        <table class="access-table">
+          <thead><tr><th>Módulo</th><th>Usuário</th><th>Master</th></tr></thead>
+          <tbody>
+            <tr><td>Pesquisa</td><td><span class="access-check">✓</span></td><td><span class="access-check">✓</span></td></tr>
+            <tr><td>Relatórios</td><td><span class="access-lock">—</span></td><td><span class="access-check">✓</span></td></tr>
+            <tr><td>Lei 360</td><td><span class="access-lock">—</span></td><td><span class="access-check">✓</span></td></tr>
+            <tr><td>Pagamentos SIAFE</td><td><span class="access-lock">—</span></td><td><span class="access-check">✓</span></td></tr>
+            <tr><td>Saúde Digital</td><td><span class="access-lock">—</span></td><td><span class="access-check">✓</span></td></tr>
+            <tr><td>Usuários / administração</td><td><span class="access-lock">—</span></td><td><span class="access-check">✓</span></td></tr>
+          </tbody>
+        </table>
+        <div class="access-note">As permissões exibidas refletem a estrutura já existente. A alteração abaixo modifica somente o perfil do usuário selecionado, utilizando a mesma base de usuários já existente no projeto.</div>
+      </div>
+      <div class="access-panel access-users-panel">
+        <div class="access-panel-head"><strong>Perfis dos usuários cadastrados</strong><span>Altere individualmente o perfil de cada usuário</span></div>
+        <div id="accessUsersList"></div>
+      </div>
     </div>
 
     <div id="usersView" class="hidden">
@@ -3583,6 +3496,7 @@ async function enterApp(user){
   roleTag.textContent = user.role === 'master' ? 'Master' : 'Usuário';
   document.getElementById('tabUsersBtn').classList.toggle('hidden', user.role !== 'master');
   initAppOnce();
+  setTimeout(applyUserModuleAccess,0);
 }
 
 function initGate(){
@@ -3838,42 +3752,137 @@ async function renderUsersInline(){
   });
 }
 
-document.getElementById('createUserBtn').addEventListener('click', async ()=>{
-  const name = document.getElementById('newUserName').value.trim();
-  const uname = document.getElementById('newUserLogin').value.trim().toLowerCase();
-  const pass = document.getElementById('newUserPass').value;
-  const pass2 = document.getElementById('newUserPass2').value;
-  const role = document.getElementById('newUserRole').value;
-  const email = document.getElementById('newUserEmail').value.trim().toLowerCase();
-  const msg = document.getElementById('createUserMsg');
-  msg.className = 'form-msg';
+const ACCESS_MODULES = [
+  {key:'dashboard', label:'Visão Geral', desc:'Painel inicial'},
+  {key:'search', label:'Pesquisa', desc:'Pesquisa integrada'},
+  {key:'reports', label:'Relatórios', desc:'Relatórios e impressão'},
+  {key:'lei360', label:'Lei 360', desc:'Monitoramento Lei 360'},
+  {key:'siafe', label:'Pagamentos SIAFE', desc:'Consulta de pagamentos'},
+  {key:'saudedigital', label:'Saúde Digital', desc:'Módulo Saúde Digital'}
+];
+function defaultPermissionsForRole(role){
+  const isMaster=String(role||'').toLowerCase()==='master';
+  const out={}; ACCESS_MODULES.forEach(m=>out[m.key]=isMaster || m.key==='search'); return out;
+}
+function normalizePermissions(user){
+  const base=defaultPermissionsForRole(user?.role);
+  const raw=(user&&user.permissions&&typeof user.permissions==='object')?user.permissions:{};
+  if(String(user?.role||'').toLowerCase()==='master') return Object.fromEntries(ACCESS_MODULES.map(m=>[m.key,true]));
+  ACCESS_MODULES.forEach(m=>{ if(typeof raw[m.key]==='boolean') base[m.key]=raw[m.key]; });
+  // Usuários comuns continuam com Pesquisa habilitada por padrão.
+  if(!Object.keys(raw).length) base.search=true;
+  return base;
+}
+function userCanAccess(moduleKey){
+  if(String(CURRENT_USER?.role||'').toLowerCase()==='master') return true;
+  return !!normalizePermissions(CURRENT_USER)[moduleKey];
+}
+function applyUserModuleAccess(){
+  const navButtons=document.querySelectorAll('.v3-nav button[data-v3]');
+  navButtons.forEach(btn=>{
+    const key=btn.dataset.v3;
+    if(['users','access','settings'].includes(key)){
+      const master=String(CURRENT_USER?.role||'').toLowerCase()==='master';
+      btn.classList.toggle('hidden',!master);
+      return;
+    }
+    if(ACCESS_MODULES.some(m=>m.key===key)) btn.classList.toggle('hidden',!userCanAccess(key));
+  });
+}
 
-  if(!(await assertStillMaster())){ msg.textContent='Sua sessão não tem mais permissão de Master. Faça login novamente.'; msg.classList.add('show','err'); return; }
-  if(!name || !uname || !pass){ msg.textContent='Preencha todos os campos.'; msg.classList.add('show','err'); return; }
-  if(pass.length < 4){ msg.textContent='A senha deve ter ao menos 4 caracteres.'; msg.classList.add('show','err'); return; }
-  if(pass !== pass2){ msg.textContent='As senhas não coincidem.'; msg.classList.add('show','err'); return; }
-  if(email && !email.endsWith(CORPORATE_EMAIL_DOMAIN)){ msg.textContent=`O e-mail precisa terminar em ${CORPORATE_EMAIL_DOMAIN}.`; msg.classList.add('show','err'); return; }
+async function renderAccessUsers(){
+  const listEl=document.getElementById('accessUsersList');
+  if(!listEl) return;
+  listEl.innerHTML='<div class="access-empty">Carregando usuários...</div>';
+  const users=await loadUsers();
+  if(!users.length){ listEl.innerHTML='<div class="access-empty">Nenhum usuário cadastrado.</div>'; return; }
+  const current=normalizeUser(CURRENT_USER&&CURRENT_USER.u);
+  const isMaster=await assertStillMaster();
+  if(!isMaster){
+    listEl.innerHTML='<div class="access-empty">Somente um usuário Master pode alterar os acessos.</div>';
+    return;
+  }
+  listEl.innerHTML='';
+  users.slice().sort((a,b)=>(a.name||a.u).localeCompare(b.name||b.u)).forEach(u=>{
+    const row=document.createElement('div'); row.className='access-user-row'; row.style.display='block';
+    const head=document.createElement('div'); head.style.cssText='display:grid;grid-template-columns:minmax(180px,1fr) auto;align-items:center;gap:14px;';
+    const info=document.createElement('div');
+    info.innerHTML=`<div class="access-user-name">${escapeHtml(u.name||u.u)} <span class="access-user-current">${u.role==='master'?'Master':'Usuário'}</span></div><div class="access-user-meta">@${escapeHtml(u.u)}${u.email?' · '+escapeHtml(u.email):''}</div>`;
+    head.appendChild(info);
+    const roleWrap=document.createElement('div'); roleWrap.style.cssText='display:flex;align-items:center;gap:8px;';
+    const roleLabel=document.createElement('span'); roleLabel.className='access-user-current'; roleLabel.textContent='Perfil';
+    const select=document.createElement('select'); select.className='access-role-select'; select.style.width='190px'; select.setAttribute('aria-label','Perfil de '+(u.name||u.u));
+    select.innerHTML='<option value="user">Usuário — acesso personalizado</option><option value="master">Master — acesso total</option>';
+    select.value=String(u.role||'user').toLowerCase()==='master'?'master':'user';
+    const roleSave=document.createElement('button'); roleSave.type='button'; roleSave.className='access-role-save'; roleSave.textContent='Salvar perfil'; roleSave.disabled=true;
+    const originalRole=select.value;
+    select.addEventListener('change',()=>{ roleSave.disabled=select.value===originalRole; });
+    roleWrap.append(roleLabel,select,roleSave); head.appendChild(roleWrap); row.appendChild(head);
 
-  const users = await loadUsers();
-  if(users.find(u=>u.u === uname)){ msg.textContent='Esse usuário já existe.'; msg.classList.add('show','err'); return; }
-  if(email && users.find(u=>String(u.email||'').toLowerCase()===email)){ msg.textContent='Esse e-mail já está vinculado a outro usuário.'; msg.classList.add('show','err'); return; }
+    const permGrid=document.createElement('div'); permGrid.className='access-perm-grid';
+    const perms=normalizePermissions(u);
+    ACCESS_MODULES.forEach(mod=>{
+      const label=document.createElement('label'); label.className='access-perm-item';
+      const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!perms[mod.key]; cb.dataset.module=mod.key;
+      const text=document.createElement('div'); text.innerHTML=`<span>${escapeHtml(mod.label)}</span><small>${escapeHtml(mod.desc)}</small>`;
+      label.append(cb,text); permGrid.appendChild(label);
+    });
+    row.appendChild(permGrid);
+    const actions=document.createElement('div'); actions.className='access-perm-actions';
+    const note=document.createElement('span'); note.className='access-perm-master-note';
+    note.textContent=select.value==='master'?'Master possui acesso total e os módulos ficam liberados automaticamente.':'Marque as abas que este usuário poderá acessar.';
+    actions.appendChild(note);
+    const permSave=document.createElement('button'); permSave.type='button'; permSave.className='access-role-save'; permSave.textContent='Salvar acessos'; permSave.disabled=select.value==='master';
+    actions.appendChild(permSave); row.appendChild(actions);
 
-  const hash = await sha256(pass);
-  const recoveryCode = makeRecoveryCode();
-  const recoveryHash = await sha256(recoveryCode);
-  users.push({ u: uname, name, passwordHash: hash, recoveryHash, role, email: email||null, createdAt: new Date().toISOString() });
-  await saveUsers(users);
+    const setMasterState=()=>{
+      const master=select.value==='master';
+      permGrid.querySelectorAll('input').forEach(cb=>{cb.checked=master?true:cb.checked; cb.disabled=master;});
+      note.textContent=master?'Master possui acesso total e os módulos ficam liberados automaticamente.':'Marque as abas que este usuário poderá acessar.';
+      permSave.disabled=master;
+    };
+    setMasterState();
+    select.addEventListener('change',setMasterState);
 
-  msg.textContent = `Usuário "${name}" criado com sucesso. Código de recuperação: ${recoveryCode}. Anote e entregue ao usuário — ele será necessário para usar "Esqueci minha senha".`;
-  msg.classList.add('show','ok');
-  document.getElementById('newUserName').value='';
-  document.getElementById('newUserLogin').value='';
-  document.getElementById('newUserPass').value='';
-  document.getElementById('newUserPass2').value='';
-  document.getElementById('newUserEmail').value='';
-  document.getElementById('newUserRole').value='user';
-  renderUsersInline();
-});
+    roleSave.addEventListener('click',async()=>{
+      if(!(await assertStillMaster())){ alert('Sua sessão não tem mais permissão de Master. Faça login novamente.'); return; }
+      const nextRole=select.value;
+      const users2=await loadUsers();
+      const target=users2.find(x=>normalizeUser(x.u)===normalizeUser(u.u));
+      if(!target){ alert('Usuário não encontrado.'); await renderAccessUsers(); return; }
+      const mastersNow=users2.filter(x=>String(x.role||'').toLowerCase()==='master').length;
+      if(normalizeUser(target.u)===current && nextRole!=='master'){
+        alert('O usuário Master conectado não pode remover o próprio perfil de Master.'); select.value='master'; roleSave.disabled=true; setMasterState(); return;
+      }
+      if(String(target.role||'').toLowerCase()==='master' && nextRole!=='master' && mastersNow<=1){
+        alert('O sistema precisa manter pelo menos um usuário Master.'); select.value='master'; roleSave.disabled=true; setMasterState(); return;
+      }
+      if(target.role===nextRole){ roleSave.disabled=true; return; }
+      target.role=nextRole;
+      target.permissions=defaultPermissionsForRole(nextRole);
+      await saveUsers(users2);
+      if(normalizeUser(target.u)===current) CURRENT_USER=target;
+      alert(`Perfil de "${target.name||target.u}" alterado para ${nextRole==='master'?'Master':'Usuário'}.`);
+      applyUserModuleAccess(); await renderAccessUsers();
+    });
+    permSave.addEventListener('click',async()=>{
+      if(!(await assertStillMaster())){ alert('Sua sessão não tem mais permissão de Master. Faça login novamente.'); return; }
+      const users2=await loadUsers();
+      const target=users2.find(x=>normalizeUser(x.u)===normalizeUser(u.u));
+      if(!target){ alert('Usuário não encontrado.'); await renderAccessUsers(); return; }
+      if(String(target.role||'').toLowerCase()==='master'){ alert('Usuários Master possuem acesso total automaticamente.'); return; }
+      const next={}; permGrid.querySelectorAll('input[data-module]').forEach(cb=>next[cb.dataset.module]=!!cb.checked);
+      target.permissions=next;
+      await saveUsers(users2);
+      if(normalizeUser(target.u)===current) CURRENT_USER=target;
+      alert(`Acessos de "${target.name||target.u}" atualizados com sucesso.`);
+      applyUserModuleAccess();
+    });
+  });
+}
+
+document.getElementById('accessManageUsersBtn')?.addEventListener('click',()=>document.querySelector('[data-v3="users"]')?.click());
+document.getElementById('accessManageUsersMasterBtn')?.addEventListener('click',()=>document.querySelector('[data-v3="users"]')?.click());
 
 /* =========================================================
    SEARCH APP (unchanged core logic)
@@ -4758,6 +4767,55 @@ initGate();
   let v3Built=false;
   function icon(path){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+path+'</svg>';}
   const I={search:icon('<circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>'),users:icon('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'),shield:icon('<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>'),report:icon('<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="14" y2="17"/>'),settings:icon('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.8 1.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V20h-2.54v-.1a1.7 1.7 0 0 0-1.03-1.56 1.7 1.7 0 0 0-1.88.34l-.06.06-1.8-1.8.06-.06A1.7 1.7 0 0 0 8.6 15a1.7 1.7 0 0 0-1.56-1.03H6v-2.54h1.04A1.7 1.7 0 0 0 8.6 10a1.7 1.7 0 0 0-.34-1.88L8.2 8.06l1.8-1.8.06.06a1.7 1.7 0 0 0 1.88.34A1.7 1.7 0 0 0 12.97 5.1V5h2.54v.1a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06 1.8 1.8-.06.06A1.7 1.7 0 0 0 19.4 10c.23.63.84 1.03 1.51 1.03H21v2.54h-.09A1.7 1.7 0 0 0 19.4 15z"/>'),logout:icon('<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>'),siafe:icon('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h10M7 13h6"/><path d="M16 13h2"/>'),lei360:icon('<path d="M12 3v18"/><path d="M5 7h5l-2.5 6a3 3 0 0 0 5 0L10 7"/><path d="M14 7h5l-2.5 6a3 3 0 0 0 5 0L19 7"/><path d="M5 21h14"/><path d="M9 7h6"/>'),saudedigital:icon('<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>')};
+  // V-FIX: reconstrói as listas suspensas da Pesquisa sempre que a Base Geral
+  // for carregada/atualizada. Esta rotina atua somente na interface dos filtros;
+  // não altera a lógica de pesquisa, as regras de negócio ou as bases do Supabase.
+  function refreshSearchFilterOptions(){
+    const filters=document.querySelector('.v3-filters');
+    if(!filters) return;
+    const source=Array.isArray(ALL)?ALL:[];
+    const normalize=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLowerCase();
+    const unique=arr=>Array.from(new Set(arr.map(v=>String(v??'').trim()).filter(Boolean)))
+      .sort((a,b)=>a.localeCompare(b,'pt-BR',{numeric:true,sensitivity:'base'}));
+    const valueFor=(rec,field)=>{
+      const keys=Object.keys(rec||{});
+      const find=names=>{
+        for(const name of names){
+          const k=keys.find(x=>normalize(x)===normalize(name));
+          if(k && rec[k]!==undefined && rec[k]!==null && String(rec[k]).trim()!=='') return String(rec[k]).trim();
+        }
+        return '';
+      };
+      if(field==='MUNICIPIO') return find(['MUNICIPIO','Município','Municipio','MUNICÍPIO/ INSTITUIÇÃO']);
+      if(field==='TIPO') return find(['TIPO','TIPO DE INSTRUMENTO','Tipo objeto','Classificação','SUBTIPO']);
+      if(field==='STATUS'){
+        const vals=[];
+        keys.forEach(k=>{if(/status|situa/i.test(k)){const v=rec[k];if(v!==undefined&&v!==null&&String(v).trim()!=='') vals.push(String(v).trim());}});
+        return vals.join(' | ');
+      }
+      return '';
+    };
+    const fill=(field,placeholder)=>{
+      const select=filters.querySelector(`select[data-filter="${field}"]`);
+      if(!select) return;
+      const old=select.value;
+      const values=unique(source.flatMap(item=>{
+        const v=valueFor(item.rec,field);
+        return field==='STATUS' ? v.split(/\s*\|\s*/).filter(Boolean) : [v];
+      }));
+      const frag=document.createDocumentFragment();
+      const ph=document.createElement('option'); ph.value=''; ph.textContent=placeholder; frag.appendChild(ph);
+      values.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;frag.appendChild(o);});
+      select.innerHTML=''; select.appendChild(frag);
+      const match=Array.from(select.options).find(o=>normalize(o.value)===normalize(old));
+      select.value=match?match.value:'';
+    };
+    fill('MUNICIPIO','Selecione o município');
+    fill('STATUS','Selecione a situação');
+    fill('TIPO','Selecione o tipo');
+  }
+  window.refreshSearchFilterOptions=refreshSearchFilterOptions;
+
   function build(){
     if(v3Built || !document.getElementById('appRoot') || document.getElementById('appRoot').classList.contains('hidden')) return;
     const root=document.getElementById('appRoot'), app=root.querySelector('.app'), footer=root.querySelector('footer');
@@ -4783,6 +4841,7 @@ initGate();
     const role=document.getElementById('whoRole'), name=document.getElementById('whoName');
     const refreshUser=()=>{document.getElementById('v3UserName').textContent=name?.textContent||'Usuário';document.getElementById('v3UserRole').textContent=role?.textContent||'USUÁRIO'; if((role?.textContent||'').toLowerCase().includes('master')) document.getElementById('v3UsersNav').classList.remove('hidden');};
     refreshUser();
+    applyUserModuleAccess();
     document.getElementById('v3Logout').onclick=()=>document.getElementById('logoutBtn').click();
     side.querySelectorAll('[data-v3]').forEach(btn=>btn.addEventListener('click',()=>nav(btn.dataset.v3)));
     const sb=app.querySelector('.searchbar');
@@ -4837,13 +4896,17 @@ initGate();
       sources.parentNode.insertBefore(filters,sources);
       document.getElementById('v3MoreBtn').onclick=()=>{const x=document.getElementById('v3MoreFields');x.classList.toggle('open');document.getElementById('v3MoreBtn').textContent=x.classList.contains('open')?'Recolher filtros':'Exibir mais filtros';};
       filters.querySelectorAll('input,select').forEach(i=>{ const ev=i.tagName==='SELECT'?'change':'input'; i.addEventListener(ev,()=>{clearTimeout(i._t);i._t=setTimeout(runSearch,120);}); });
+      refreshSearchFilterOptions();
     }
   }
   function nav(which){
+    if(!['users','access','settings'].includes(which) && ACCESS_MODULES.some(m=>m.key===which) && !userCanAccess(which)){ alert('Seu perfil não possui acesso a esta aba.'); return; }
+    if(which==='users' && String(CURRENT_USER?.role||'').toLowerCase()!=='master'){ alert('Acesso restrito ao perfil Master.'); return; }
+    if(which==='access' && String(CURRENT_USER?.role||'').toLowerCase()!=='master'){ alert('Acesso restrito ao perfil Master.'); return; }
     document.querySelectorAll('.v3-nav button').forEach(b=>b.classList.toggle('active',b.dataset.v3===which));
-    const search=document.getElementById('searchView'), users=document.getElementById('usersView');
+    const search=document.getElementById('searchView'), users=document.getElementById('usersView'), access=document.getElementById('accessView');
     if(which==='dashboard'){
-      search?.classList.add('hidden'); users?.classList.add('hidden');
+      search?.classList.add('hidden'); users?.classList.add('hidden'); access?.classList.add('hidden');
       document.getElementById('siafeView')?.classList.add('hidden');
       document.getElementById('lei360View')?.classList.remove('active');
       document.getElementById('saudeDigitalView')?.classList.add('hidden');
@@ -4855,13 +4918,13 @@ initGate();
     }
     document.getElementById('dashboardView')?.classList.add('hidden');
     if(which==='search'){
-      search?.classList.remove('hidden');users?.classList.add('hidden');document.getElementById('siafeView')?.classList.add('hidden');
+      search?.classList.remove('hidden');users?.classList.add('hidden');access?.classList.add('hidden');document.getElementById('siafeView')?.classList.add('hidden');
       document.getElementById('lei360View')?.classList.remove('active');
       document.getElementById('saudeDigitalView')?.classList.add('hidden');
       document.querySelector('.v3-main header.top')?.style.removeProperty('display');
       document.querySelector('.v3-main footer')?.style.removeProperty('display');
     }
-    else if(which==='users'){document.getElementById('tabUsersBtn')?.click();search?.classList.add('hidden');users?.classList.remove('hidden');document.getElementById('siafeView')?.classList.add('hidden');document.getElementById('lei360View')?.classList.remove('active');document.getElementById('saudeDigitalView')?.classList.add('hidden');document.querySelector('.v3-main header.top')?.style.removeProperty('display');document.querySelector('.v3-main footer')?.style.removeProperty('display');}
+    else if(which==='users'){document.getElementById('tabUsersBtn')?.click();search?.classList.add('hidden');users?.classList.remove('hidden');access?.classList.add('hidden');document.getElementById('siafeView')?.classList.add('hidden');document.getElementById('lei360View')?.classList.remove('active');document.getElementById('saudeDigitalView')?.classList.add('hidden');document.querySelector('.v3-main header.top')?.style.setProperty('display','none','important');document.querySelector('.v3-main footer')?.style.setProperty('display','none','important');}
     else if(which==='reports'){if(lastMatches.length) openPrintSelectionModal();else alert('Faça uma pesquisa antes de gerar um relatório.');}
     else if(which==='siafe'){
       document.getElementById('searchView')?.classList.add('hidden');
@@ -4893,7 +4956,16 @@ initGate();
       document.querySelector('.v3-main footer')?.style.setProperty('display','none','important');
       window.refreshSaudeDigitalView?.();
     }
-    else if(which==='access'){alert('Controle de Acessos: estrutura reservada para a próxima etapa. A gestão de usuários existente permanece disponível para o perfil Master.');}
+    else if(which==='access'){
+      search?.classList.add('hidden');users?.classList.add('hidden');
+      document.getElementById('siafeView')?.classList.add('hidden');
+      document.getElementById('lei360View')?.classList.remove('active');
+      document.getElementById('saudeDigitalView')?.classList.add('hidden');
+      access?.classList.remove('hidden');
+      document.querySelector('.v3-main header.top')?.style.setProperty('display','none','important');
+      document.querySelector('.v3-main footer')?.style.setProperty('display','none','important');
+      renderAccessUsers();
+    }
     else if(which==='settings'){alert('Configurações: estrutura reservada para a próxima etapa.');}
   }
   function val(rec, names){
@@ -6383,6 +6455,7 @@ initGate();
       const rows=Array.isArray(DATASETS[sheet])?DATASETS[sheet]:[];
       rows.forEach((rec,i)=>ALL.push({sheet,rec,idx:i,hay:Object.values(rec).join(' ').toLowerCase()}));
     });
+    refreshSearchFilterOptions();
     activeSheets=new Set(SHEET_NAMES);
     if(typeof renderChips==='function') renderChips();
     const n=document.querySelector('#statStrip .stat-chip:first-child .n'); if(n)n.textContent=ALL.length.toLocaleString('pt-BR');
@@ -6564,6 +6637,7 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
   try{ RECORDS = JSON.parse(document.getElementById('lei360-data').textContent); }catch(e){ RECORDS = []; console.warn('Lei 360: falha ao carregar dados', e); }
   let filtered = RECORDS.slice();
   let expanded = new Set();
+    const collapsedGroups = new Set();
 
   /* =========================================================
      IMPORTAÇÃO DE PLANILHA — Lei 360
@@ -7000,12 +7074,17 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
         </tr>
         <tr class="l360-detail-row"><td colspan="8" style="padding:0;border:0;"><div class="l360-detail${isOpen?' open':''}" id="detail-${escapeHtml(key)}">${isOpen?renderTimeline(r):''}</div></td></tr>`;
       }).join('');
+      const groupOpen=!collapsedGroups.has(g);
       return `<div class="group">
-        <div class="group-head"><span class="dot"></span><h2>${escapeHtml(g)}</h2><span class="gc">${grows.length} registro(s)</span></div>
-        <table class="v3-table l360-table">
+        <div class="group-head l360-group-head">
+          <button type="button" class="l360-group-toggle" data-group="${escapeHtml(g)}" aria-expanded="${groupOpen}">
+            <span class="dot"></span><h2>${escapeHtml(g)}</h2><span class="gc">${grows.length} registro(s)</span><span class="l360-group-chevron" aria-hidden="true">${groupOpen?'Recolher':'Expandir'}</span>
+          </button>
+        </div>
+        ${groupOpen ? `<table class="v3-table l360-table">
           <thead><tr><th>MAPP / Convênio</th><th>Convenente</th><th>Município</th><th>Gestor / Fiscal</th><th>Valor total</th><th>Progresso</th><th>Próxima parcela</th><th>Situação</th></tr></thead>
           <tbody>${trs}</tbody>
-        </table>
+        </table>` : ''}
       </div>`;
     }).join('');
     wrap.querySelectorAll('.l360-row').forEach(tr=>{
@@ -7090,6 +7169,15 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
       if(el) el.addEventListener('change',applyLei360Filters);
     });
     document.getElementById('l360PrintBtn')?.addEventListener('click',printLei360Report);
+    document.getElementById('l360ResultsWrap')?.addEventListener('click',(ev)=>{
+      const btn=ev.target.closest('.l360-group-toggle');
+      if(!btn) return;
+      const group=btn.getAttribute('data-group');
+      if(!group) return;
+      if(collapsedGroups.has(group)) collapsedGroups.delete(group);
+      else collapsedGroups.add(group);
+      renderTable(filtered);
+    });
     document.getElementById('l360ImportBtn')?.addEventListener('click',()=>document.getElementById('l360File')?.click());
     document.getElementById('l360File')?.addEventListener('change',importLei360File);
     applyLocalLei360Override();
@@ -9003,7 +9091,6 @@ body:has(#lei360View.active) .v3-main .l360-view > .v3-filters{
   .v3-main .l360-view .l360-import-status{text-align:left !important;}
 }
 </style>
-
 <style id="lei360-header-reference-final">
 /* Lei 360 — cabeçalho seguindo o mesmo padrão visual das demais abas.
    Camada exclusivamente visual: não altera HTML funcional, JavaScript, eventos,
@@ -9015,8 +9102,6 @@ body:has(#lei360View.active) .v3-main .l360-view > header.top{
   box-shadow:none!important;
 }
 </style>
-
-
 <style id="lei360-sidebar-spacing-final">
 /* LEI 360 — alinhamento horizontal com as demais abas.
    Somente apresentação: não altera HTML funcional, JavaScript, filtros,
@@ -9028,19 +9113,6 @@ body:has(#lei360View.active) .v3-main .l360-view > header.top{
   }
 }
 </style>
-
-<style id="lei360-sidebar-spacing-final">
-/* LEI 360 — alinhamento horizontal com as demais abas.
-   Somente apresentação: não altera HTML funcional, JavaScript, filtros,
-   importação, dados, Supabase, GitHub ou regras de negócio. */
-@media (min-width:761px){
-  body:has(#lei360View.active) .v3-main .app{
-    padding-left:26px!important;
-    padding-right:26px!important;
-  }
-}
-</style>
-
 <style id="lei360-title-size-only">
 /* Ajuste exclusivamente visual: título da aba Lei 360 alinhado ao porte
    dos títulos das demais abas. Nenhuma lógica ou regra funcional alterada. */
@@ -9622,6 +9694,222 @@ body:has(#searchView:not(.hidden)) .v3-main .v3-filters{
   .v3-main .l360-view .l360-head-actions{width:100%!important;justify-content:flex-start!important;}
 }
 </style>
+<style id="lei360-filters-proportional-final">
+/* Ajuste exclusivamente visual dos filtros da Lei 360.
+   Mantém IDs, eventos, lógica, dados e regras funcionais intactos. */
+@media (min-width:851px){
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter-layout{
+    display:grid!important;
+    grid-template-columns:repeat(7,minmax(0,1fr))!important;
+    column-gap:12px!important;
+    row-gap:12px!important;
+    width:100%!important;
+    align-items:end!important;
+  }
+
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter{
+    grid-column:span 1!important;
+    min-width:0!important;
+    width:100%!important;
+  }
+
+  /* Primeira linha: os cinco campos de identificação + município mais amplo. */
+  #l360Mapp{grid-column:1!important;}
+  #l360Convenio{grid-column:2!important;}
+  #l360Sacc{grid-column:3!important;}
+  #l360Nup{grid-column:4!important;}
+  #l360Cnpj{grid-column:5!important;}
+  #l360Municipio{grid-column:6 / span 2!important;}
+
+  /* Segunda linha: sete campos distribuídos de forma uniforme. */
+  #l360Convenente{grid-column:1!important;}
+  #l360Fiscal{grid-column:2!important;}
+  #l360Situacao{grid-column:3!important;}
+  #l360Status{grid-column:4!important;}
+  #l360Superintendencia{grid-column:5!important;}
+  #l360Classificacao{grid-column:6!important;}
+  #l360TipoObjeto{grid-column:7!important;}
+
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter input,
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter select{
+    width:100%!important;
+    min-width:0!important;
+    height:36px!important;
+    box-sizing:border-box!important;
+  }
+}
+</style>
+<style id="lei360-filter-grid-final-v2">
+/* Correção final da grade dos filtros Lei 360 — somente CSS. */
+@media (min-width:851px){
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter-layout{
+    grid-template-columns:repeat(12,minmax(0,1fr))!important;
+    column-gap:10px!important;
+    row-gap:12px!important;
+    align-items:end!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter{
+    min-width:0!important;
+  }
+  #l360Mapp{grid-column:1 / span 2!important;}
+  #l360Convenio{grid-column:3 / span 2!important;}
+  #l360Sacc{grid-column:5 / span 2!important;}
+  #l360Nup{grid-column:7 / span 2!important;}
+  #l360Cnpj{grid-column:9 / span 2!important;}
+  #l360Municipio{grid-column:11 / span 2!important;}
+
+  #l360Convenente{grid-column:1 / span 2!important;}
+  #l360Fiscal{grid-column:3 / span 2!important;}
+  #l360Situacao{grid-column:5 / span 2!important;}
+  #l360Status{grid-column:7 / span 2!important;}
+  #l360Superintendencia{grid-column:9 / span 2!important;}
+  #l360Classificacao{grid-column:11 / span 1!important;}
+  #l360TipoObjeto{grid-column:12 / span 1!important;}
+
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter input,
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter select{
+    height:36px!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters{
+    padding-bottom:14px!important;
+  }
+}
+</style>
+<style id="lei360-filter-spacing-final">
+/* LEI 360 — ajuste final de espaçamento dos filtros.
+   SOMENTE VISUAL/CSS. Nenhuma lógica, evento, dado, importação ou regra de negócio é alterada. */
+@media (min-width:851px){
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters{
+    height:auto!important;
+    min-height:0!important;
+    padding:14px 18px 15px!important;
+    margin:0 0 12px!important;
+    box-sizing:border-box!important;
+  }
+
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-section-head{
+    height:30px!important;
+    min-height:30px!important;
+    margin:0 0 12px!important;
+    padding:0 0 9px!important;
+    box-sizing:border-box!important;
+    align-items:flex-start!important;
+  }
+
+  /* Grade de 6 colunas: aumenta os campos de texto e elimina a grande
+     faixa vazia criada pela antiga grade de 4 colunas. */
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter-layout{
+    display:grid!important;
+    grid-template-columns:repeat(6,minmax(0,1fr))!important;
+    column-gap:12px!important;
+    row-gap:11px!important;
+    align-items:end!important;
+    width:100%!important;
+  }
+
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter-group,
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-group-fields{
+    display:contents!important;
+  }
+
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter{
+    min-width:0!important;
+    width:auto!important;
+    overflow:visible!important;
+  }
+
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter label{
+    display:block!important;
+    margin:0 0 5px!important;
+    font-size:9.5px!important;
+    line-height:1.15!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter input,
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter select{
+    width:100%!important;
+    min-width:0!important;
+    height:36px!important;
+    box-sizing:border-box!important;
+    padding:0 10px!important;
+    font-size:10.5px!important;
+  }
+
+  /* Campos que precisam de mais área horizontal. */
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(6){
+    grid-column:span 1!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(7),
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(8){
+    grid-column:span 1!important;
+  }
+
+  /* Segunda linha começa no início da grade, mantendo todos os campos
+     dentro do quadro branco e sem área vazia excessiva. */
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(7){
+    grid-column:1!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(8){
+    grid-column:2!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(9){
+    grid-column:3!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(10){
+    grid-column:4!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(11){
+    grid-column:5!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(12){
+    grid-column:6!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(13){
+    grid-column:1!important;
+  }
+
+  /* O último campo ocupa a coluna seguinte, deixando a segunda linha
+     visualmente equilibrada sem criar uma terceira linha. */
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(13){
+    grid-column:2!important;
+  }
+}
+
+@media (max-width:850px){
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters{
+    height:auto!important;
+    min-height:0!important;
+    padding:13px 14px 14px!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter-layout{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:10px!important;
+  }
+}
+</style>
+<style id="lei360-sidebar-gap-final">
+/* LEI 360 — alinhamento lateral com as demais abas.
+   SOMENTE VISUAL/CSS: cria o mesmo respiro entre a barra lateral e o conteúdo
+   que já existe nas telas Pesquisa e Pagamentos SIAFE.
+*/
+@media (min-width:761px){
+  body:has(#lei360View.active) .v3-main > .l360-view{
+    margin-left:26px!important;
+    margin-right:26px!important;
+    width:auto!important;
+    box-sizing:border-box!important;
+  }
+}
+@media (max-width:760px){
+  body:has(#lei360View.active) .v3-main > .l360-view{
+    margin-left:0!important;
+    margin-right:0!important;
+  }
+}
+</style>
 
 
 <style id="v40-filter-reference-fidelity">
@@ -9779,225 +10067,6 @@ body:has(#searchView:not(.hidden)) .v3-main .v3-filters{
   }
   body:has(#searchView:not(.hidden)) .v3-main .v3-more-fields.open .v3-filter{
     min-width:0!important;
-  }
-}
-</style>
-
-<style id="lei360-sidebar-gap-final">
-/* LEI 360 — alinhamento lateral com as demais abas.
-   SOMENTE VISUAL/CSS: cria o mesmo respiro entre a barra lateral e o conteúdo
-   que já existe nas telas Pesquisa e Pagamentos SIAFE.
-*/
-@media (min-width:761px){
-  body:has(#lei360View.active) .v3-main > .l360-view{
-    margin-left:26px!important;
-    margin-right:26px!important;
-    width:auto!important;
-    box-sizing:border-box!important;
-  }
-}
-@media (max-width:760px){
-  body:has(#lei360View.active) .v3-main > .l360-view{
-    margin-left:0!important;
-    margin-right:0!important;
-  }
-}
-</style>
-<style id="lei360-filter-spacing-final">
-/* LEI 360 — ajuste final de espaçamento dos filtros.
-   SOMENTE VISUAL/CSS. Nenhuma lógica, evento, dado, importação ou regra de negócio é alterada. */
-@media (min-width:851px){
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters{
-    height:auto!important;
-    min-height:0!important;
-    padding:14px 18px 15px!important;
-    margin:0 0 12px!important;
-    box-sizing:border-box!important;
-  }
-
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-section-head{
-    height:30px!important;
-    min-height:30px!important;
-    margin:0 0 12px!important;
-    padding:0 0 9px!important;
-    box-sizing:border-box!important;
-    align-items:flex-start!important;
-  }
-
-  /* Grade de 6 colunas: aumenta os campos de texto e elimina a grande
-     faixa vazia criada pela antiga grade de 4 colunas. */
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter-layout{
-    display:grid!important;
-    grid-template-columns:repeat(6,minmax(0,1fr))!important;
-    column-gap:12px!important;
-    row-gap:11px!important;
-    align-items:end!important;
-    width:100%!important;
-  }
-
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter-group,
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-group-fields{
-    display:contents!important;
-  }
-
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter{
-    min-width:0!important;
-    width:auto!important;
-    overflow:visible!important;
-  }
-
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter label{
-    display:block!important;
-    margin:0 0 5px!important;
-    font-size:9.5px!important;
-    line-height:1.15!important;
-    white-space:nowrap!important;
-    overflow:hidden!important;
-    text-overflow:ellipsis!important;
-  }
-
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter input,
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter select{
-    width:100%!important;
-    min-width:0!important;
-    height:36px!important;
-    box-sizing:border-box!important;
-    padding:0 10px!important;
-    font-size:10.5px!important;
-  }
-
-  /* Campos que precisam de mais área horizontal. */
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(6){
-    grid-column:span 1!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(7),
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(8){
-    grid-column:span 1!important;
-  }
-
-  /* Segunda linha começa no início da grade, mantendo todos os campos
-     dentro do quadro branco e sem área vazia excessiva. */
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(7){
-    grid-column:1!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(8){
-    grid-column:2!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(9){
-    grid-column:3!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(10){
-    grid-column:4!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(11){
-    grid-column:5!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(12){
-    grid-column:6!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(13){
-    grid-column:1!important;
-  }
-
-  /* O último campo ocupa a coluna seguinte, deixando a segunda linha
-     visualmente equilibrada sem criar uma terceira linha. */
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(13){
-    grid-column:2!important;
-  }
-}
-
-@media (max-width:850px){
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters{
-    height:auto!important;
-    min-height:0!important;
-    padding:13px 14px 14px!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter-layout{
-    grid-template-columns:repeat(2,minmax(0,1fr))!important;
-    gap:10px!important;
-  }
-}
-</style>
-
-<style id="lei360-filter-grid-final-v2">
-/* Correção final da grade dos filtros Lei 360 — somente CSS. */
-@media (min-width:851px){
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter-layout{
-    grid-template-columns:repeat(12,minmax(0,1fr))!important;
-    column-gap:10px!important;
-    row-gap:12px!important;
-    align-items:end!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter{
-    min-width:0!important;
-  }
-  #l360Mapp{grid-column:1 / span 2!important;}
-  #l360Convenio{grid-column:3 / span 2!important;}
-  #l360Sacc{grid-column:5 / span 2!important;}
-  #l360Nup{grid-column:7 / span 2!important;}
-  #l360Cnpj{grid-column:9 / span 2!important;}
-  #l360Municipio{grid-column:11 / span 2!important;}
-
-  #l360Convenente{grid-column:1 / span 2!important;}
-  #l360Fiscal{grid-column:3 / span 2!important;}
-  #l360Situacao{grid-column:5 / span 2!important;}
-  #l360Status{grid-column:7 / span 2!important;}
-  #l360Superintendencia{grid-column:9 / span 2!important;}
-  #l360Classificacao{grid-column:11 / span 1!important;}
-  #l360TipoObjeto{grid-column:12 / span 1!important;}
-
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter input,
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter select{
-    height:36px!important;
-  }
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters{
-    padding-bottom:14px!important;
-  }
-}
-</style>
-
-<style id="lei360-filters-proportional-final">
-/* Ajuste exclusivamente visual dos filtros da Lei 360.
-   Mantém IDs, eventos, lógica, dados e regras funcionais intactos. */
-@media (min-width:851px){
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter-layout{
-    display:grid!important;
-    grid-template-columns:repeat(7,minmax(0,1fr))!important;
-    column-gap:12px!important;
-    row-gap:12px!important;
-    width:100%!important;
-    align-items:end!important;
-  }
-
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter{
-    grid-column:span 1!important;
-    min-width:0!important;
-    width:100%!important;
-  }
-
-  /* Primeira linha: os cinco campos de identificação + município mais amplo. */
-  #l360Mapp{grid-column:1!important;}
-  #l360Convenio{grid-column:2!important;}
-  #l360Sacc{grid-column:3!important;}
-  #l360Nup{grid-column:4!important;}
-  #l360Cnpj{grid-column:5!important;}
-  #l360Municipio{grid-column:6 / span 2!important;}
-
-  /* Segunda linha: sete campos distribuídos de forma uniforme. */
-  #l360Convenente{grid-column:1!important;}
-  #l360Fiscal{grid-column:2!important;}
-  #l360Situacao{grid-column:3!important;}
-  #l360Status{grid-column:4!important;}
-  #l360Superintendencia{grid-column:5!important;}
-  #l360Classificacao{grid-column:6!important;}
-  #l360TipoObjeto{grid-column:7!important;}
-
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter input,
-  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter select{
-    width:100%!important;
-    min-width:0!important;
-    height:36px!important;
-    box-sizing:border-box!important;
   }
 }
 </style>
