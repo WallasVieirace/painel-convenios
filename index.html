@@ -898,11 +898,38 @@
     overflow-y:auto;
   }
   .user-row{
-    display:flex;align-items:center;justify-content:space-between;
+    display:block;
     padding:10px 0;
     border-bottom:1px solid var(--line);
+  }
+  .user-row-main{
+    display:flex;align-items:center;justify-content:space-between;
     gap:10px;
   }
+  .user-access-inline{
+    margin-top:9px;padding:10px 12px;border:1px solid #e1e7ee;
+    border-radius:7px;background:#fbfcfe;
+  }
+  .user-access-inline-head{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;
+  }
+  .user-access-inline-head strong{font-size:10px;color:var(--primary-deep);}
+  .user-access-inline-head span{font-size:8.5px;color:var(--ink-soft);}
+  .user-access-inline-grid{
+    display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;
+  }
+  .user-access-inline-item{
+    display:flex;align-items:center;gap:7px;border:1px solid #e1e7ee;border-radius:6px;
+    padding:7px 8px;background:#fff;cursor:pointer;min-width:0;
+  }
+  .user-access-inline-item input{width:15px;height:15px;accent-color:#178f83;cursor:pointer;flex:0 0 auto;}
+  .user-access-inline-item input:disabled{cursor:not-allowed;opacity:.65;}
+  .user-access-inline-item span{font-size:9px;font-weight:700;color:#31465d;line-height:1.2;}
+  .user-access-inline-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;}
+  .user-access-inline-note{font-size:8.5px;color:#718096;}
+  .user-access-inline-save{height:28px;border:1px solid #173f66;border-radius:6px;background:#173f66;color:#fff;padding:0 11px;font-size:9px;font-weight:700;cursor:pointer;}
+  .user-access-inline-save:disabled{opacity:.5;cursor:not-allowed;}
+  @media(max-width:760px){.user-access-inline-grid{grid-template-columns:1fr 1fr}.user-row-main{display:block}.urow-actions{margin-top:8px;flex-wrap:wrap}}
   .user-row:last-child{border-bottom:none;}
   .user-row .uinfo{min-width:0;}
   .user-row .uname{font-size:13.5px;font-weight:600;color:var(--ink);}
@@ -1334,6 +1361,23 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.18;b
 .access-perm-actions{display:flex;align-items:center;justify-content:space-between;padding:0 12px 12px;gap:10px;}
 .access-perm-actions .access-role-save{margin-left:auto;}
 .access-perm-master-note{font-size:9px;color:#718096;}
+.user-perm-box{margin-top:14px;border:1px solid #e1e7ee;border-radius:8px;background:#fbfcfe;padding:12px;}
+.user-perm-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px;}
+.user-perm-head strong{font-size:10px;color:var(--v3-navy);}
+.user-perm-head span{font-size:8.5px;color:#7a8798;}
+.user-perm-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;}
+.user-perm-item{display:flex;align-items:center;gap:7px;border:1px solid #e1e7ee;border-radius:6px;padding:8px 9px;background:#fff;cursor:pointer;}
+.user-perm-item:hover{background:#f6f9fc;border-color:#cbd8e5;}
+.user-perm-item input{width:15px;height:15px;accent-color:#178f83;cursor:pointer;flex:0 0 auto;}
+.user-perm-item input:disabled{cursor:not-allowed;opacity:.65;}
+.user-perm-item span{font-size:9px;font-weight:700;color:#31465d;}
+.user-perm-item small{display:block;font-size:7.5px;color:#7a8798;font-weight:500;margin-top:1px;}
+.user-perm-actions{display:flex;align-items:center;justify-content:space-between;margin-top:8px;gap:8px;}
+.user-perm-actions button{border:0;background:transparent;color:#178f83;font-size:8.5px;font-weight:700;cursor:pointer;padding:2px 0;}
+.user-perm-note{font-size:8px;color:#7a8798;}
+@media(max-width:900px){.user-perm-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:600px){.user-perm-grid{grid-template-columns:1fr;}}
+
 @media(max-width:900px){.access-perm-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
 @media(max-width:600px){.access-perm-grid{grid-template-columns:1fr;}}
 @media(max-width:760px){.access-grid{grid-template-columns:1fr}.access-table{min-width:620px}.access-panel{overflow:auto}}
@@ -3426,6 +3470,20 @@ body:has(#usersView:not(.hidden)) .v3-main > .app > footer{
 <style id="sesa-credit-position-v22">
 #gate .gate-credit{margin-top:7px!important;}
 </style>
+
+<style id="v26-remove-spiral-backgrounds">
+/* V26 — remove somente os elementos decorativos em espiral das telas internas.
+   Nenhuma lógica, navegação, autenticação ou regra de negócio é alterada. */
+#appRoot .v3-sidebar::before,
+#appRoot .v3-sidebar::after,
+#appRoot .v3-main::before,
+#appRoot .v3-main::after {
+  display:none !important;
+  content:none !important;
+  background:none !important;
+  opacity:0 !important;
+}
+</style>
 </head>
 <body>
 <div class="flag-stripe"></div>
@@ -3621,7 +3679,7 @@ body:has(#usersView:not(.hidden)) .v3-main > .app > footer{
         <div class="access-note">As permissões exibidas refletem a estrutura já existente. A alteração abaixo modifica somente o perfil do usuário selecionado, utilizando a mesma base de usuários já existente no projeto.</div>
       </div>
       <div class="access-panel access-users-panel">
-        <div class="access-panel-head"><strong>Perfis dos usuários cadastrados</strong><span>Altere individualmente o perfil de cada usuário</span></div>
+        <div class="access-panel-head"><strong>Autonomia de acesso por usuário</strong><span>Marque as abas que cada usuário poderá acessar</span></div>
         <div id="accessUsersList"></div>
       </div>
     </div>
@@ -3643,6 +3701,13 @@ body:has(#usersView:not(.hidden)) .v3-main > .app > footer{
               <option value="user">Usuário — acesso à busca</option>
               <option value="master">Master — acesso total + gerenciar usuários</option>
             </select>
+          </div>
+          <div class="field-input full">
+            <div class="user-perm-box">
+              <div class="user-perm-head"><strong>Permissões de acesso</strong><span>Marque as abas que este usuário poderá acessar</span></div>
+              <div class="user-perm-grid" id="newUserPermissions"></div>
+              <div class="user-perm-actions"><span class="user-perm-note" id="newUserPermissionsNote">Usuário comum: escolha individualmente as abas.</span><button type="button" id="newUserSelectAll">Selecionar todas</button></div>
+            </div>
           </div>
         </div>
         <button class="panel-btn" id="createUserBtn">Criar usuário</button>
@@ -4264,18 +4329,47 @@ async function renderUsersInline(){
     row.className = 'user-row';
     const masterCount = users.filter(x=>x.role==='master').length;
     const disableDelete = (u.u === CURRENT_USER.u) || (u.role === 'master' && masterCount <= 1);
+    const perms=normalizePermissions(u);
+    const permItems=ACCESS_MODULES.map(mod=>`<label class="user-access-inline-item"><input type="checkbox" data-inline-module="${mod.key}" ${perms[mod.key]?'checked':''} ${u.role==='master'?'disabled':''}><span>${escapeHtml(mod.label)}</span></label>`).join('');
     row.innerHTML = `
-      <div class="uinfo">
-        <div class="uname">${escapeHtml(u.name || u.u)} <span class="role-tag">${u.role==='master'?'Master':'Usuário'}</span></div>
-        <div class="umeta">@${escapeHtml(u.u)} · desde ${new Date(u.createdAt).toLocaleDateString('pt-BR')}${u.email?(' · '+escapeHtml(u.email)):''}</div>
+      <div class="user-row-main">
+        <div class="uinfo">
+          <div class="uname">${escapeHtml(u.name || u.u)} <span class="role-tag">${u.role==='master'?'Master':'Usuário'}</span></div>
+          <div class="umeta">@${escapeHtml(u.u)} · desde ${new Date(u.createdAt).toLocaleDateString('pt-BR')}${u.email?(' · '+escapeHtml(u.email)):''}</div>
+        </div>
+        <div class="urow-actions">
+          <button class="email-btn" data-u="${escapeHtml(u.u)}" data-name="${escapeHtml(u.name||u.u)}" data-email="${escapeHtml(u.email||'')}">${u.email?'Alterar e-mail':'Vincular e-mail'}</button>
+          <button class="reset-btn" data-u="${escapeHtml(u.u)}" data-name="${escapeHtml(u.name||u.u)}">Redefinir senha</button>
+          <button class="del-btn" ${disableDelete?'disabled':''} data-u="${escapeHtml(u.u)}" data-name="${escapeHtml(u.name||u.u)}">Remover</button>
+        </div>
       </div>
-      <div class="urow-actions">
-        <button class="email-btn" data-u="${escapeHtml(u.u)}" data-name="${escapeHtml(u.name||u.u)}" data-email="${escapeHtml(u.email||'')}">${u.email?'Alterar e-mail':'Vincular e-mail'}</button>
-        <button class="reset-btn" data-u="${escapeHtml(u.u)}" data-name="${escapeHtml(u.name||u.u)}">Redefinir senha</button>
-        <button class="del-btn" ${disableDelete?'disabled':''} data-u="${escapeHtml(u.u)}" data-name="${escapeHtml(u.name||u.u)}">Remover</button>
+      <div class="user-access-inline">
+        <div class="user-access-inline-head"><strong>Autonomia de acesso</strong><span>${u.role==='master'?'Master — acesso total':'Defina as abas que este usuário poderá acessar'}</span></div>
+        <div class="user-access-inline-grid">${permItems}</div>
+        <div class="user-access-inline-actions"><span class="user-access-inline-note">${u.role==='master'?'As opções ficam liberadas automaticamente para Master.':'Selecione as permissões e clique em Salvar acessos.'}</span><button type="button" class="user-access-inline-save" data-u="${escapeHtml(u.u)}" ${u.role==='master'?'disabled':''}>Salvar acessos</button></div>
       </div>
     `;
     listEl.appendChild(row);
+  });
+  listEl.querySelectorAll('.user-access-inline-save').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      if(!(await assertStillMaster())){ alert('Sua sessão não tem mais permissão de Master. Faça login novamente.'); return; }
+      const uname=btn.getAttribute('data-u');
+      const users2=await loadUsers();
+      const target=users2.find(x=>x.u===uname);
+      if(!target){ alert('Usuário não encontrado.'); return; }
+      if(String(target.role||'').toLowerCase()==='master'){ alert('Usuários Master possuem acesso total automaticamente.'); return; }
+      const row=btn.closest('.user-row');
+      const next={};
+      row.querySelectorAll('input[data-inline-module]').forEach(cb=>next[cb.dataset.inlineModule]=!!cb.checked);
+      if(!Object.values(next).some(Boolean)) next.search=true;
+      target.permissions=next;
+      await saveUsers(users2);
+      if(normalizeUser(target.u)===normalizeUser(CURRENT_USER?.u)) CURRENT_USER=target;
+      btn.textContent='Salvo';
+      setTimeout(()=>{btn.textContent='Salvar acessos';},1200);
+      applyUserModuleAccess();
+    });
   });
   listEl.querySelectorAll('.email-btn').forEach(btn=>{
     btn.addEventListener('click', async ()=>{
@@ -4336,6 +4430,72 @@ const ACCESS_MODULES = [
   {key:'siafe', label:'Pagamentos SIAFE', desc:'Consulta de pagamentos'},
   {key:'saudedigital', label:'Saúde Digital', desc:'Módulo Saúde Digital'}
 ];
+
+function renderNewUserPermissionChoices(){
+  const grid=document.getElementById('newUserPermissions');
+  if(!grid) return;
+  grid.innerHTML='';
+  ACCESS_MODULES.forEach(mod=>{
+    const label=document.createElement('label'); label.className='user-perm-item';
+    const cb=document.createElement('input'); cb.type='checkbox'; cb.dataset.module=mod.key; cb.checked=(mod.key==='search');
+    const text=document.createElement('div'); text.innerHTML=`<span>${escapeHtml(mod.label)}</span><small>${escapeHtml(mod.desc)}</small>`;
+    label.append(cb,text); grid.appendChild(label);
+  });
+}
+function syncNewUserPermissionState(){
+  const role=document.getElementById('newUserRole')?.value||'user';
+  const master=role==='master';
+  document.querySelectorAll('#newUserPermissions input[data-module]').forEach(cb=>{ cb.checked=master ? true : cb.checked; cb.disabled=master; });
+  const note=document.getElementById('newUserPermissionsNote');
+  const all=document.getElementById('newUserSelectAll');
+  if(note) note.textContent=master ? 'Master possui acesso total automaticamente.' : 'Usuário comum: escolha individualmente as abas.';
+  if(all) all.style.visibility=master?'hidden':'visible';
+}
+
+renderNewUserPermissionChoices();
+document.getElementById('newUserRole')?.addEventListener('change',syncNewUserPermissionState);
+document.getElementById('newUserSelectAll')?.addEventListener('click',()=>{
+  document.querySelectorAll('#newUserPermissions input[data-module]').forEach(cb=>cb.checked=true);
+});
+syncNewUserPermissionState();
+
+document.getElementById('createUserBtn')?.addEventListener('click', async ()=>{
+  const name=document.getElementById('newUserName').value.trim();
+  const uname=document.getElementById('newUserLogin').value.trim().toLowerCase();
+  const pass=document.getElementById('newUserPass').value;
+  const pass2=document.getElementById('newUserPass2').value;
+  const role=document.getElementById('newUserRole').value;
+  const email=document.getElementById('newUserEmail').value.trim().toLowerCase();
+  const msg=document.getElementById('createUserMsg');
+  msg.className='form-msg';
+  if(!(await assertStillMaster())){msg.textContent='Sua sessão não tem mais permissão de Master. Faça login novamente.';msg.classList.add('show','err');return;}
+  if(!name||!uname||!pass){msg.textContent='Preencha todos os campos.';msg.classList.add('show','err');return;}
+  if(pass.length<4){msg.textContent='A senha deve ter ao menos 4 caracteres.';msg.classList.add('show','err');return;}
+  if(pass!==pass2){msg.textContent='As senhas não coincidem.';msg.classList.add('show','err');return;}
+  if(email&&!email.endsWith(CORPORATE_EMAIL_DOMAIN)){msg.textContent=`O e-mail precisa terminar em ${CORPORATE_EMAIL_DOMAIN}.`;msg.classList.add('show','err');return;}
+  const users=await loadUsers();
+  if(users.find(u=>u.u===uname)){msg.textContent='Esse usuário já existe.';msg.classList.add('show','err');return;}
+  if(email&&users.find(u=>String(u.email||'').toLowerCase()===email)){msg.textContent='Esse e-mail já está vinculado a outro usuário.';msg.classList.add('show','err');return;}
+  const hash=await sha256(pass);
+  const recoveryCode=makeRecoveryCode();
+  const recoveryHash=await sha256(recoveryCode);
+  const permissions={};
+  ACCESS_MODULES.forEach(mod=>{
+    const cb=document.querySelector(`#newUserPermissions input[data-module="${mod.key}"]`);
+    permissions[mod.key]=role==='master'?true:!!cb?.checked;
+  });
+  if(role!=='master' && !Object.values(permissions).some(Boolean)) permissions.search=true;
+  users.push({u:uname,name,passwordHash:hash,recoveryHash,role,email:email||null,permissions,createdAt:new Date().toISOString()});
+  await saveUsers(users);
+  msg.textContent=`Usuário "${name}" criado com sucesso. Código de recuperação: ${recoveryCode}. Anote e entregue ao usuário — ele será necessário para usar "Esqueci minha senha".`;
+  msg.classList.add('show','ok');
+  ['newUserName','newUserLogin','newUserPass','newUserPass2','newUserEmail'].forEach(id=>{document.getElementById(id).value='';});
+  document.getElementById('newUserRole').value='user';
+  renderNewUserPermissionChoices();
+  syncNewUserPermissionState();
+  renderUsersInline();
+});
+
 function defaultPermissionsForRole(role){
   const isMaster=String(role||'').toLowerCase()==='master';
   const out={}; ACCESS_MODULES.forEach(m=>out[m.key]=isMaster || m.key==='search'); return out;
