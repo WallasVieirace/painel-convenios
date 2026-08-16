@@ -2307,6 +2307,691 @@ body:has(#siafeView:not(.hidden)) .v3-main .app{padding-top:0!important;}
 }
 @media(prefers-reduced-motion:reduce){#gate .gate-btn{transition:none!important;}}
 </style>
+
+<style id="v21-top-organization">
+/* V21 — organização superior de Pesquisa e Lei 360.
+   SOMENTE UI/CSS: nenhuma regra de dados, autenticação ou negócio é alterada. */
+
+/* ===== PESQUISA ===== */
+body:has(#searchView:not(.hidden)) .v3-main header.top{
+  min-height:74px!important;
+  box-sizing:border-box!important;
+  padding:16px 0 12px!important;
+  margin:0 0 10px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:22px!important;
+  position:relative!important;
+  z-index:5!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .brand{
+  min-width:290px!important;
+  flex:0 0 auto!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .brand-text h1{
+  font-size:26px!important;
+  line-height:1.12!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .brand-text .sub{
+  margin-top:4px!important;
+  font-size:11.5px!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main .searchbar{
+  margin:0 0 12px!important;
+}
+
+/* ===== LEI 360 =====
+   A Lei 360 possui um header próprio dentro de #lei360View. O header global
+   não deve ocupar espaço simultaneamente, evitando sobreposição dos KPIs. */
+body:has(#lei360View.active) .v3-main > .app > header.top{
+  display:none!important;
+}
+body:has(#lei360View.active) .v3-main > .app{
+  padding-top:0!important;
+}
+body:has(#lei360View.active) .v3-main .l360-view{
+  padding-top:0!important;
+}
+body:has(#lei360View.active) .v3-main .l360-view > header.top{
+  display:flex!important;
+  position:relative!important;
+  box-sizing:border-box!important;
+  min-height:84px!important;
+  width:100%!important;
+  margin:0 0 14px!important;
+  padding:14px 18px!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:18px!important;
+  background:#fff!important;
+  border:1px solid var(--v3-line)!important;
+  border-radius:10px!important;
+  box-shadow:0 2px 9px rgba(15,39,64,.035)!important;
+  z-index:5!important;
+}
+body:has(#lei360View.active) .v3-main .l360-view > header.top .brand{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:20px!important;
+  width:100%!important;
+  min-width:0!important;
+}
+body:has(#lei360View.active) .v3-main .l360-view > header.top .brand-text{
+  min-width:0!important;
+}
+body:has(#lei360View.active) .v3-main .l360-view > header.top .eyebrow{
+  display:block!important;
+  margin:0 0 4px!important;
+  color:#b4873a!important;
+  font-size:8.5px!important;
+  line-height:1.2!important;
+  font-weight:800!important;
+  letter-spacing:.12em!important;
+  text-transform:uppercase!important;
+}
+body:has(#lei360View.active) .v3-main .l360-view > header.top h1{
+  margin:0!important;
+  color:#102f50!important;
+  font-size:24px!important;
+  line-height:1.12!important;
+  font-weight:800!important;
+  letter-spacing:-.02em!important;
+}
+body:has(#lei360View.active) .v3-main .l360-view > header.top .sub{
+  margin-top:5px!important;
+  color:#65748a!important;
+  font-size:10.5px!important;
+  line-height:1.35!important;
+  max-width:650px!important;
+}
+body:has(#lei360View.active) .v3-main .l360-view > header.top .l360-head-actions{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:9px!important;
+  flex:0 0 auto!important;
+  margin-left:auto!important;
+  flex-wrap:nowrap!important;
+}
+body:has(#lei360View.active) .v3-main .l360-view > header.top .l360-import-status{
+  max-width:250px!important;
+  font-size:9px!important;
+  line-height:1.25!important;
+}
+body:has(#lei360View.active) .v3-main .l360-view > header.top .l360-import-btn{
+  height:34px!important;
+  padding:0 12px!important;
+  border-radius:6px!important;
+  font-size:10px!important;
+}
+body:has(#lei360View.active) .v3-main .l360-view > header.top .l360-updated{
+  font-size:8.5px!important;
+  color:#8a97a8!important;
+  white-space:nowrap!important;
+}
+body:has(#lei360View.active) .v3-main .l360-view > header.top .page-header-logo{
+  display:none!important;
+}
+
+/* KPIs começam somente depois do cabeçalho, sem invadir sua área. */
+body:has(#lei360View.active) .v3-main .l360-view .l360-kpis{
+  position:relative!important;
+  z-index:1!important;
+  margin-top:0!important;
+  margin-bottom:14px!important;
+  gap:10px!important;
+}
+body:has(#lei360View.active) .v3-main .l360-view .l360-kpi{
+  min-width:0!important;
+  overflow:hidden!important;
+}
+body:has(#lei360View.active) .v3-main .l360-view .l360-kpi-value{
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+
+/* Filtros descem naturalmente após os KPIs. */
+body:has(#lei360View.active) .v3-main .l360-view > .v3-filters{
+  margin-top:0!important;
+  position:relative!important;
+  z-index:1!important;
+}
+
+@media(max-width:1050px){
+  body:has(#lei360View.active) .v3-main .l360-view > header.top .l360-import-status{display:none!important;}
+  body:has(#lei360View.active) .v3-main .l360-view > header.top h1{font-size:21px!important;}
+}
+@media(max-width:760px){
+  body:has(#searchView:not(.hidden)) .v3-main header.top{min-height:auto!important;align-items:flex-start!important;flex-direction:column!important;gap:10px!important;}
+  body:has(#lei360View.active) .v3-main .l360-view > header.top{align-items:flex-start!important;}
+  body:has(#lei360View.active) .v3-main .l360-view > header.top .brand{flex-direction:column!important;align-items:flex-start!important;}
+  body:has(#lei360View.active) .v3-main .l360-view > header.top .l360-head-actions{width:100%!important;justify-content:flex-start!important;margin-left:0!important;}
+}
+</style>
+
+
+<style id="v34-fine-adjustments">
+/* V34 — ajuste fino solicitado: cards e título dos filtros.
+   Somente CSS. Nenhuma lógica, dado, evento, Supabase, GitHub ou regra de negócio foi alterada. */
+@media (min-width:851px){
+  /* Dá mais respiro ao cabeçalho para os indicadores não encobrirem o título. */
+  body:has(#searchView:not(.hidden)) .v3-main header.top{
+    height:142px!important;
+    min-height:142px!important;
+  }
+
+  /* Desce discretamente os três cards indicadores. */
+  body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip{
+    top:66px!important;
+  }
+
+  /* O título "Filtros de pesquisa" fica um pouco mais afastado da linha superior. */
+  body:has(#searchView:not(.hidden)) .v3-main .v3-filters .v3-section-head{
+    padding-top:7px!important;
+    margin-bottom:12px!important;
+  }
+}
+</style>
+
+<style id="v39-final-filters-layout">
+/* V39 FINAL — apenas apresentação do bloco de filtros.
+   Nenhuma lógica, evento, Supabase, GitHub ou regra de negócio é alterada. */
+@media (min-width:851px){
+  body:has(#searchView:not(.hidden)) .v3-main .v3-filters{
+    height:auto!important;
+    min-height:0!important;
+    padding:12px 16px 12px!important;
+    overflow:visible!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main .v3-filter-layout{
+    display:grid!important;
+    grid-template-columns:2.75fr 1.05fr 1.05fr 1.75fr!important;
+    gap:14px!important;
+    align-items:start!important;
+    transform:none!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main .v3-filter-group{
+    display:block!important;
+    min-width:0!important;
+    padding-left:8px!important;
+    border-left:2px solid #e3edf6!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main .v3-filter-group:first-child{
+    border-left-color:#2a8ac4!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main .v3-group-title{
+    display:block!important;
+    margin:0 0 8px!important;
+    font-size:9px!important;
+    line-height:1.2!important;
+    font-weight:800!important;
+    color:#143a5e!important;
+    text-transform:uppercase!important;
+    letter-spacing:.04em!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main .v3-group-fields{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:8px!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main .v3-group-fields.four{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main .v3-group-fields.two{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main .v3-filter{
+    min-width:0!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main .v3-filter label{
+    display:block!important;
+    margin:0 0 4px!important;
+    font-size:9px!important;
+    line-height:1.15!important;
+    font-weight:700!important;
+    color:#274763!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main .v3-filter input,
+  body:has(#searchView:not(.hidden)) .v3-main .v3-filter select{
+    width:100%!important;
+    height:34px!important;
+    box-sizing:border-box!important;
+    border:1px solid #d3deea!important;
+    border-radius:6px!important;
+    padding:0 9px!important;
+    font-size:10.5px!important;
+    color:#233f5d!important;
+    background:#fff!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main .v3-more{
+    margin-top:8px!important;
+    min-height:28px!important;
+    height:28px!important;
+    display:flex!important;
+    justify-content:center!important;
+    align-items:center!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main .v3-more-fields.open{
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:10px 12px!important;
+    margin-top:10px!important;
+    align-items:start!important;
+  }
+}
+@media (max-width:850px){
+  body:has(#searchView:not(.hidden)) .v3-main .v3-filter-layout{
+    grid-template-columns:1fr 1fr!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main .v3-filter-group{
+    display:block!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main .v3-group-title{
+    display:block!important;
+  }
+}
+</style>
+
+<style id="header-alignment-final">
+/* Ajuste visual solicitado: alinhar o conteúdo institucional do cabeçalho ao início da área de pesquisa.
+   Nenhuma regra de programação/JavaScript foi alterada. */
+@media (min-width: 761px){
+  .v3-main header.top .brand{
+    transform:translateX(-11px)!important;
+  }
+}
+</style>
+
+<style id="v40-header-icons-aligned">
+/* V40 — somente acabamento visual dos controles do cabeçalho.
+   Nenhuma regra funcional/JavaScript foi alterada. */
+body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-actions{
+  position:absolute!important;
+  top:10px!important;
+  right:18px!important;
+  height:38px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:16px!important;
+  padding:0!important;
+  margin:0!important;
+  white-space:nowrap!important;
+  overflow:visible!important;
+  z-index:40!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-action{
+  width:auto!important;
+  min-width:34px!important;
+  height:34px!important;
+  padding:0 2px!important;
+  margin:0!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:5px!important;
+  border-radius:6px!important;
+  flex:0 0 auto!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-action:first-child{
+  min-width:48px!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-divider{
+  display:none!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-user{
+  width:92px!important;
+  min-width:92px!important;
+  max-width:92px!important;
+  height:38px!important;
+  padding:0!important;
+  margin:0!important;
+  display:grid!important;
+  grid-template-columns:34px minmax(0,1fr)!important;
+  grid-template-rows:20px 14px!important;
+  column-gap:8px!important;
+  row-gap:0!important;
+  align-items:center!important;
+  border-left:1px solid #e0e6ed!important;
+  box-sizing:border-box!important;
+  overflow:visible!important;
+  flex:0 0 92px!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-user>svg{
+  grid-column:1!important;
+  grid-row:1 / span 2!important;
+  width:34px!important;
+  height:34px!important;
+  box-sizing:border-box!important;
+  margin:0!important;
+  padding:3px!important;
+  border:1px solid #a7b7c9!important;
+  border-radius:50%!important;
+  color:#0b3153!important;
+  flex:none!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-user>span:not(.v3-header-role){
+  grid-column:2!important;
+  grid-row:1!important;
+  display:block!important;
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  font:650 11px/20px "Segoe UI",Arial,sans-serif!important;
+  color:#102d4e!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-role{
+  grid-column:2!important;
+  grid-row:2!important;
+  display:block!important;
+  width:100%!important;
+  max-width:none!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  background:transparent!important;
+  color:#718097!important;
+  border-radius:0!important;
+  font:500 8.5px/14px "Segoe UI",Arial,sans-serif!important;
+  letter-spacing:0!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-bell{
+  width:34px!important;
+  min-width:34px!important;
+  max-width:34px!important;
+  flex:0 0 34px!important;
+  position:relative!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-bell svg{
+  width:20px!important;
+  height:20px!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-bell .dot{
+  width:15px!important;
+  height:15px!important;
+  right:-2px!important;
+  top:-1px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  background:#0d7d5a!important;
+  color:#fff!important;
+  border-radius:50%!important;
+  box-shadow:none!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-bell .dot:after{
+  content:"3"!important;
+  font:700 8px "Segoe UI",Arial,sans-serif!important;
+  color:#fff!important;
+}
+@media(max-width:760px){
+  body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-actions{
+    right:8px!important;
+    top:8px!important;
+    gap:8px!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-user{
+    width:82px!important;
+    min-width:82px!important;
+    max-width:82px!important;
+    flex-basis:82px!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-action:first-child span{
+    display:none!important;
+  }
+}
+</style>
+
+
+<style id="lei360-visual-grid-fix">
+/* LEI 360 — ajuste exclusivamente visual.
+   Não altera HTML estrutural, JavaScript, eventos, dados, Supabase, GitHub,
+   filtros, importação, cálculos ou regras de negócio. */
+@media (min-width:851px){
+  /* 1) Cabeçalho: título e ações ficam em duas áreas independentes,
+        evitando que botão/status invadam o bloco institucional. */
+  body:has(#lei360View.active) .v3-main .l360-view > header.top{
+    min-height:96px!important;
+    height:96px!important;
+    margin:0 0 12px!important;
+    padding:12px 16px!important;
+    overflow:hidden!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > header.top .brand{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    align-items:center!important;
+    gap:22px!important;
+    width:100%!important;
+    height:100%!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > header.top .brand-text{
+    min-width:0!important;
+    align-self:center!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > header.top .l360-head-actions{
+    display:grid!important;
+    grid-template-columns:auto auto auto!important;
+    align-items:center!important;
+    justify-content:end!important;
+    gap:10px!important;
+    margin:0!important;
+    flex:none!important;
+    min-width:0!important;
+    white-space:nowrap!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > header.top .l360-import-status{
+    max-width:235px!important;
+    text-align:right!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > header.top .l360-import-btn{
+    height:34px!important;
+    min-width:112px!important;
+    padding:0 13px!important;
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    box-sizing:border-box!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > header.top .l360-updated{
+    min-width:142px!important;
+    text-align:left!important;
+  }
+
+  /* 2) Indicadores: cinco cards com a mesma largura, altura e alinhamento.
+        O conteúdo interno não pode empurrar o card nem atravessar a borda. */
+  body:has(#lei360View.active) .v3-main .l360-view .l360-kpis{
+    display:grid!important;
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    gap:10px!important;
+    width:100%!important;
+    margin:0 0 12px!important;
+    align-items:stretch!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view .l360-kpi{
+    box-sizing:border-box!important;
+    min-width:0!important;
+    height:92px!important;
+    padding:12px 13px!important;
+    gap:10px!important;
+    align-items:flex-start!important;
+    overflow:hidden!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view .l360-kpi > div:last-child{
+    min-width:0!important;
+    flex:1 1 auto!important;
+    overflow:hidden!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view .l360-kpi-icon{
+    width:34px!important;
+    height:34px!important;
+    flex:0 0 34px!important;
+    font-size:14px!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view .l360-kpi-label{
+    margin:0 0 4px!important;
+    line-height:1.15!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view .l360-kpi-value{
+    font-size:16px!important;
+    line-height:1.15!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    max-width:100%!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view .l360-kpi-note{
+    margin-top:3px!important;
+    line-height:1.15!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+
+  /* 3) Quadro de filtros: os grupos respeitam a largura do quadro branco.
+        Identificação ocupa duas frações; os demais grupos ficam nivelados. */
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters{
+    box-sizing:border-box!important;
+    width:100%!important;
+    padding:13px 16px 14px!important;
+    margin:0 0 12px!important;
+    overflow:hidden!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-section-head{
+    min-height:27px!important;
+    box-sizing:border-box!important;
+    margin:0 0 11px!important;
+    padding:3px 0 9px!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter-layout{
+    display:grid!important;
+    grid-template-columns:minmax(0,2.25fr) minmax(0,1fr) minmax(0,1.45fr) minmax(0,2fr)!important;
+    gap:12px!important;
+    align-items:start!important;
+    width:100%!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter-group{
+    box-sizing:border-box!important;
+    min-width:0!important;
+    padding-left:9px!important;
+    border-left:2px solid #e3edf6!important;
+    overflow:hidden!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter-group:first-child{
+    border-left-color:#2a8ac4!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-group-title{
+    margin:0 0 7px!important;
+    line-height:1.15!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-group-fields{
+    display:grid!important;
+    gap:7px!important;
+    min-width:0!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-group-fields.five{
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-group-fields.two{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-group-fields.three{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter{
+    min-width:0!important;
+    overflow:hidden!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter label{
+    display:block!important;
+    margin:0 0 4px!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter input,
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter select{
+    width:100%!important;
+    min-width:0!important;
+    box-sizing:border-box!important;
+  }
+
+  /* 4) Evita que a barra de ações fique solta fora do quadro branco. */
+  body:has(#lei360View.active) .v3-main .l360-view .l360-toolbar{
+    min-height:34px!important;
+    margin:0 0 10px!important;
+    display:flex!important;
+    justify-content:flex-end!important;
+    align-items:center!important;
+  }
+}
+
+@media (max-width:1100px) and (min-width:851px){
+  body:has(#lei360View.active) .v3-main .l360-view > header.top .l360-head-actions{
+    gap:7px!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > header.top .l360-import-status{display:none!important;}
+  body:has(#lei360View.active) .v3-main .l360-view .l360-kpi{padding:11px!important;}
+  body:has(#lei360View.active) .v3-main .l360-view .l360-kpi-value{font-size:14.5px!important;}
+}
+
+@media (max-width:850px){
+  body:has(#lei360View.active) .v3-main .l360-view > header.top{
+    height:auto!important;
+    min-height:0!important;
+    overflow:visible!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > header.top .brand{
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+    gap:10px!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > header.top .l360-head-actions{
+    display:flex!important;
+    justify-content:flex-start!important;
+    flex-wrap:wrap!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view .l360-kpis{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter-layout{
+    grid-template-columns:1fr 1fr!important;
+  }
+}
+
+@media (max-width:520px){
+  body:has(#lei360View.active) .v3-main .l360-view .l360-kpis{
+    grid-template-columns:1fr!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter-layout{
+    grid-template-columns:1fr!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-group-fields.five,
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-group-fields.two,
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-group-fields.three{
+    grid-template-columns:1fr!important;
+  }
+}
+</style>
 </head>
 <body>
 <div class="flag-stripe"></div>
@@ -7638,6 +8323,739 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
 }
 
 </style>
+
+<style id="v22-header-layout-fix">
+/* V22 — somente correção visual do cabeçalho da Pesquisa. Não altera lógica, DOM funcional ou eventos. */
+@media(min-width:851px){
+  .v3-main .app{padding-left:30px!important;padding-right:30px!important;}
+  .v3-main header.top{
+    position:relative!important;
+    display:flex!important;
+    flex-direction:row!important;
+    align-items:center!important;
+    justify-content:flex-start!important;
+    gap:0!important;
+    width:calc(100% + 60px)!important;
+    box-sizing:border-box!important;
+    height:86px!important;
+    min-height:86px!important;
+    margin-left:-30px!important;
+    margin-right:-30px!important;
+    padding:0 30px!important;
+    overflow:visible!important;
+  }
+  .v3-main header.top:before{
+    position:static!important;
+    flex:0 0 28px!important;
+    width:28px!important;
+    height:28px!important;
+    margin:0 18px 0 0!important;
+  }
+  .v3-main header.top .brand{
+    flex:0 0 auto!important;
+    min-width:0!important;
+    width:auto!important;
+    max-width:520px!important;
+    margin:0!important;
+    padding:0!important;
+    align-self:center!important;
+    display:flex!important;
+  }
+  .v3-main header.top .brand-text{
+    min-width:0!important;
+    width:auto!important;
+    margin:0!important;
+    padding:0!important;
+  }
+  .v3-main header.top .brand-text .eyebrow{
+    display:block!important;
+    margin:0 0 4px!important;
+    color:#b2771b!important;
+    font:600 9px/1.1 "Segoe UI",Arial,sans-serif!important;
+    letter-spacing:.13em!important;
+    text-transform:uppercase!important;
+  }
+  .v3-main header.top .brand-text h1{
+    display:block!important;
+    margin:0!important;
+    padding:0!important;
+    color:#102f53!important;
+    font-family:"Source Serif Pro",Georgia,"Times New Roman",serif!important;
+    font-size:28px!important;
+    line-height:1.08!important;
+    font-weight:700!important;
+    letter-spacing:-.018em!important;
+    white-space:nowrap!important;
+  }
+  .v3-main header.top .brand-text .sub{
+    display:block!important;
+    margin:5px 0 0!important;
+    padding:0!important;
+    color:#65758a!important;
+    font:400 11px/1.35 "Segoe UI",Arial,sans-serif!important;
+    white-space:nowrap!important;
+  }
+  .v3-main header.top .v3-header-actions{
+    position:absolute!important;
+    top:50%!important;
+    right:28px!important;
+    transform:translateY(-50%)!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:flex-end!important;
+    width:auto!important;
+    height:42px!important;
+    margin:0!important;
+    padding:0!important;
+    gap:12px!important;
+    background:transparent!important;
+    z-index:50!important;
+  }
+  .v3-main header.top .v3-header-action span{display:inline!important;}
+  .v3-main header.top .v3-header-action{white-space:nowrap!important;}
+  .v3-main header.top .v3-header-user{white-space:nowrap!important;}
+}
+
+/* A busca continua no local funcional abaixo do cabeçalho; não deve ocupar o header. */
+@media(min-width:851px){
+  .v3-main .searchbar{z-index:10!important;}
+}
+</style>
+
+<style id="v30-pesquisa-indicators-and-spacing">
+/* V30 — Pesquisa: restaurar indicadores e compactar áreas superiores.
+   Somente apresentação; nenhuma lógica/JS/regra de negócio é alterada. */
+body:has(#searchView:not(.hidden)) .v3-main header.top{
+  position:relative!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 575px!important;
+  align-items:start!important;
+  column-gap:18px!important;
+  min-height:116px!important;
+  height:116px!important;
+  padding:18px 18px 10px 18px!important;
+  box-sizing:border-box!important;
+  overflow:visible!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .brand{
+  min-width:0!important;
+  align-self:start!important;
+  padding-top:1px!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .brand-text h1{
+  margin:0!important;
+  font-size:27px!important;
+  line-height:1.08!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .brand-text .sub{
+  margin-top:5px!important;
+  font-size:12px!important;
+  line-height:1.3!important;
+}
+/* Indicadores: voltam para o topo, sem sobreposição com Ajuda/Usuário/Notificação. */
+body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:10px!important;
+  width:575px!important;
+  min-width:0!important;
+  margin:26px 0 0 auto!important;
+  padding:0!important;
+  align-self:start!important;
+  box-sizing:border-box!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip .stat-chip{
+  display:flex!important;
+  min-width:0!important;
+  width:auto!important;
+  min-height:64px!important;
+  height:64px!important;
+  padding:9px 12px!important;
+  box-sizing:border-box!important;
+  background:#fff!important;
+  border:1px solid #d9e2ec!important;
+  border-radius:8px!important;
+  box-shadow:0 2px 8px rgba(15,39,64,.045)!important;
+  overflow:hidden!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip .stat-chip .n{
+  font-size:20px!important;
+  line-height:1.05!important;
+  white-space:nowrap!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip .stat-chip .l{
+  font-size:8.5px!important;
+  line-height:1.2!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip .stat-chip .stat-caption,
+body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip .stat-chip .updated-at{
+  font-size:9px!important;
+  line-height:1.2!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip .stat-chip:nth-child(3){display:flex!important;}
+/* Ações do cabeçalho: ficam acima dos cards, alinhadas à direita. */
+body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-actions{
+  position:absolute!important;
+  top:5px!important;
+  right:12px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:10px!important;
+  height:28px!important;
+  margin:0!important;
+  padding:0!important;
+  background:transparent!important;
+  z-index:40!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-action,
+body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-user{
+  margin:0!important;
+}
+/* Barra Pesquisar: menos altura vazia, mantendo todos os controles. */
+body:has(#searchView:not(.hidden)) .v3-main .searchbar{
+  min-height:0!important;
+  height:86px!important;
+  padding:10px 12px!important;
+  margin:0 0 10px!important;
+  box-sizing:border-box!important;
+  overflow:visible!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main .searchbar-label{
+  margin:0 0 7px!important;
+  line-height:1!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main .search-row.v3-quick{
+  height:40px!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main .searchbar-help{
+  display:none!important;
+}
+/* Filtros: compacto, mas alto o suficiente para conter Processo/Região/Ano. */
+body:has(#searchView:not(.hidden)) .v3-main .v3-filters{
+  height:286px!important;
+  min-height:286px!important;
+  padding:12px 18px 10px!important;
+  margin-bottom:10px!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main .v3-section-head{
+  margin-bottom:9px!important;
+  padding-bottom:8px!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main .v3-filter-layout{
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:11px 24px!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main .v3-filter .field-input,
+body:has(#searchView:not(.hidden)) .v3-main .v3-filter label{
+  margin-bottom:3px!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main .v3-more{
+  margin-top:9px!important;
+  min-height:26px!important;
+  height:26px!important;
+}
+@media(max-width:1100px){
+  body:has(#searchView:not(.hidden)) .v3-main header.top{grid-template-columns:1fr!important;height:auto!important;min-height:150px!important;}
+  body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip{width:100%!important;margin-top:10px!important;}
+}
+@media(max-width:760px){
+  body:has(#searchView:not(.hidden)) .v3-main header.top{padding:12px!important;min-height:0!important;}
+  body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip{grid-template-columns:1fr!important;width:100%!important;margin-top:10px!important;}
+  body:has(#searchView:not(.hidden)) .v3-main .v3-filters{height:auto!important;min-height:0!important;overflow:visible!important;}
+  body:has(#searchView:not(.hidden)) .v3-main .v3-filter-layout{grid-template-columns:1fr 1fr!important;}
+}
+</style>
+
+
+<style id="v31-pesquisa-ajuste-final">
+/* =========================================================
+   V31 — PESQUISA: CARDS + COMPACTAÇÃO DOS PAINÉIS
+   Apenas apresentação visual. Nenhuma lógica/JS é alterada.
+   ========================================================= */
+
+/* Cabeçalho da Pesquisa: reservar uma faixa real para os indicadores. */
+body:has(#searchView:not(.hidden)) .v3-main header.top{
+  position:relative!important;
+  min-height:118px!important;
+  height:118px!important;
+  box-sizing:border-box!important;
+  padding:18px 22px 12px!important;
+  overflow:visible!important;
+}
+
+/* Marca/título permanece à esquerda e não disputa espaço com os cards. */
+body:has(#searchView:not(.hidden)) .v3-main header.top .brand{
+  width:54%!important;
+  max-width:680px!important;
+  padding:0!important;
+  margin:0!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .brand-text h1{
+  font-size:29px!important;
+  line-height:1.05!important;
+  white-space:nowrap!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .brand-text .sub{
+  margin-top:4px!important;
+}
+
+/* Ajuda / usuário / notificações ficam em uma única linha no topo direito. */
+body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-actions{
+  position:absolute!important;
+  top:9px!important;
+  right:18px!important;
+  height:34px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:11px!important;
+  z-index:40!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-action{
+  width:auto!important;
+  min-width:30px!important;
+  height:32px!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-user{
+  min-width:66px!important;
+  height:34px!important;
+  margin:0!important;
+  padding:0 4px 0 7px!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-user>svg{
+  width:31px!important;
+  height:31px!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-role{
+  margin-top:2px!important;
+}
+
+/* Indicadores: restaurados no topo da Pesquisa, abaixo das ações. */
+body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip{
+  position:absolute!important;
+  top:45px!important;
+  right:18px!important;
+  width:min(570px,46%)!important;
+  min-width:500px!important;
+  height:62px!important;
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:9px!important;
+  margin:0!important;
+  padding:0!important;
+  z-index:30!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip .stat-chip{
+  min-width:0!important;
+  height:62px!important;
+  box-sizing:border-box!important;
+  padding:8px 12px!important;
+  border:1px solid #d7e0e9!important;
+  border-radius:8px!important;
+  background:#fff!important;
+  box-shadow:0 2px 8px rgba(15,42,68,.035)!important;
+  overflow:hidden!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip .stat-ic{
+  width:20px!important;
+  flex:0 0 20px!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip .stat-text{
+  min-width:0!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip .n{
+  font-family:"Segoe UI",Arial,sans-serif!important;
+  font-size:20px!important;
+  line-height:1.05!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip .l{
+  font-size:8.5px!important;
+  line-height:1.1!important;
+  white-space:nowrap!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip .updated-at{
+  font-size:9px!important;
+  white-space:nowrap!important;
+}
+
+/* Barra Pesquisa: mantém a versão já aprovada e compacta. */
+body:has(#searchView:not(.hidden)) .v3-main .searchbar{
+  height:64px!important;
+  margin:0 0 10px!important;
+  padding:11px 12px!important;
+}
+
+/* Filtros: 3 linhas, sem área vazia excessiva abaixo. */
+body:has(#searchView:not(.hidden)) .v3-main .v3-filters{
+  height:286px!important;
+  min-height:286px!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+  padding-bottom:10px!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main .v3-filter-layout{
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  grid-auto-rows:minmax(42px,auto)!important;
+  gap:13px 25px!important;
+  align-items:start!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main .v3-more{
+  margin-top:9px!important;
+  min-height:28px!important;
+  height:28px!important;
+}
+
+/* Em resoluções menores, os cards quebram de forma controlada. */
+@media (min-width:851px) and (max-width:1150px){
+  body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip{
+    min-width:430px!important;
+    width:47%!important;
+    gap:6px!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip .stat-chip{
+    padding:7px 8px!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip .n{
+    font-size:17px!important;
+  }
+}
+@media (max-width:850px){
+  body:has(#searchView:not(.hidden)) .v3-main header.top{
+    height:auto!important;
+    min-height:185px!important;
+    padding:14px!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main header.top .brand{
+    width:100%!important;
+    max-width:none!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-actions{
+    top:10px!important;
+    right:10px!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip{
+    position:absolute!important;
+    left:14px!important;
+    right:14px!important;
+    top:108px!important;
+    width:auto!important;
+    min-width:0!important;
+    height:auto!important;
+    grid-template-columns:1fr 1fr!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip .stat-chip:last-child{
+    grid-column:1/-1!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main .v3-filters{
+    height:auto!important;
+    min-height:0!important;
+    overflow:visible!important;
+  }
+}
+</style>
+
+
+<style id="v33-pesquisa-ajuste-final">
+/* V33 — ajuste fino da aba Pesquisa: somente posicionamento visual. */
+body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip{
+  top:56px!important;
+}
+/* Mantém os cards compactos e alinhados após o deslocamento. */
+body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip .stat-chip{
+  height:64px!important;
+  min-height:64px!important;
+}
+/* Desce levemente o conteúdo interno do quadro de filtros, preservando suas dimensões. */
+body:has(#searchView:not(.hidden)) .v3-main .v3-filters{
+  padding-top:8px!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main .v3-filter-layout{
+  transform:translateY(5px)!important;
+}
+</style>
+
+<style id="v35-fine-adjustments">
+/* V35 — ajuste fino solicitado: cards abaixo do título e cabeçalho dos filtros mais respirado.
+   Somente CSS; nenhuma lógica, JavaScript ou regra de negócio é alterada. */
+body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip{
+  top:68px!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main .v3-filters{
+  padding:8px 20px 10px!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main .v3-filters .v3-section-head{
+  padding-top:2px!important;
+  height:28px!important;
+  margin-bottom:10px!important;
+  box-sizing:border-box!important;
+}
+</style>
+
+
+<style id="v36-lei360-layout-fix">
+/* V36 — correção visual exclusiva da aba Lei 360.
+   Somente CSS. Não altera JavaScript, dados, eventos, Supabase, GitHub,
+   autenticação, filtros ou regras de negócio. */
+body:has(#lei360View.active) .v3-main .l360-view > header.top{
+  position:relative!important;
+  min-height:92px!important;
+  height:92px!important;
+  margin:0 0 12px!important;
+  padding:14px 18px!important;
+  overflow:visible!important;
+  box-sizing:border-box!important;
+}
+body:has(#lei360View.active) .v3-main .l360-view > header.top .brand{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:0!important;
+  position:relative!important;
+}
+body:has(#lei360View.active) .v3-main .l360-view > header.top .brand-text{
+  width:54%!important;
+  max-width:54%!important;
+  min-width:0!important;
+}
+body:has(#lei360View.active) .v3-main .l360-view > header.top .eyebrow{
+  margin-bottom:3px!important;
+  font-size:8.5px!important;
+}
+body:has(#lei360View.active) .v3-main .l360-view > header.top h1{
+  font-size:23px!important;
+  line-height:1.08!important;
+  margin:0!important;
+  white-space:nowrap!important;
+}
+body:has(#lei360View.active) .v3-main .l360-view > header.top .sub{
+  margin-top:4px!important;
+  font-size:9.5px!important;
+  line-height:1.25!important;
+  max-width:100%!important;
+}
+body:has(#lei360View.active) .v3-main .l360-view > header.top .l360-head-actions{
+  position:absolute!important;
+  top:50%!important;
+  right:0!important;
+  transform:translateY(-50%)!important;
+  width:43%!important;
+  max-width:43%!important;
+  margin:0!important;
+  padding:0!important;
+  display:grid!important;
+  grid-template-columns:minmax(145px,1fr) auto auto!important;
+  align-items:center!important;
+  justify-content:end!important;
+  gap:8px!important;
+  flex-wrap:nowrap!important;
+}
+body:has(#lei360View.active) .v3-main .l360-view > header.top .l360-import-status{
+  max-width:none!important;
+  width:auto!important;
+  margin:0!important;
+  text-align:right!important;
+  font-size:8.5px!important;
+  line-height:1.2!important;
+  white-space:normal!important;
+}
+body:has(#lei360View.active) .v3-main .l360-view > header.top .l360-import-btn{
+  height:32px!important;
+  min-width:98px!important;
+  padding:0 10px!important;
+  font-size:9.5px!important;
+  margin:0!important;
+}
+body:has(#lei360View.active) .v3-main .l360-view > header.top .l360-updated{
+  font-size:8px!important;
+  line-height:1.2!important;
+  margin:0!important;
+  white-space:nowrap!important;
+}
+body:has(#lei360View.active) .v3-main .l360-view .l360-kpis{
+  position:relative!important;
+  z-index:1!important;
+  margin-top:0!important;
+  margin-bottom:12px!important;
+  gap:10px!important;
+  align-items:stretch!important;
+}
+body:has(#lei360View.active) .v3-main .l360-view .l360-kpi{
+  min-height:82px!important;
+  height:82px!important;
+  box-sizing:border-box!important;
+  padding:11px 12px!important;
+  gap:9px!important;
+  align-items:flex-start!important;
+  overflow:hidden!important;
+}
+body:has(#lei360View.active) .v3-main .l360-view .l360-kpi-icon{
+  width:34px!important;
+  height:34px!important;
+  font-size:14px!important;
+}
+body:has(#lei360View.active) .v3-main .l360-view .l360-kpi-label{
+  font-size:8.5px!important;
+  line-height:1.15!important;
+  margin-bottom:4px!important;
+}
+body:has(#lei360View.active) .v3-main .l360-view .l360-kpi-value{
+  font-size:16px!important;
+  line-height:1.1!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  max-width:100%!important;
+}
+body:has(#lei360View.active) .v3-main .l360-view .l360-kpi-note{
+  font-size:8.5px!important;
+  line-height:1.15!important;
+  margin-top:3px!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+body:has(#lei360View.active) .v3-main .l360-view > .v3-filters{
+  margin-top:0!important;
+  position:relative!important;
+  z-index:1!important;
+}
+@media(max-width:1050px){
+  body:has(#lei360View.active) .v3-main .l360-view > header.top{height:auto!important;min-height:92px!important;}
+  body:has(#lei360View.active) .v3-main .l360-view > header.top .brand-text{width:50%!important;max-width:50%!important;}
+  body:has(#lei360View.active) .v3-main .l360-view > header.top .l360-head-actions{width:47%!important;max-width:47%!important;grid-template-columns:1fr auto!important;}
+  body:has(#lei360View.active) .v3-main .l360-view > header.top .l360-updated{display:none!important;}
+}
+@media(max-width:760px){
+  body:has(#lei360View.active) .v3-main .l360-view > header.top{height:auto!important;min-height:0!important;padding:13px 14px!important;}
+  body:has(#lei360View.active) .v3-main .l360-view > header.top .brand{height:auto!important;}
+  body:has(#lei360View.active) .v3-main .l360-view > header.top .brand-text{width:100%!important;max-width:100%!important;}
+  body:has(#lei360View.active) .v3-main .l360-view > header.top h1{white-space:normal!important;font-size:20px!important;}
+  body:has(#lei360View.active) .v3-main .l360-view > header.top .l360-head-actions{position:static!important;transform:none!important;width:100%!important;max-width:100%!important;margin-top:10px!important;display:flex!important;justify-content:flex-start!important;}
+  body:has(#lei360View.active) .v3-main .l360-view .l360-kpi{height:auto!important;min-height:78px!important;}
+}
+</style>
+
+<style id="v37-lei360-header-fix">
+/* V37 — organização do cabeçalho da Lei 360 */
+.v3-main .l360-view header.top{
+  position:relative !important;
+  display:block !important;
+  width:100% !important;
+  min-height:92px !important;
+  padding:0 0 18px !important;
+  margin-bottom:12px !important;
+}
+.v3-main .l360-view header.top .brand{
+  display:block !important;
+  width:100% !important;
+  min-width:0 !important;
+  padding-right:390px !important;
+  box-sizing:border-box !important;
+}
+.v3-main .l360-view header.top .brand-text{
+  display:block !important;
+  max-width:720px !important;
+}
+.v3-main .l360-view header.top .brand-text h1{
+  margin:0 0 6px !important;
+}
+.v3-main .l360-view header.top .brand-text .sub{
+  max-width:700px !important;
+}
+.v3-main .l360-view .l360-head-actions{
+  position:absolute !important;
+  top:27px !important;
+  right:18px !important;
+  margin:0 !important;
+  padding:0 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-end !important;
+  gap:10px !important;
+  flex-wrap:nowrap !important;
+  width:auto !important;
+  z-index:5 !important;
+}
+.v3-main .l360-view .l360-import-status{
+  max-width:205px !important;
+  text-align:right !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+.v3-main .l360-view .l360-import-btn{
+  flex:0 0 auto !important;
+  margin-left:8px !important;
+}
+.v3-main .l360-view .l360-updated{
+  flex:0 0 auto !important;
+}
+@media (max-width:900px){
+  .v3-main .l360-view header.top .brand{padding-right:0 !important;}
+  .v3-main .l360-view header.top{min-height:145px !important;}
+  .v3-main .l360-view .l360-head-actions{position:relative !important;top:auto !important;right:auto !important;margin-top:12px !important;justify-content:flex-start !important;flex-wrap:wrap !important;}
+  .v3-main .l360-view .l360-import-status{text-align:left !important;}
+}
+</style>
+
+<style id="lei360-header-reference-final">
+/* Lei 360 — cabeçalho seguindo o mesmo padrão visual das demais abas.
+   Camada exclusivamente visual: não altera HTML funcional, JavaScript, eventos,
+   filtros, importação, dados, autenticação ou regras de negócio. */
+body:has(#lei360View.active) .v3-main .l360-view > header.top{
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+}
+</style>
+
+
+<style id="lei360-sidebar-spacing-final">
+/* LEI 360 — alinhamento horizontal com as demais abas.
+   Somente apresentação: não altera HTML funcional, JavaScript, filtros,
+   importação, dados, Supabase, GitHub ou regras de negócio. */
+@media (min-width:761px){
+  body:has(#lei360View.active) .v3-main .app{
+    padding-left:26px!important;
+    padding-right:26px!important;
+  }
+}
+</style>
+
+<style id="lei360-sidebar-spacing-final">
+/* LEI 360 — alinhamento horizontal com as demais abas.
+   Somente apresentação: não altera HTML funcional, JavaScript, filtros,
+   importação, dados, Supabase, GitHub ou regras de negócio. */
+@media (min-width:761px){
+  body:has(#lei360View.active) .v3-main .app{
+    padding-left:26px!important;
+    padding-right:26px!important;
+  }
+}
+</style>
+
+<style id="lei360-title-size-only">
+/* Ajuste exclusivamente visual: título da aba Lei 360 alinhado ao porte
+   dos títulos das demais abas. Nenhuma lógica ou regra funcional alterada. */
+body:has(#lei360View.active) .v3-main .l360-view > header.top h1{
+  font-size:30px!important;
+  line-height:1.12!important;
+  font-weight:800!important;
+  letter-spacing:-.02em!important;
+}
+@media(max-width:760px){
+  body:has(#lei360View.active) .v3-main .l360-view > header.top h1{
+    font-size:25px!important;
+  }
+}
+</style>
 </body>
 </html>
 <style>
@@ -7728,5 +9146,858 @@ Total: '+total.toLocaleString('pt-BR')+' registros.\
   }
   #gate .gate-left-hero h1{font-size:36px!important;}
   #gate .gate-left-hero p{font-size:14px!important;}
+}
+</style>
+
+
+<style id="v20-executive-visual-redesign">
+/* V20 — REDESIGN VISUAL EXECUTIVO
+   SOMENTE CAMADA VISUAL. Não altera JS, Supabase, dados, autenticação, regras ou integrações. */
+:root{
+  --v20-navy:#092f52;
+  --v20-navy2:#0d4260;
+  --v20-teal:#006d63;
+  --v20-green:#0a9b68;
+  --v20-lime:#58b92a;
+  --v20-bg:#f7f9fc;
+  --v20-line:#dfe6ee;
+  --v20-text:#102d4e;
+  --v20-muted:#64748b;
+}
+
+html,body{background:var(--v20-bg)!important;font-family:"Segoe UI",Arial,sans-serif!important;color:var(--v20-text)!important;}
+.flag-stripe{height:4px!important;background:linear-gradient(90deg,#0b3153 0%,#0b3153 68%,#08735f 86%,#58b92a 100%)!important;}
+.v3-shell{grid-template-columns:212px minmax(0,1fr)!important;min-height:calc(100vh - 4px)!important;}
+
+/* SIDEBAR — mesma linguagem visual aprovada no login */
+.v3-sidebar{position:sticky!important;top:0!important;height:calc(100vh - 4px)!important;width:212px!important;box-sizing:border-box!important;padding:18px 14px 14px!important;overflow:hidden!important;color:#fff!important;background:linear-gradient(180deg,#082f51 0%,#0a405b 34%,#006f61 66%,#0b9b67 84%,#58b92a 100%)!important;border-right:1px solid rgba(255,255,255,.08)!important;box-shadow:4px 0 18px rgba(6,42,67,.10)!important;}
+.v3-sidebar:before{content:"";position:absolute;left:-20px;right:-20px;bottom:-70px;height:250px;opacity:.18;pointer-events:none;background:repeating-radial-gradient(ellipse at 18% 100%,transparent 0 17px,rgba(255,255,255,.20) 18px 19px,transparent 20px 27px);transform:rotate(-7deg);}
+.v3-sidebar:after{content:"";position:absolute;left:0;right:0;bottom:0;height:180px;opacity:.18;pointer-events:none;background:linear-gradient(155deg,transparent 42%,rgba(255,210,50,.65) 42.5%,transparent 43.2%,transparent 53%,rgba(255,210,50,.35) 53.5%,transparent 54.2%);}
+.v3-brand{position:relative!important;z-index:2!important;height:72px!important;padding:2px 8px 12px!important;margin:0 0 17px!important;border-bottom:1px solid rgba(255,255,255,.13)!important;box-sizing:border-box!important;}
+.v3-brand:before{content:"";display:block;width:165px;height:66px;background-image:url("data:image/png;base64,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");background-repeat:no-repeat;background-position:left top;background-size:contain;}
+.v3-brand img{display:none!important;}
+.v3-brand small{display:none!important;}
+.v3-nav-title{position:relative!important;z-index:2!important;padding:0 10px 8px!important;font-size:9px!important;letter-spacing:.09em!important;text-transform:uppercase!important;color:rgba(255,255,255,.62)!important;font-weight:700!important;}
+.v3-nav{position:relative!important;z-index:2!important;gap:3px!important;}
+.v3-nav button{height:40px!important;box-sizing:border-box!important;padding:0 11px!important;border-radius:7px!important;color:rgba(255,255,255,.88)!important;font:500 12px/1 "Segoe UI",Arial,sans-serif!important;gap:11px!important;transition:background .16s ease,transform .16s ease!important;}
+.v3-nav button:hover{background:rgba(255,255,255,.10)!important;color:#fff!important;transform:translateX(1px);}
+.v3-nav button.active{background:rgba(21,188,154,.55)!important;border-left:0!important;box-shadow:inset 3px 0 #54d6b0!important;color:#fff!important;padding-left:11px!important;}
+.v3-nav svg{width:19px!important;height:19px!important;opacity:.98!important;}
+.v3-sidebar-spacer{position:relative!important;z-index:2!important;}
+.v3-userbox{position:relative!important;z-index:2!important;border-top:1px solid rgba(255,255,255,.13)!important;padding:12px 10px 5px!important;background:transparent!important;color:rgba(255,255,255,.72)!important;font-size:9.5px!important;}
+.v3-userbox b{font-size:11px!important;color:#fff!important;margin-top:3px!important;}
+.v3-userbox .role{font-size:8px!important;border-color:rgba(255,255,255,.22)!important;color:#fff!important;}
+
+/* ÁREA PRINCIPAL */
+.v3-main{position:relative!important;min-width:0!important;background:#f7f9fc!important;overflow:hidden!important;}
+.v3-main:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.62;background:repeating-radial-gradient(ellipse at 97% 18%,transparent 0 22px,rgba(39,154,111,.085) 23px 24px,transparent 25px 34px);mask-image:linear-gradient(to bottom,black 0 42%,transparent 72%);}
+.v3-main:after{content:"";position:absolute;left:-120px;bottom:-100px;width:720px;height:310px;pointer-events:none;opacity:.45;background:repeating-radial-gradient(ellipse at 22% 100%,transparent 0 20px,rgba(19,145,100,.07) 21px 22px,transparent 23px 31px);transform:rotate(-5deg);}
+.v3-main .app{position:relative!important;z-index:1!important;max-width:none!important;width:100%!important;margin:0!important;padding:0 30px 24px!important;background:transparent!important;box-sizing:border-box!important;}
+
+/* HEADER */
+.v3-main header.top{position:relative!important;height:86px!important;box-sizing:border-box!important;margin:0 -30px 0!important;padding:0 30px!important;display:flex!important;align-items:center!important;background:rgba(255,255,255,.97)!important;border-bottom:1px solid #e2e8ef!important;box-shadow:0 1px 5px rgba(16,45,78,.035)!important;}
+.v3-main header.top:before{content:"☰";display:flex;align-items:center;justify-content:center;width:28px;height:28px;margin-right:18px;color:#0b3153;font-size:24px;font-weight:400;line-height:1;}
+.v3-main .brand{min-width:300px!important;align-items:center!important;}
+.v3-main .eyebrow{display:none!important;}
+.v3-main .brand-text h1{font-family:"Segoe UI",Arial,sans-serif!important;font-size:21px!important;line-height:1.15!important;font-weight:700!important;letter-spacing:-.02em!important;color:#0b2d50!important;margin:0!important;}
+.v3-main .brand-text .sub{font-family:"Segoe UI",Arial,sans-serif!important;font-size:11.5px!important;line-height:1.35!important;color:#65758a!important;margin:4px 0 0!important;}
+
+/* Busca real do sistema visualmente posicionada no header; continua sendo o #searchInput original */
+.v3-main .searchbar{position:absolute!important;z-index:10!important;top:19px!important;left:50%!important;transform:translateX(-50%)!important;width:480px!important;height:43px!important;box-sizing:border-box!important;margin:0!important;padding:0!important;border:1px solid #d8e1ea!important;border-radius:9px!important;background:#fff!important;box-shadow:0 1px 3px rgba(16,45,78,.025)!important;}
+.v3-main .searchbar-label,.v3-main .searchbar-help,.v3-main .v3-search-field,.v3-main .v3-search-btn,.v3-main .v3-clear-btn,.v3-main .v30-main-import-btn,.v3-main .v30-main-import-status{display:none!important;}
+.v3-main .searchbar .search-row{height:100%!important;display:flex!important;align-items:center!important;padding:0 12px!important;box-sizing:border-box!important;gap:9px!important;}
+.v3-main .searchbar .search-row>svg{width:18px!important;height:18px!important;color:#61748a!important;flex:none!important;}
+.v3-main .searchbar #searchInput{display:block!important;flex:1!important;width:auto!important;height:41px!important;border:0!important;outline:0!important;padding:0!important;background:transparent!important;font:400 12px "Segoe UI",Arial,sans-serif!important;color:#263e5b!important;}
+.v3-main .searchbar #searchInput::placeholder{color:#71829a!important;opacity:1!important;}
+.v3-main .searchbar:after{content:"Ctrl + K";position:absolute;right:9px;top:10px;padding:3px 7px;border-radius:5px;background:#f1f4f7;color:#5d7087;font:600 8.5px "Segoe UI",Arial,sans-serif;}
+
+/* ações do header */
+.v3-main header.top .v3-header-actions{position:absolute!important;top:22px!important;right:26px!important;display:flex!important;align-items:center!important;gap:12px!important;height:42px!important;padding:0!important;margin:0!important;background:transparent!important;z-index:20!important;}
+.v3-main header.top .v3-header-action{width:34px!important;height:34px!important;padding:0!important;border-radius:50%!important;display:flex!important;align-items:center!important;justify-content:center!important;color:#0b3153!important;background:transparent!important;}
+.v3-main header.top .v3-header-action:hover{background:#f0f4f8!important;}
+.v3-main header.top .v3-header-action svg{width:20px!important;height:20px!important;}
+.v3-main header.top .v3-header-divider{display:none!important;}
+.v3-main header.top .v3-header-user{height:42px!important;display:flex!important;align-items:center!important;gap:8px!important;padding:0 8px!important;border-left:1px solid #e0e6ed!important;color:#0b3153!important;}
+.v3-main header.top .v3-header-user>svg{width:35px!important;height:35px!important;border:1px solid #a7b7c9!important;border-radius:50%!important;padding:3px!important;color:#0b3153!important;}
+.v3-main header.top .v3-header-user>span:not(.v3-header-role){font-size:12px!important;font-weight:650!important;color:#102d4e!important;max-width:95px!important;}
+.v3-main header.top .v3-header-role{display:block!important;background:transparent!important;color:#718097!important;padding:0!important;font-size:9px!important;font-weight:500!important;margin-top:12px!important;margin-left:-103px!important;letter-spacing:0!important;}
+.v3-main header.top .v3-header-bell .dot{width:15px!important;height:15px!important;right:0!important;top:0!important;background:#0d7d5a!important;color:#fff!important;border-radius:50%!important;display:flex!important;align-items:center!important;justify-content:center!important;box-shadow:none!important;}
+.v3-main header.top .v3-header-bell .dot:after{content:"3";font:700 8px "Segoe UI",Arial,sans-serif;color:#fff;}
+
+/* TÍTULO DA PÁGINA — visual criado sem alterar o DOM funcional */
+#searchView{position:relative!important;padding-top:112px!important;}
+#searchView:before{content:"Pesquisa   ›   Pesquisa Integrada\A Pesquisa Integrada\A Pesquise convênios em todas as bases disponíveis";display:block;white-space:pre-line;height:78px;padding:18px 2px 0;box-sizing:border-box;font-family:"Segoe UI",Arial,sans-serif;font-size:10px;line-height:1.9;color:#6c7c91;background:transparent;}
+#searchView:after{content:"";position:absolute;right:0;top:76px;width:520px;height:100px;pointer-events:none;}
+
+/* FILTROS — estrutura achatada visualmente em 4 colunas, mantendo os mesmos inputs */
+.v3-main .v3-filters{height:286px!important;box-sizing:border-box!important;padding:17px 21px 14px!important;margin:0 0 12px!important;border:1px solid #dce4ec!important;border-radius:10px!important;background:#fff!important;box-shadow:0 3px 12px rgba(17,45,76,.045)!important;}
+.v3-main .v3-section-head{height:34px!important;margin:0 0 14px!important;padding:0!important;border-bottom:1px solid #e5eaf0!important;display:flex!important;align-items:flex-start!important;gap:28px!important;}
+.v3-main .v3-section-head strong{font-size:11px!important;font-weight:700!important;text-transform:none!important;letter-spacing:0!important;color:#102f53!important;position:relative!important;padding:0 10px 11px!important;}
+.v3-main .v3-section-head strong:after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:#008e69;border-radius:2px;}
+.v3-main .v3-section-head button{font-size:11px!important;color:#263f5d!important;border:0!important;background:transparent!important;padding:0!important;}
+.v3-main .v3-filter-layout{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:16px 25px!important;align-items:start!important;}
+.v3-main .v3-filter-group{display:contents!important;}
+.v3-main .v3-group-title{display:none!important;}
+.v3-main .v3-group-fields{display:contents!important;}
+.v3-main .v3-filter{min-width:0!important;}
+.v3-main .v3-filter label{display:block!important;font-size:10px!important;font-weight:650!important;color:#183a5e!important;text-transform:none!important;letter-spacing:0!important;margin:0 0 6px!important;}
+.v3-main .v3-filter input,.v3-main .v3-filter select{width:100%!important;height:35px!important;box-sizing:border-box!important;border:1px solid #d4dde7!important;border-radius:6px!important;background:#fff!important;padding:0 11px!important;color:#52657d!important;font:400 11px "Segoe UI",Arial,sans-serif!important;outline:0!important;}
+.v3-main .v3-filter input:focus,.v3-main .v3-filter select:focus{border-color:#78a7c9!important;box-shadow:0 0 0 2px rgba(24,108,151,.08)!important;}
+.v3-main .v3-more{margin-top:16px!important;display:flex!important;justify-content:center!important;}
+.v3-main .v3-more button{height:28px!important;padding:0 14px!important;border:1px solid #dbe3eb!important;background:#f8fafc!important;border-radius:6px!important;color:#315270!important;font-size:10px!important;}
+
+/* filtros ativos e fontes — compactos para preservar as funções existentes */
+.v3-main .sources-section{height:78px!important;box-sizing:border-box!important;padding:11px 14px!important;margin:0 0 12px!important;border:1px solid #dce4ec!important;border-radius:10px!important;background:#fff!important;box-shadow:0 2px 9px rgba(17,45,76,.035)!important;}
+.v3-main .legend-strip-head{margin:0 0 7px!important;}
+.v3-main .legend-strip-head .lsh-title{font-size:10px!important;text-transform:none!important;letter-spacing:0!important;color:#183a5e!important;}
+.v3-main .legend-strip-head .lsh-all{font-size:9.5px!important;color:#0d6d68!important;}
+.v3-main .legend-strip{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:7px!important;}
+.v3-main .legend-chip{height:36px!important;min-height:0!important;padding:5px 8px!important;border:1px solid #dfe6ed!important;border-radius:6px!important;box-shadow:none!important;}
+.v3-main .legend-chip .lg-label{font-size:9px!important;color:#173a5c!important;}
+.v3-main .legend-chip .lg-count{font-size:8px!important;color:#75849a!important;}
+
+/* RESULTADOS */
+.v3-main .results-meta{height:56px!important;box-sizing:border-box!important;margin:0!important;padding:0 18px!important;border:1px solid #dce4ec!important;border-bottom:0!important;border-radius:10px 10px 0 0!important;background:#fff!important;}
+.v3-main #resultsWrap{border:1px solid #dce4ec!important;border-radius:0 0 10px 10px!important;background:#fff!important;box-shadow:0 3px 12px rgba(17,45,76,.04)!important;overflow:auto!important;}
+.v3-main .v3-table{font-size:11px!important;}
+.v3-main .v3-table th{height:36px!important;padding:8px 12px!important;background:#fbfcfd!important;color:#52677f!important;font-size:9px!important;text-transform:none!important;letter-spacing:0!important;border-bottom:1px solid #e1e7ed!important;}
+.v3-main .v3-table td{height:45px!important;padding:8px 12px!important;color:#304863!important;font-size:10.5px!important;border-bottom:1px solid #edf1f5!important;}
+.v3-main .v3-table tr.data-row:hover td{background:#f8fbfc!important;}
+.v3-main .v3-table .id-main{font-size:10.5px!important;color:#173a5c!important;font-weight:650!important;}
+.v3-main .v3-table .money{font-size:10.5px!important;color:#173a5c!important;font-weight:650!important;}
+.v3-main .v3-status{padding:5px 8px!important;border-radius:6px!important;font-size:8.5px!important;font-weight:700!important;}
+
+/* rodapé */
+.v3-main footer.v3-footer{height:48px!important;box-sizing:border-box!important;padding:0 28px!important;border-top:1px solid #e1e7ed!important;background:#fff!important;color:#6b7b90!important;font-size:9px!important;}
+
+@media(max-width:1200px){
+  .v3-shell{grid-template-columns:195px minmax(0,1fr)!important}
+  .v3-sidebar{width:195px!important}
+  .v3-main .searchbar{width:390px!important}
+  .v3-main header.top .v3-header-actions{right:16px!important}
+}
+@media(max-width:850px){
+  .v3-main .searchbar{width:330px!important;left:47%!important}
+  .v3-main .brand{min-width:250px!important}
+  .v3-main header.top .v3-header-actions{right:8px!important;gap:5px!important}
+  .v3-main .v3-filters{height:auto!important}
+  .v3-main .v3-filter-layout{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+</style>
+<style id="v20-page-title-refinement">
+#searchView{padding-top:0!important;}
+#searchView:before{height:112px!important;padding:16px 2px 0!important;box-sizing:border-box!important;font-size:10px!important;line-height:1.7!important;color:#6c7c91!important;content:"Pesquisa   ›   Pesquisa Integrada"!important;}
+#searchView .v3-filters{position:relative!important;}
+#searchView .v3-filters:before{content:"Pesquisa Integrada";position:absolute;left:21px;top:-69px;font:700 23px/1.15 "Segoe UI",Arial,sans-serif;color:#102f53;letter-spacing:-.02em;}
+#searchView .v3-filters:after{content:"Pesquise convênios em todas as bases disponíveis";position:absolute;left:21px;top:-38px;font:400 12px/1.3 "Segoe UI",Arial,sans-serif;color:#63758a;}
+</style>
+
+<style id="v23-pesquisa-header-menu-fix">
+/* V23 — Correção visual: remover o ícone de menu artificial do cabeçalho da Pesquisa.
+   Nenhuma lógica, evento, navegação ou regra de negócio é alterada. */
+.v3-main header.top:before{
+  content:none!important;
+  display:none!important;
+  width:0!important;
+  height:0!important;
+  margin:0!important;
+  padding:0!important;
+}
+</style>
+
+
+<style id="v28-pesquisa-layout-final">
+/* V28 — correção final da composição superior da aba Pesquisa.
+   Somente CSS: nenhuma programação, evento, dado, autenticação ou regra de negócio foi alterada. */
+@media (min-width:851px){
+  body:has(#searchView:not(.hidden)) .v3-main header.top{
+    position:relative!important;display:flex!important;align-items:flex-start!important;justify-content:space-between!important;
+    width:100%!important;height:96px!important;min-height:96px!important;box-sizing:border-box!important;
+    margin:0!important;padding:18px 4px 10px!important;background:transparent!important;border:0!important;border-radius:0!important;
+    box-shadow:none!important;overflow:visible!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main header.top:before{content:none!important;display:none!important;}
+  body:has(#searchView:not(.hidden)) .v3-main header.top .brand{display:block!important;flex:1 1 auto!important;min-width:0!important;max-width:760px!important;margin:0!important;padding:0!important;}
+  body:has(#searchView:not(.hidden)) .v3-main header.top .brand-text{display:block!important;margin:0!important;padding:0!important;}
+  body:has(#searchView:not(.hidden)) .v3-main header.top .brand-text .eyebrow{display:block!important;margin:0 0 5px!important;color:#b17c25!important;font:700 9px/1.15 "Segoe UI",Arial,sans-serif!important;letter-spacing:.15em!important;text-transform:uppercase!important;}
+  body:has(#searchView:not(.hidden)) .v3-main header.top .brand-text h1{display:block!important;margin:0!important;color:#102f50!important;font-family:Georgia,"Times New Roman",serif!important;font-size:29px!important;line-height:1.08!important;font-weight:700!important;letter-spacing:-.012em!important;white-space:nowrap!important;}
+  body:has(#searchView:not(.hidden)) .v3-main header.top .brand-text .sub{display:block!important;margin:5px 0 0!important;color:#63758a!important;font:400 11.5px/1.35 "Segoe UI",Arial,sans-serif!important;white-space:nowrap!important;}
+  body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip{display:none!important;}
+  body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-actions{position:static!important;flex:0 0 auto!important;display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:12px!important;height:40px!important;margin:0!important;padding:0!important;background:transparent!important;transform:none!important;z-index:20!important;}
+  body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-action{white-space:nowrap!important;}
+
+  /* Remove a duplicidade criada visualmente no conteúdo da Pesquisa. */
+  body:has(#searchView:not(.hidden)) #searchView{position:relative!important;padding-top:0!important;}
+  body:has(#searchView:not(.hidden)) #searchView:before,
+  body:has(#searchView:not(.hidden)) #searchView:after,
+  body:has(#searchView:not(.hidden)) #searchView .v3-filters:before,
+  body:has(#searchView:not(.hidden)) #searchView .v3-filters:after{display:none!important;content:none!important;}
+
+  /* Barra única: Pesquisar por + campo + Pesquisar + Importar bases. */
+  body:has(#searchView:not(.hidden)) .v3-main .searchbar{
+    position:static!important;transform:none!important;width:100%!important;height:64px!important;box-sizing:border-box!important;
+    margin:0 0 12px!important;padding:11px 12px!important;border:1px solid #d8e1eb!important;border-radius:9px!important;
+    background:#fff!important;box-shadow:0 2px 8px rgba(16,45,78,.035)!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main .searchbar-label,
+  body:has(#searchView:not(.hidden)) .v3-main .searchbar-help{display:none!important;}
+  body:has(#searchView:not(.hidden)) .v3-main .searchbar .search-row.v3-quick{
+    position:static!important;display:grid!important;grid-template-columns:185px minmax(260px,1fr) 112px 132px!important;
+    gap:9px!important;width:100%!important;height:40px!important;padding:0!important;margin:0!important;align-items:center!important;border:0!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main .searchbar .search-row.v3-quick:before{display:none!important;content:none!important;}
+  body:has(#searchView:not(.hidden)) .v3-main .searchbar .search-row.v3-quick>svg{display:none!important;}
+  body:has(#searchView:not(.hidden)) .v3-main .searchbar .v3-search-field{display:grid!important;grid-template-columns:minmax(90px,1fr) 82px!important;width:100%!important;height:40px!important;box-sizing:border-box!important;border:1px solid #cfd9e3!important;border-radius:6px!important;background:#fff!important;overflow:hidden!important;}
+  body:has(#searchView:not(.hidden)) .v3-main .searchbar .v3-search-field-label{display:flex!important;align-items:center!important;padding:0 11px!important;color:#173a5c!important;font:600 11.5px "Segoe UI",Arial,sans-serif!important;white-space:nowrap!important;}
+  body:has(#searchView:not(.hidden)) .v3-main .searchbar .v3-search-field select{width:100%!important;height:100%!important;border:0!important;border-left:1px solid #e1e7ed!important;border-radius:0!important;padding:0 8px!important;color:#173a5c!important;background:#fff!important;font:600 11.5px "Segoe UI",Arial,sans-serif!important;}
+  body:has(#searchView:not(.hidden)) .v3-main .searchbar .search-row.v3-quick #searchInput{display:block!important;width:100%!important;height:40px!important;box-sizing:border-box!important;border:1px solid #cfd9e3!important;border-radius:6px!important;padding:0 12px!important;background:#fff!important;color:#233f5d!important;font:400 12px "Segoe UI",Arial,sans-serif!important;}
+  body:has(#searchView:not(.hidden)) .v3-main .searchbar .search-row.v3-quick .v3-search-btn{display:block!important;width:100%!important;height:40px!important;box-sizing:border-box!important;border:1px solid #0b2d4f!important;border-radius:6px!important;background:#0b2d4f!important;color:#fff!important;font:700 11.5px "Segoe UI",Arial,sans-serif!important;}
+  body:has(#searchView:not(.hidden)) .v3-main .searchbar .search-row.v3-quick .v3-search-btn:before{content:""!important;}
+  body:has(#searchView:not(.hidden)) .v3-main .searchbar .search-row.v3-quick .v3-clear-btn{display:none!important;}
+  body:has(#searchView:not(.hidden)) .v3-main .searchbar .search-row.v3-quick .v30-main-import-btn{display:inline-flex!important;align-items:center!important;justify-content:center!important;width:100%!important;height:40px!important;box-sizing:border-box!important;border:1px solid #d6b15a!important;border-radius:6px!important;background:#fff!important;color:#173a5c!important;font:700 11px "Segoe UI",Arial,sans-serif!important;gap:6px!important;}
+  body:has(#searchView:not(.hidden)) .v3-main .searchbar .search-row.v3-quick .v30-main-import-btn svg{width:15px!important;height:15px!important;}
+  body:has(#searchView:not(.hidden)) .v3-main .searchbar .v30-main-import-status{display:none!important;}
+  body:has(#searchView:not(.hidden)) .v3-main .v3-filters{margin-top:0!important;}
+}
+@media (min-width:851px) and (max-width:1150px){
+  body:has(#searchView:not(.hidden)) .v3-main .searchbar .search-row.v3-quick{grid-template-columns:170px minmax(200px,1fr) 105px 122px!important;}
+  body:has(#searchView:not(.hidden)) .v3-main header.top .brand-text h1{font-size:27px!important;}
+  body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-actions{gap:7px!important;}
+}
+@media (max-width:850px){
+  body:has(#searchView:not(.hidden)) .v3-main header.top{background:transparent!important;border:0!important;box-shadow:none!important;min-height:96px!important;height:auto!important;}
+  body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip{display:none!important;}
+  body:has(#searchView:not(.hidden)) #searchView:before,
+  body:has(#searchView:not(.hidden)) #searchView:after,
+  body:has(#searchView:not(.hidden)) #searchView .v3-filters:before,
+  body:has(#searchView:not(.hidden)) #searchView .v3-filters:after{display:none!important;content:none!important;}
+  body:has(#searchView:not(.hidden)) .v3-main .searchbar{position:static!important;transform:none!important;width:100%!important;height:auto!important;padding:10px!important;}
+  body:has(#searchView:not(.hidden)) .v3-main .searchbar .search-row.v3-quick{grid-template-columns:1fr 1fr!important;height:auto!important;}
+  body:has(#searchView:not(.hidden)) .v3-main .searchbar #searchInput{grid-column:1/-1!important;}
+}
+</style>
+
+
+<style id="v29-final-layout-fix">
+/* V29 — correção final de distribuição da aba Pesquisa */
+body:has(#searchView:not(.hidden)) .v3-main .v3-filters{
+  height:370px!important;
+  min-height:370px!important;
+  box-sizing:border-box!important;
+  overflow:visible!important;
+  padding-bottom:18px!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main .v3-filter-layout{
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:16px 25px!important;
+  align-items:start!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main .v3-more{
+  margin-top:16px!important;
+  min-height:28px!important;
+  display:flex!important;
+  justify-content:center!important;
+  align-items:center!important;
+}
+/* Não permitir que o atalho Ctrl+K seja desenhado sobre o botão Importar bases. */
+body:has(#searchView:not(.hidden)) .v3-main .searchbar:after{
+  content:none!important;
+  display:none!important;
+}
+/* Cabeçalho superior: distribuição limpa e sem sobreposição. */
+body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-actions{
+  position:absolute!important;
+  top:17px!important;
+  right:20px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:12px!important;
+  height:42px!important;
+  margin:0!important;
+  padding:0!important;
+  z-index:30!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-action{
+  width:34px!important;
+  height:34px!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-user{
+  height:42px!important;
+  min-width:70px!important;
+  padding:0 6px 0 10px!important;
+  margin:0!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:7px!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-user>svg{
+  width:34px!important;
+  height:34px!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-role{
+  margin-top:12px!important;
+}
+/* A barra de pesquisa não cria elementos decorativos adicionais. */
+body:has(#searchView:not(.hidden)) .v3-main .searchbar .search-row.v3-quick:after,
+body:has(#searchView:not(.hidden)) .v3-main .searchbar .search-row.v3-quick:before{
+  content:none!important;
+  display:none!important;
+}
+</style>
+
+
+
+<style id="v32-search-layout-final">
+/* V32 — Pesquisa: restaurar indicadores e eliminar espaço vertical excessivo.
+   Somente camada visual; nenhuma lógica/JS é alterada. */
+body:has(#searchView:not(.hidden)) .v3-main header.top{
+  position:relative!important;
+  height:126px!important;
+  min-height:126px!important;
+  box-sizing:border-box!important;
+  margin:0!important;
+  padding:12px 24px!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  display:flex!important;
+  align-items:flex-start!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .brand{
+  display:block!important;
+  flex:1 1 auto!important;
+  min-width:0!important;
+  max-width:620px!important;
+  margin:0!important;
+  padding:0!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .brand .logo{display:none!important;}
+body:has(#searchView:not(.hidden)) .v3-main header.top .brand-text{display:block!important;margin:0!important;padding:0!important;}
+body:has(#searchView:not(.hidden)) .v3-main header.top .brand-text .eyebrow{
+  display:block!important;margin:3px 0 4px!important;color:#b17c25!important;
+  font:700 9px/1.15 "Segoe UI",Arial,sans-serif!important;letter-spacing:.15em!important;text-transform:uppercase!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .brand-text h1{
+  display:block!important;margin:0!important;color:#102f50!important;
+  font-family:Georgia,"Times New Roman",serif!important;font-size:29px!important;line-height:1.08!important;font-weight:700!important;
+  letter-spacing:-.012em!important;white-space:nowrap!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .brand-text .sub{
+  display:block!important;margin:4px 0 0!important;color:#63758a!important;
+  font:400 11px/1.3 "Segoe UI",Arial,sans-serif!important;white-space:nowrap!important;
+}
+/* Ações no topo direito, sem sobrepor os cards. */
+body:has(#searchView:not(.hidden)) .v3-main header.top .v3-header-actions{
+  position:absolute!important;top:8px!important;right:20px!important;
+  display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:10px!important;
+  height:34px!important;margin:0!important;padding:0!important;background:transparent!important;z-index:50!important;
+}
+/* Cards indicadores: os próprios elementos preenchidos pelo JS. */
+body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip{
+  position:absolute!important;display:grid!important;visibility:visible!important;opacity:1!important;
+  top:48px!important;right:18px!important;width:570px!important;height:64px!important;min-width:0!important;
+  grid-template-columns:1fr 1fr 1.08fr!important;gap:9px!important;margin:0!important;padding:0!important;
+  z-index:40!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip .stat-chip{
+  display:flex!important;visibility:visible!important;opacity:1!important;
+  width:auto!important;min-width:0!important;height:64px!important;min-height:64px!important;
+  box-sizing:border-box!important;padding:9px 12px!important;
+  border:1px solid #d7e0e9!important;border-radius:8px!important;background:#fff!important;
+  box-shadow:0 2px 8px rgba(15,42,68,.05)!important;overflow:hidden!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip .stat-ic{width:19px!important;flex:0 0 19px!important;color:#2d668f!important;}
+body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip .stat-text{min-width:0!important;display:flex!important;flex-direction:column!important;justify-content:center!important;}
+body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip .n{
+  font-family:"Segoe UI",Arial,sans-serif!important;font-size:22px!important;line-height:1.02!important;font-weight:750!important;color:#0e2d4d!important;white-space:nowrap!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip .l{
+  font-size:8.5px!important;line-height:1.1!important;color:#1a3b5d!important;text-transform:uppercase!important;letter-spacing:.02em!important;margin-top:3px!important;white-space:nowrap!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip .stat-caption{display:block!important;font-size:8px!important;color:#71829a!important;line-height:1.1!important;margin-top:2px!important;white-space:nowrap!important;}
+body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip .stat-update{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:space-between!important;}
+body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip .update-label{display:block!important;font-size:8px!important;color:#63758a!important;line-height:1.1!important;margin-bottom:3px!important;}
+body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip .update-value{display:block!important;font-size:10px!important;font-weight:700!important;color:#0e2d4d!important;white-space:nowrap!important;}
+body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip .update-refresh{display:block!important;font-size:21px!important;color:#0b6f58!important;margin-left:8px!important;}
+/* Pesquisa compacta: aproveita o espaço liberado pelo cabeçalho. */
+body:has(#searchView:not(.hidden)) .v3-main .searchbar{
+  position:relative!important;top:auto!important;left:auto!important;transform:none!important;
+  width:100%!important;height:64px!important;min-height:64px!important;box-sizing:border-box!important;
+  margin:0 0 10px!important;padding:10px 12px!important;
+  border:1px solid #d7e0e9!important;border-radius:9px!important;background:#fff!important;box-shadow:0 2px 8px rgba(15,42,68,.035)!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main .searchbar:after{display:none!important;content:none!important;}
+/* Filtros compactos, sem espaço vazio abaixo. */
+body:has(#searchView:not(.hidden)) .v3-main .v3-filters{
+  height:286px!important;min-height:286px!important;box-sizing:border-box!important;overflow:hidden!important;
+  padding:0 20px 10px!important;margin:0!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main .v3-filter-layout{
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;grid-auto-rows:42px!important;gap:13px 25px!important;align-items:start!important;
+}
+/* Mantém Processo/Região/Ano dentro do quadro. */
+body:has(#searchView:not(.hidden)) .v3-main .v3-filter-layout .field:nth-last-child(-n+3){min-width:0!important;}
+@media(max-width:1050px){
+  body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip{width:500px!important;}
+  body:has(#searchView:not(.hidden)) .v3-main header.top .brand-text h1{font-size:25px!important;}
+}
+</style>
+
+<style id="v33-search-cards-filters-fix">
+/* V33 — Correção de posição dos cards do topo e espaçamento do quadro de
+   filtros na aba Pesquisa. Somente camada visual (CSS) — nenhuma lógica
+   JS é alterada, nenhum id/seletor usado pelo código é tocado.
+
+   1) Os cards de indicadores (Total de Registros / Fontes de Dados /
+      Última atualização) usavam posicionamento absoluto com pixels fixos
+      (top/right/width fixos), o que os deixava presos num canto e frágil
+      a qualquer mudança de largura de tela. Trocado por alinhamento
+      flexível normal, ao lado do título, verticalmente centralizado. */
+body:has(#searchView:not(.hidden)) .v3-main header.top{
+  position:relative!important;
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  flex-wrap:wrap!important;gap:16px 24px!important;
+  height:auto!important;min-height:0!important;padding:44px 24px 20px!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .brand-text{flex:1 1 320px!important;min-width:260px!important;}
+body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip{
+  position:static!important;display:grid!important;
+  grid-template-columns:repeat(3,minmax(150px,1fr))!important;
+  width:auto!important;max-width:600px!important;height:auto!important;
+  gap:10px!important;margin:0!important;padding:0!important;flex:0 0 auto!important;
+}
+body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip .stat-chip{
+  height:auto!important;min-height:64px!important;
+}
+
+/* 2) O quadro "Filtros de pesquisa" tinha altura fixa (286px) calculada
+      para quando "Exibir mais filtros" está aberto — no estado padrão
+      (fechado, com menos campos) isso deixava um espaço em branco enorme
+      embaixo. Agora a altura acompanha o conteúdo de verdade. */
+body:has(#searchView:not(.hidden)) .v3-main .v3-filters{
+  height:auto!important;min-height:0!important;overflow:visible!important;
+  padding:15px 20px 16px!important;
+}
+
+@media(max-width:1050px){
+  body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip{max-width:100%!important;width:100%!important;}
+}
+@media(max-width:760px){
+  body:has(#searchView:not(.hidden)) .v3-main header.top{
+    flex-direction:column!important;align-items:stretch!important;padding-top:52px!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main header.top .stat-strip{
+    grid-template-columns:1fr 1fr!important;max-width:100%!important;width:100%!important;
+  }
+}
+</style>
+
+<style id="v34-lei360-header-fix">
+/* V34 — Lei 360: o título ("Monitoramento de Repasses — Lei 360") estava
+   sendo cortado ("Monito...") porque .brand reservava 390px fixos de
+   espaço à direita (para caber a barra de status/botão/atualização, que
+   usava posicionamento absoluto) — sobrava só ~130px de largura útil pro
+   título. Trocado por um layout flexível normal, sem depender de
+   pixels fixos reservados. Somente camada visual; nenhuma lógica alterada. */
+.v3-main .l360-view header.top .brand{
+  padding-right:0!important;
+  display:flex!important;flex-wrap:wrap!important;align-items:flex-start!important;
+  justify-content:space-between!important;gap:14px 24px!important;
+  max-width:none!important;box-sizing:border-box!important;
+}
+.v3-main .l360-view header.top .brand-text{
+  flex:1 1 320px!important;min-width:280px!important;max-width:640px!important;
+}
+.v3-main .l360-view header.top .brand-text h1{
+  white-space:normal!important;overflow:visible!important;width:auto!important;
+  font-size:26px!important;text-overflow:clip!important;
+}
+.v3-main .l360-view .l360-head-actions{
+  position:static!important;flex:0 0 auto!important;top:auto!important;right:auto!important;
+  margin:4px 0 0!important;
+}
+@media(max-width:900px){
+  .v3-main .l360-view header.top .brand{flex-direction:column!important;align-items:stretch!important;}
+  .v3-main .l360-view .l360-head-actions{width:100%!important;justify-content:flex-start!important;}
+}
+</style>
+
+
+<style id="v40-filter-reference-fidelity">
+/* V40 — ajuste EXCLUSIVAMENTE VISUAL do bloco "Filtros de pesquisa".
+   Não altera HTML, JavaScript, eventos, dados, Supabase, GitHub ou regras de negócio. */
+@media (min-width:851px){
+  body:has(#searchView:not(.hidden)) .v3-main .v3-filters{
+    padding:14px 14px 12px!important;
+    margin-bottom:12px!important;
+    border-radius:9px!important;
+    min-height:0!important;
+    height:auto!important;
+    overflow:visible!important;
+  }
+
+  /* Cabeçalho do quadro */
+  body:has(#searchView:not(.hidden)) .v3-main .v3-filters > .v3-section-head{
+    height:27px!important;
+    margin:0 0 9px!important;
+    padding:0 1px!important;
+    border-bottom:1px solid #d8e1eb!important;
+    align-items:flex-start!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main .v3-section-head strong{
+    font-size:10px!important;
+    line-height:15px!important;
+    letter-spacing:.035em!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main .v3-section-head button{
+    font-size:9.5px!important;
+    line-height:15px!important;
+    padding:0!important;
+  }
+
+  /* Distribuição horizontal exatamente no conceito da referência:
+     Identificação | Localização | Convenente | Convênio */
+  body:has(#searchView:not(.hidden)) .v3-main .v3-filter-layout{
+    display:grid!important;
+    grid-template-columns:2.55fr 1fr 1.03fr 1.45fr!important;
+    column-gap:10px!important;
+    row-gap:0!important;
+    align-items:start!important;
+    width:100%!important;
+    margin:0!important;
+  }
+
+  body:has(#searchView:not(.hidden)) .v3-main .v3-filter-group{
+    min-width:0!important;
+    padding:0 0 0 9px!important;
+    margin:0!important;
+    border-left:1px solid #d9e3ed!important;
+    box-sizing:border-box!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main .v3-filter-group:first-child{
+    padding-left:9px!important;
+    border-left:2px solid #149bd0!important;
+  }
+
+  body:has(#searchView:not(.hidden)) .v3-main .v3-group-title{
+    display:block!important;
+    height:14px!important;
+    margin:0 0 7px!important;
+    font-size:9px!important;
+    line-height:14px!important;
+    font-weight:800!important;
+    color:#123b60!important;
+    text-transform:uppercase!important;
+    letter-spacing:.035em!important;
+    white-space:nowrap!important;
+  }
+
+  body:has(#searchView:not(.hidden)) .v3-main .v3-group-fields,
+  body:has(#searchView:not(.hidden)) .v3-main .v3-group-fields.four,
+  body:has(#searchView:not(.hidden)) .v3-main .v3-group-fields.two{
+    display:grid!important;
+    gap:0 8px!important;
+    min-width:0!important;
+    margin:0!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main .v3-group-fields.four{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main .v3-group-fields.two{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+
+  body:has(#searchView:not(.hidden)) .v3-main .v3-filter{
+    min-width:0!important;
+    margin:0!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main .v3-filter label{
+    display:block!important;
+    height:13px!important;
+    margin:0 0 4px!important;
+    font-size:9px!important;
+    line-height:13px!important;
+    font-weight:700!important;
+    color:#254763!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main .v3-filter input,
+  body:has(#searchView:not(.hidden)) .v3-main .v3-filter select{
+    display:block!important;
+    width:100%!important;
+    height:34px!important;
+    min-height:34px!important;
+    box-sizing:border-box!important;
+    border:1px solid #d1ddea!important;
+    border-radius:5px!important;
+    padding:0 9px!important;
+    font-size:10px!important;
+    line-height:34px!important;
+    color:#304f6d!important;
+    background:#fff!important;
+  }
+
+  /* O botão "Recolher filtros" fica abaixo do grupo Localização,
+     como na imagem de referência, em vez de ocupar o centro do quadro. */
+  body:has(#searchView:not(.hidden)) .v3-main .v3-more{
+    display:grid!important;
+    grid-template-columns:2.55fr 1fr 1.03fr 1.45fr!important;
+    column-gap:10px!important;
+    height:29px!important;
+    min-height:29px!important;
+    margin:8px 0 0!important;
+    padding:0!important;
+    align-items:start!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main .v3-more button{
+    grid-column:2!important;
+    justify-self:center!important;
+    width:140px!important;
+    height:28px!important;
+    min-height:28px!important;
+    padding:0 10px!important;
+    border:1px solid #d5e0eb!important;
+    border-radius:6px!important;
+    background:#f8fafc!important;
+    color:#173f63!important;
+    font-size:9.5px!important;
+    font-weight:650!important;
+  }
+
+  /* Campos adicionais permanecem abaixo, alinhados à esquerda,
+     sem invadir o bloco "Fontes de dados". */
+  body:has(#searchView:not(.hidden)) .v3-main .v3-more-fields.open{
+    display:grid!important;
+    grid-template-columns:170px 170px 170px!important;
+    column-gap:12px!important;
+    row-gap:8px!important;
+    margin:9px 0 0!important;
+    padding:0!important;
+  }
+  body:has(#searchView:not(.hidden)) .v3-main .v3-more-fields.open .v3-filter{
+    min-width:0!important;
+  }
+}
+</style>
+
+<style id="lei360-sidebar-gap-final">
+/* LEI 360 — alinhamento lateral com as demais abas.
+   SOMENTE VISUAL/CSS: cria o mesmo respiro entre a barra lateral e o conteúdo
+   que já existe nas telas Pesquisa e Pagamentos SIAFE.
+*/
+@media (min-width:761px){
+  body:has(#lei360View.active) .v3-main > .l360-view{
+    margin-left:26px!important;
+    margin-right:26px!important;
+    width:auto!important;
+    box-sizing:border-box!important;
+  }
+}
+@media (max-width:760px){
+  body:has(#lei360View.active) .v3-main > .l360-view{
+    margin-left:0!important;
+    margin-right:0!important;
+  }
+}
+</style>
+<style id="lei360-filter-spacing-final">
+/* LEI 360 — ajuste final de espaçamento dos filtros.
+   SOMENTE VISUAL/CSS. Nenhuma lógica, evento, dado, importação ou regra de negócio é alterada. */
+@media (min-width:851px){
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters{
+    height:auto!important;
+    min-height:0!important;
+    padding:14px 18px 15px!important;
+    margin:0 0 12px!important;
+    box-sizing:border-box!important;
+  }
+
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-section-head{
+    height:30px!important;
+    min-height:30px!important;
+    margin:0 0 12px!important;
+    padding:0 0 9px!important;
+    box-sizing:border-box!important;
+    align-items:flex-start!important;
+  }
+
+  /* Grade de 6 colunas: aumenta os campos de texto e elimina a grande
+     faixa vazia criada pela antiga grade de 4 colunas. */
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter-layout{
+    display:grid!important;
+    grid-template-columns:repeat(6,minmax(0,1fr))!important;
+    column-gap:12px!important;
+    row-gap:11px!important;
+    align-items:end!important;
+    width:100%!important;
+  }
+
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter-group,
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-group-fields{
+    display:contents!important;
+  }
+
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter{
+    min-width:0!important;
+    width:auto!important;
+    overflow:visible!important;
+  }
+
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter label{
+    display:block!important;
+    margin:0 0 5px!important;
+    font-size:9.5px!important;
+    line-height:1.15!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter input,
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter select{
+    width:100%!important;
+    min-width:0!important;
+    height:36px!important;
+    box-sizing:border-box!important;
+    padding:0 10px!important;
+    font-size:10.5px!important;
+  }
+
+  /* Campos que precisam de mais área horizontal. */
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(6){
+    grid-column:span 1!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(7),
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(8){
+    grid-column:span 1!important;
+  }
+
+  /* Segunda linha começa no início da grade, mantendo todos os campos
+     dentro do quadro branco e sem área vazia excessiva. */
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(7){
+    grid-column:1!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(8){
+    grid-column:2!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(9){
+    grid-column:3!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(10){
+    grid-column:4!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(11){
+    grid-column:5!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(12){
+    grid-column:6!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(13){
+    grid-column:1!important;
+  }
+
+  /* O último campo ocupa a coluna seguinte, deixando a segunda linha
+     visualmente equilibrada sem criar uma terceira linha. */
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter:nth-child(13){
+    grid-column:2!important;
+  }
+}
+
+@media (max-width:850px){
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters{
+    height:auto!important;
+    min-height:0!important;
+    padding:13px 14px 14px!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter-layout{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:10px!important;
+  }
+}
+</style>
+
+<style id="lei360-filter-grid-final-v2">
+/* Correção final da grade dos filtros Lei 360 — somente CSS. */
+@media (min-width:851px){
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter-layout{
+    grid-template-columns:repeat(12,minmax(0,1fr))!important;
+    column-gap:10px!important;
+    row-gap:12px!important;
+    align-items:end!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter{
+    min-width:0!important;
+  }
+  #l360Mapp{grid-column:1 / span 2!important;}
+  #l360Convenio{grid-column:3 / span 2!important;}
+  #l360Sacc{grid-column:5 / span 2!important;}
+  #l360Nup{grid-column:7 / span 2!important;}
+  #l360Cnpj{grid-column:9 / span 2!important;}
+  #l360Municipio{grid-column:11 / span 2!important;}
+
+  #l360Convenente{grid-column:1 / span 2!important;}
+  #l360Fiscal{grid-column:3 / span 2!important;}
+  #l360Situacao{grid-column:5 / span 2!important;}
+  #l360Status{grid-column:7 / span 2!important;}
+  #l360Superintendencia{grid-column:9 / span 2!important;}
+  #l360Classificacao{grid-column:11 / span 1!important;}
+  #l360TipoObjeto{grid-column:12 / span 1!important;}
+
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter input,
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter select{
+    height:36px!important;
+  }
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters{
+    padding-bottom:14px!important;
+  }
+}
+</style>
+
+<style id="lei360-filters-proportional-final">
+/* Ajuste exclusivamente visual dos filtros da Lei 360.
+   Mantém IDs, eventos, lógica, dados e regras funcionais intactos. */
+@media (min-width:851px){
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter-layout{
+    display:grid!important;
+    grid-template-columns:repeat(7,minmax(0,1fr))!important;
+    column-gap:12px!important;
+    row-gap:12px!important;
+    width:100%!important;
+    align-items:end!important;
+  }
+
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter{
+    grid-column:span 1!important;
+    min-width:0!important;
+    width:100%!important;
+  }
+
+  /* Primeira linha: os cinco campos de identificação + município mais amplo. */
+  #l360Mapp{grid-column:1!important;}
+  #l360Convenio{grid-column:2!important;}
+  #l360Sacc{grid-column:3!important;}
+  #l360Nup{grid-column:4!important;}
+  #l360Cnpj{grid-column:5!important;}
+  #l360Municipio{grid-column:6 / span 2!important;}
+
+  /* Segunda linha: sete campos distribuídos de forma uniforme. */
+  #l360Convenente{grid-column:1!important;}
+  #l360Fiscal{grid-column:2!important;}
+  #l360Situacao{grid-column:3!important;}
+  #l360Status{grid-column:4!important;}
+  #l360Superintendencia{grid-column:5!important;}
+  #l360Classificacao{grid-column:6!important;}
+  #l360TipoObjeto{grid-column:7!important;}
+
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter input,
+  body:has(#lei360View.active) .v3-main .l360-view > .v3-filters .v3-filter select{
+    width:100%!important;
+    min-width:0!important;
+    height:36px!important;
+    box-sizing:border-box!important;
+  }
 }
 </style>
