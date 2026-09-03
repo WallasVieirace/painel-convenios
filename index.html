@@ -411,6 +411,13 @@ html, body {
 .home-stack.tem-selecao .home-quadro{opacity:.4;filter:grayscale(35%);transform:scale(.99)}
 .home-stack.tem-selecao .home-quadro.selecionado{opacity:1;filter:none;transform:scale(1.01);box-shadow:0 14px 34px rgba(18,52,59,.14)}
 .home-quadro.selecionado{border-color:var(--accent,#0b8b69)}
+.home-quadro .home-kpis-mini,.home-quadro .home-info-grid{display:none}
+.home-quadro.selecionado .home-kpis-mini{display:flex}
+.home-quadro.selecionado .home-info-grid{display:grid}
+.home-quadro-head-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.home-quadro-expand{font-size:9px;font-weight:800;color:var(--muted);display:flex;align-items:center;gap:3px;white-space:nowrap}
+.home-quadro-expand i{font-style:normal;font-size:11px;transition:transform .18s ease}
+.home-quadro.selecionado .home-quadro-expand i{transform:rotate(180deg)}
 .home-c-contratos{--accent:#0b8b69;--accent-soft:#eaf7f1}
 .home-c-lei360{--accent:#2b7fcb;--accent-soft:#edf3fc}
 .home-c-celebracao{--accent:#d88924;--accent-soft:#fff4e6}
@@ -744,7 +751,7 @@ function dashboard(){
  if(homeContratosSaldoNeg)homeContratosAtencao.push({cls:'danger',text:`${homeContratosSaldoNeg.toLocaleString('pt-BR')} contrato(s) com saldo negativo`});
  if(homeContratosSemFiscal)homeContratosAtencao.push({cls:'warn',text:`${homeContratosSemFiscal.toLocaleString('pt-BR')} contrato(s) sem fiscal designado`});
  const homeQuadroContratos=`<div class="home-quadro home-c-contratos" data-id="contratos" onclick="selecionarQuadroHome('contratos')">
-  <div class="home-quadro-head"><div class="home-quadro-head-left"><span class="home-quadro-ico"><svg viewBox="0 0 24 24"><path d="M8 3h8l4 4v14H4V3z"/><path d="M14 3v5h5"/><path d="M8 13h8M8 17h5"/></svg></span><div><div class="home-quadro-titulo">Contratos</div><div class="home-quadro-desc">Monitoramento de contratos vigentes</div></div></div><span class="home-quadro-tag">${ex.length.toLocaleString('pt-BR')} registros</span></div>
+  <div class="home-quadro-head"><div class="home-quadro-head-left"><span class="home-quadro-ico"><svg viewBox="0 0 24 24"><path d="M8 3h8l4 4v14H4V3z"/><path d="M14 3v5h5"/><path d="M8 13h8M8 17h5"/></svg></span><div><div class="home-quadro-titulo">Contratos</div><div class="home-quadro-desc">Monitoramento de contratos vigentes</div></div></div><span class="home-quadro-head-right"><span class="home-quadro-tag">${ex.length.toLocaleString('pt-BR')} registros</span><span class="home-quadro-expand">Detalhes <i>⌄</i></span></span></div>
   <div class="home-kpis-mini"><div class="home-kpi-mini"><span class="home-kpi-mini-label">Valor atualizado</span><span class="home-kpi-mini-value">${compactMoney(contratosValor)}</span></div><div class="home-kpi-mini"><span class="home-kpi-mini-label">Saldo</span><span class="home-kpi-mini-value">${compactMoney(contratosSaldo)}</span></div><div class="home-kpi-mini"><span class="home-kpi-mini-label">Gestores</span><span class="home-kpi-mini-value">${homeContratosGestores.toLocaleString('pt-BR')}</span></div></div>
   <div class="home-destaque">${homeIconCheck}Execução financeira em ${execPct.toLocaleString('pt-BR',{maximumFractionDigits:1})}% (pago sobre empenhado)</div>
   <div class="home-info-grid">
@@ -765,7 +772,7 @@ function dashboard(){
  if(homeLeiPendencias)homeLeiAtencao.push({cls:'warn',text:`${homeLeiPendencias.toLocaleString('pt-BR')} convênio(s) com pendências registradas`});
  if(homeLeiSaldoAberto)homeLeiAtencao.push({cls:'warn',text:`${homeLeiSaldoAberto.toLocaleString('pt-BR')} convênio(s) ainda com saldo a pagar`});
  const homeQuadroLei=`<div class="home-quadro home-c-lei360" data-id="lei360" onclick="selecionarQuadroHome('lei360')">
-  <div class="home-quadro-head"><div class="home-quadro-head-left"><span class="home-quadro-ico"><svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4z"/></svg></span><div><div class="home-quadro-titulo">Lei 360</div><div class="home-quadro-desc">Convênios sob a Lei Complementar 360/2025</div></div></div><span class="home-quadro-tag">${leiF.length.toLocaleString('pt-BR')} convênios</span></div>
+  <div class="home-quadro-head"><div class="home-quadro-head-left"><span class="home-quadro-ico"><svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4z"/></svg></span><div><div class="home-quadro-titulo">Lei 360</div><div class="home-quadro-desc">Convênios sob a Lei Complementar 360/2025</div></div></div><span class="home-quadro-head-right"><span class="home-quadro-tag">${leiF.length.toLocaleString('pt-BR')} convênios</span><span class="home-quadro-expand">Detalhes <i>⌄</i></span></span></div>
   <div class="home-kpis-mini"><div class="home-kpi-mini"><span class="home-kpi-mini-label">Valor total</span><span class="home-kpi-mini-value">${compactMoney(leiTotals.total)}</span></div><div class="home-kpi-mini"><span class="home-kpi-mini-label">Saldo a pagar</span><span class="home-kpi-mini-value">${compactMoney(leiTotals.open)}</span></div><div class="home-kpi-mini"><span class="home-kpi-mini-label">Vigentes</span><span class="home-kpi-mini-value">${homeLeiVigentes.toLocaleString('pt-BR')}</span></div></div>
   <div class="home-destaque">${homeIconCheck}${homeLeiVigentes.toLocaleString('pt-BR')} de ${leiF.length.toLocaleString('pt-BR')} convênios estão vigentes</div>
   <div class="home-info-grid">
@@ -784,7 +791,7 @@ function dashboard(){
  const homeCeAtencao=homeCeStatusEntries.slice(1,3).map(([n,c])=>({cls:'warn',text:`${c.toLocaleString('pt-BR')} processo(s) em "${n}"`}));
  const homeCeLocalItems=homeCeLocalEntries.map(([n,c])=>({nome:n,prazoLabel:`${c.toLocaleString('pt-BR')}`,risk:'safe'}));
  const homeQuadroCelebracao=`<div class="home-quadro home-c-celebracao" data-id="celebracao" onclick="selecionarQuadroHome('celebracao')">
-  <div class="home-quadro-head"><div class="home-quadro-head-left"><span class="home-quadro-ico"><svg viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M6 20V10l6-6 6 6v10"/><path d="M10 20v-6h4v6"/></svg></span><div><div class="home-quadro-titulo">Celebração</div><div class="home-quadro-desc">Convênios/contratos em fase de celebração</div></div></div><span class="home-quadro-tag">${ce.length.toLocaleString('pt-BR')} processos</span></div>
+  <div class="home-quadro-head"><div class="home-quadro-head-left"><span class="home-quadro-ico"><svg viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M6 20V10l6-6 6 6v10"/><path d="M10 20v-6h4v6"/></svg></span><div><div class="home-quadro-titulo">Celebração</div><div class="home-quadro-desc">Convênios/contratos em fase de celebração</div></div></div><span class="home-quadro-head-right"><span class="home-quadro-tag">${ce.length.toLocaleString('pt-BR')} processos</span><span class="home-quadro-expand">Detalhes <i>⌄</i></span></span></div>
   <div class="home-kpis-mini"><div class="home-kpi-mini"><span class="home-kpi-mini-label">Valor MAPP</span><span class="home-kpi-mini-value">${compactMoney(homeCeValorTotal)}</span></div><div class="home-kpi-mini"><span class="home-kpi-mini-label">Processos</span><span class="home-kpi-mini-value">${ce.length.toLocaleString('pt-BR')}</span></div></div>
   <div class="home-destaque">${homeIconCheck}${homeCeStatusEntries.length?`${homeCeStatusEntries[0][1].toLocaleString('pt-BR')} de ${ce.length.toLocaleString('pt-BR')} processos estão em "${esc(homeCeStatusEntries[0][0])}"`:'Sem dados de status suficientes nesta base'}</div>
   <div class="home-info-grid">
@@ -800,7 +807,7 @@ function dashboard(){
  if(homeExecAPagar)homeExecAtencao.push({cls:'warn',text:`${compactMoney(homeExecAPagar)} empenhados ainda não pagos`});
  if(homeContratosAbaixo50)homeExecAtencao.push({cls:'danger',text:`${homeContratosAbaixo50.toLocaleString('pt-BR')} contrato(s) com execução abaixo de 50%`});
  const homeQuadroExecucao=`<div class="home-quadro home-c-execucao" data-id="execucao" onclick="selecionarQuadroHome('execucao')">
-  <div class="home-quadro-head"><div class="home-quadro-head-left"><span class="home-quadro-ico"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M21 7v6h-6"/></svg></span><div><div class="home-quadro-titulo">Execução</div><div class="home-quadro-desc">Execução financeira dos contratos</div></div></div><span class="home-quadro-tag">${execPct.toLocaleString('pt-BR',{maximumFractionDigits:1})}% pago/empenhado</span></div>
+  <div class="home-quadro-head"><div class="home-quadro-head-left"><span class="home-quadro-ico"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M21 7v6h-6"/></svg></span><div><div class="home-quadro-titulo">Execução</div><div class="home-quadro-desc">Execução financeira dos contratos</div></div></div><span class="home-quadro-head-right"><span class="home-quadro-tag">${execPct.toLocaleString('pt-BR',{maximumFractionDigits:1})}% pago/empenhado</span><span class="home-quadro-expand">Detalhes <i>⌄</i></span></span></div>
   <div class="home-kpis-mini"><div class="home-kpi-mini"><span class="home-kpi-mini-label">Empenhado</span><span class="home-kpi-mini-value">${compactMoney(contratosEmp)}</span></div><div class="home-kpi-mini"><span class="home-kpi-mini-label">A pagar</span><span class="home-kpi-mini-value">${compactMoney(homeExecAPagar)}</span></div><div class="home-kpi-mini"><span class="home-kpi-mini-label">Saldo a empenhar</span><span class="home-kpi-mini-value">${compactMoney(contratosSaldoEmpenhar)}</span></div></div>
   <div class="home-destaque">${homeIconCheck}Execução geral em ${execPct.toLocaleString('pt-BR',{maximumFractionDigits:1})}% — ${homeContratosVigentes.toLocaleString('pt-BR')} contratos vigentes</div>
   <div class="home-info-grid">
@@ -820,7 +827,7 @@ function dashboard(){
  if(homeSiafiDivergentes)homeSiafiAtencao.push({cls:'danger',text:`${homeSiafiDivergentes.toLocaleString('pt-BR')} lançamento(s) com divergência entre liquidado e pago`});
  if(homeSiafiSemOB)homeSiafiAtencao.push({cls:'warn',text:`${homeSiafiSemOB.toLocaleString('pt-BR')} lançamento(s) sem Ordem Bancária emitida`});
  const homeQuadroSiafi=`<div class="home-quadro home-c-siafe" data-id="siafe" onclick="selecionarQuadroHome('siafe')">
-  <div class="home-quadro-head"><div class="home-quadro-head-left"><span class="home-quadro-ico"><svg viewBox="0 0 24 24"><path d="M3 7h18v10H3z"/><path d="M3 10h18"/><path d="M7 14h4"/></svg></span><div><div class="home-quadro-titulo">Pagamentos SIAFE</div><div class="home-quadro-desc">Repasses processados no SIAFE</div></div></div><span class="home-quadro-tag">${esc(df.periodo||'2026')}</span></div>
+  <div class="home-quadro-head"><div class="home-quadro-head-left"><span class="home-quadro-ico"><svg viewBox="0 0 24 24"><path d="M3 7h18v10H3z"/><path d="M3 10h18"/><path d="M7 14h4"/></svg></span><div><div class="home-quadro-titulo">Pagamentos SIAFE</div><div class="home-quadro-desc">Repasses processados no SIAFE</div></div></div><span class="home-quadro-head-right"><span class="home-quadro-tag">${esc(df.periodo||'2026')}</span><span class="home-quadro-expand">Detalhes <i>⌄</i></span></span></div>
   <div class="home-kpis-mini"><div class="home-kpi-mini"><span class="home-kpi-mini-label">Empenhado</span><span class="home-kpi-mini-value">${compactMoney(siafiEmp)}</span></div><div class="home-kpi-mini"><span class="home-kpi-mini-label">Liquidado</span><span class="home-kpi-mini-value">${compactMoney(siafiLiq)}</span></div><div class="home-kpi-mini"><span class="home-kpi-mini-label">Pago</span><span class="home-kpi-mini-value">${compactMoney(siafiPago)}</span></div></div>
   <div class="home-destaque">${homeIconCheck}${homeSiafiPct.toLocaleString('pt-BR',{maximumFractionDigits:1})}% do valor empenhado já foi pago</div>
   <div class="home-info-grid">
