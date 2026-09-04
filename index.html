@@ -2075,6 +2075,11 @@ function getContractsExpiryDate(r){
  if(!r||typeof r!=='object')return null;
 
  const directKeys=[
+  // "DATA TÉRMINO ATUAL" é a coluna oficial da base CONTRATOS (coluna K da
+  // planilha) para a data de vencimento — checada em primeiro lugar, com
+  // correspondência exata, para nunca depender do casamento aproximado feito
+  // mais abaixo (que já causou o cruzamento incorreto com a coluna CONTRATO).
+  'DATA TÉRMINO ATUAL','Data Término Atual','DATA TERMINO ATUAL',
   'DATA DE VENCIMENTO','Data de vencimento','DATA VENCIMENTO','VENCIMENTO',
   'Data Vencimento','DATA FINAL','Data Final','DATA FINAL CONTRATO',
   'Data Final Contrato','DATA FIM','Data Fim','FIM DO CONTRATO',
@@ -2092,16 +2097,18 @@ function getContractsExpiryDate(r){
  // 2) Como o arquivo pode ter sido importado com outro nome de coluna,
  //    procura SOMENTE na própria linha de CONTRATOS por colunas que indiquem
  //    término/vencimento/vigência. Colunas de início/assinatura/pagamento são
- //    deliberadamente ignoradas.
+ //    deliberadamente ignoradas — assim como colunas de CONTAGEM de dias
+ //    ("DIAS A VENCER", "DIAS VENCIDOS"), que não são datas e antes eram
+ //    capturadas indevidamente pelo padrão genérico "venc" (de "a vencer").
  const candidates=Object.keys(r).filter(k=>{
    const n=norm(k).replace(/[^a-z0-9]/g,'');
    if(!n)return false;
-   if(/inicio|assinatura|publica|pagamento|empenho|liquid|celebracao|criacao/.test(n))return false;
-   return /venciment|venc|termino|vigenc|fim|final|validade|prazo/.test(n);
+   if(/^dias|inicio|assinatura|publica|pagamento|empenho|liquid|celebracao|criacao/.test(n))return false;
+   return /venciment|termino|vigenc|fim|final|validade|prazo/.test(n);
  }).sort((a,b)=>{
    const score=k=>{
      const n=norm(k).replace(/[^a-z0-9]/g,'');
-     if(/venciment|venc/.test(n))return 100;
+     if(/venciment/.test(n))return 100;
      if(/termino/.test(n))return 95;
      if(/vigenc/.test(n))return 90;
      if(/fim/.test(n))return 85;
