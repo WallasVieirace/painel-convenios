@@ -2276,15 +2276,45 @@ const MODULE_REPORT_CONFIGS={
    const alert={level:'success',text:`${pct}% do valor já foi pago, com apenas ${pendentes.toLocaleString('pt-BR')} de ${total.toLocaleString('pt-BR')} planos ainda pendentes.`};
    return {kpis,alert,cols:[['PA','N° PA'],['Ação Detalhada','Ação Detalhada'],['Status','Status'],['Valor','Valor',brl],['Saldo','Saldo a\nPagar',brl]],rows:rows.filter(r=>/pendente/i.test(String(val(r,['Status'])||''))).slice(0,60)};
  }},
- 'CELEBRAÇÃO':{title:'Celebração — Funil de Novos Convênios',fonte:'Celebração',tableTitle:'Distribuição por situação',compute:(rows)=>{
+ 'CELEBRAÇÃO':{title:'Celebração — Situação, Última Atualização e Observação',fonte:'Celebração',tableTitle:'Processos ordenados pelo tempo sem atualização (mais parados primeiro)',compute:(rows)=>{
    const total=rows.length;
    const counts={};rows.forEach(r=>{const s=String(val(r,['STATUS'])||'—').trim();counts[s]=(counts[s]||0)+1});
-   const top=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
    const pendente=counts['MAPP PENDENTE']||0;
-   const pct=total?Math.round(pendente/total*1000)/10:0;
-   const kpis=[['Total',total.toLocaleString('pt-BR')],['MAPP pendente',pendente.toLocaleString('pt-BR')],['Situações distintas',top.length.toLocaleString('pt-BR')]];
-   const alert=pct>=25?{level:'warning',text:`${pct}% dos processos (${pendente.toLocaleString('pt-BR')} de ${total.toLocaleString('pt-BR')}) estão parados em "MAPP Pendente" — maior gargalo do funil de celebração de novos convênios.`}:null;
-   return {kpis,alert,cols:[['Status','STATUS'],['Quantidade','__count']],rows:top.map(([status,c])=>({STATUS:status,__count:c}))};
+   const pctPendente=total?Math.round(pendente/total*1000)/10:0;
+   const today=new Date();today.setHours(0,0,0,0);
+   // "Última atualização" = DATA DA MUDANÇA DO STATUS (única data de referência
+   // disponível na própria base de Celebração para saber quando o processo
+   // mudou de situação pela última vez).
+   const enriched=rows.map(r=>{
+     const d=parseExpiryDate(val(r,['DATA DA MUDANÇA DO STATUS']));
+     const days=d?Math.max(0,Math.round((today-d)/86400000)):null;
+     return {r,d,days};
+   });
+   const semData=enriched.filter(x=>!x.d).length;
+   const paradosLongos=enriched.filter(x=>x.days!==null&&x.days>=90).length;
+   const pctParados=total?Math.round(paradosLongos/total*1000)/10:0;
+   const kpis=[['Total',total.toLocaleString('pt-BR')],['MAPP pendente',pendente.toLocaleString('pt-BR')],['Sem atualização há 90+ dias',paradosLongos.toLocaleString('pt-BR')],['Sem data de atualização',semData.toLocaleString('pt-BR')]];
+   const alert=paradosLongos>0
+     ?{level:pctParados>=30?'danger':'warning',text:`${paradosLongos.toLocaleString('pt-BR')} de ${total.toLocaleString('pt-BR')} processos (${pctParados}%) não têm mudança de status registrada há 90 dias ou mais — indício de processos parados no funil de celebração. Veja a observação de cada um na tabela abaixo.`}
+     :(pctPendente>=25?{level:'warning',text:`${pctPendente}% dos processos (${pendente.toLocaleString('pt-BR')} de ${total.toLocaleString('pt-BR')}) estão parados em "MAPP Pendente" — maior gargalo do funil de celebração de novos convênios.`}:null);
+   const sorted=[...enriched].sort((a,b)=>{
+     if(a.days!==null&&b.days!==null)return b.days-a.days;
+     if(a.days!==null)return -1;
+     if(b.days!==null)return 1;
+     return 0;
+   });
+   const reportRows=sorted.map(({r,d,days})=>({...r,
+     __LAST_UPDATE_DATE:d?d.toLocaleDateString('pt-BR'):'—',
+     __DAYS_SINCE_UPDATE:days===null?'—':days
+   }));
+   return {kpis,alert,cols:[
+     ['MAPP','MAPP'],
+     ['Município / Instituição','MUNICÍPIO/ INSTITUIÇÃO'],
+     ['Status','STATUS'],
+     ['Última Atualização','__LAST_UPDATE_DATE'],
+     ['Dias sem Atualização','__DAYS_SINCE_UPDATE',v=>typeof v==='number'?v.toLocaleString('pt-BR'):(v||'—')],
+     ['Observação','OBSERVAÇÃO',v=>v||'—']
+   ],rows:reportRows.slice(0,60)};
  }},
  'PRESTAÇÃO DE CONTAS':{title:'Prestação de Contas — Situação e Riscos',fonte:'Prestação de Contas',compute:(rows)=>{
    const total=rows.length;
