@@ -2322,9 +2322,14 @@ function printGroupByBaseAndMapp(rows){
        const valor=temRC?(num(repasseRaw)+num(contraRaw)):valorFallback;
        const saldoFallback=leiExact(first,['Saldo atual do Convênio','SALDO','Saldo']);
        const saldo=temRC?((num(repasseRaw)+num(contraRaw))-emp):saldoFallback;
+       // Repasse/Contrapartida/Pago separados (além do valor consolidado acima)
+       // para a tabela de Execução do PDF, que detalha essas parcelas do valor.
+       const repasse=num(repasseRaw);
+       const contra=num(contraRaw);
+       const pago=num(leiExact(first,['Valor pago','VALOR PAGO','Pago','Despesas Orçamentárias Pagas']));
        const parcelasRaw=hasParcelBase?searchParcels(first):[];
        const parcelas=parcelasRaw.filter(p=>{const da=String(p.da??'').trim(),dp=String(p.dp??'').trim();return (da!==''&&da!=='-')||(dp!==''&&dp!=='-')});
-       return {mapp,sacc,convenente,municipio,status,valor,emp,saldo,registros:items.length,parcelas};
+       return {mapp,sacc,convenente,municipio,status,valor,emp,pago,saldo,repasse,contra,registros:items.length,parcelas};
      }).sort((a,b)=>String(a.mapp).localeCompare(String(b.mapp),'pt-BR',{numeric:true}));
    }
    return {base,hasMapp,mapps,flatRows:hasMapp?[]:baseRows,count:baseRows.length};
@@ -2814,11 +2819,23 @@ function generateSelectedPrint(){
  const summaryHtml=selected.resumo?`<div class="print-section"><div class="section-title">Resumo executivo</div><div class="summary-grid"><div class="summary-card"><small>Registros encontrados</small><b>${rows.length.toLocaleString('pt-BR')}</b></div>${moneySummary.map(x=>`<div class="summary-card"><small>${esc(x.label)}</small><b>${brl(x.total)}</b></div>`).join('')}</div></div>`:'';
  const mappHtml=(selected.mappResumo||selected.parcelas)?(()=>{
   const sections=grouped.filter(g=>g.hasMapp&&g.mapps.length).map(g=>{
+    // A base EXECUÇÃO ganha colunas financeiras detalhadas (repasse,
+    // contrapartida, empenhado, pago e saldo), além do valor consolidado já
+    // mostrado nas demais bases — o resto continua com o resumo enxuto.
+    const isExec=g.base==='EXECUÇÃO'||g.base==='Execução';
+    const headers=isExec
+      ?['MAPP','SACC','Convenente','Município','Status','Repasse Atualizado','Contrapartida Atualizada','Valor Atualizado','Empenhado','Pago','Saldo do Convênio','Reg.']
+      :['MAPP','SACC','Convenente','Município','Status','Valor Atualizado','Reg.'];
     const rowsHtml=g.mapps.map(m=>{
-     const parcelasHtml=(selected.parcelas&&m.parcelas.length)?`<tr class="print-parcel-row"><td colspan="8"><table class="print-parcel-subtable"><thead><tr><th>Parcela</th><th>Valor</th><th>Empenhado</th><th>Pago</th><th>A receber</th><th>Data prevista</th><th>Pagamento</th><th>Situação</th></tr></thead><tbody>${m.parcelas.map(p=>{const openv=Math.max(0,num(p.apda)-num(p.pago));return `<tr><td>${p.n}ª APDA</td><td>${brl(p.apda)}</td><td>${brl(p.apda)}</td><td>${brl(p.pago)}</td><td>${brl(openv)}</td><td>${esc(searchDate(p.da))}</td><td>${esc(searchDate(p.dp))}</td><td><span class="status ${/^pag/i.test(String(p.st||''))?'paid':'open'}">${esc(p.st||'—')}</span></td></tr>`}).join('')}</tbody></table></td></tr>`:'';
-     return `<tr><td><b>${esc(m.mapp)}</b></td><td>${esc(m.sacc)}</td><td>${esc(m.convenente)}</td><td>${esc(m.municipio)}</td><td>${esc(m.status)}</td><td>${m.valor!==''&&m.valor!==undefined?brl(m.valor):'—'}</td><td>${m.registros}</td></tr>${parcelasHtml}`;
+     const parcelasHtml=(selected.parcelas&&m.parcelas.length)?`<tr class="print-parcel-row"><td colspan="${headers.length}"><table class="print-parcel-subtable"><thead><tr><th>Parcela</th><th>Valor</th><th>Empenhado</th><th>Pago</th><th>A receber</th><th>Data prevista</th><th>Pagamento</th><th>Situação</th></tr></thead><tbody>${m.parcelas.map(p=>{const openv=Math.max(0,num(p.apda)-num(p.pago));return `<tr><td>${p.n}ª APDA</td><td>${brl(p.apda)}</td><td>${brl(p.apda)}</td><td>${brl(p.pago)}</td><td>${brl(openv)}</td><td>${esc(searchDate(p.da))}</td><td>${esc(searchDate(p.dp))}</td><td><span class="status ${/^pag/i.test(String(p.st||''))?'paid':'open'}">${esc(p.st||'—')}</span></td></tr>`}).join('')}</tbody></table></td></tr>`:'';
+     const commonCells=`<td><b>${esc(m.mapp)}</b></td><td>${esc(m.sacc)}</td><td>${esc(m.convenente)}</td><td>${esc(m.municipio)}</td><td>${esc(m.status)}</td>`;
+     const execCells=isExec?`<td>${brl(m.repasse||0)}</td><td>${brl(m.contra||0)}</td>`:'';
+     const valorCell=`<td>${m.valor!==''&&m.valor!==undefined?brl(m.valor):'—'}</td>`;
+     const execTailCells=isExec?`<td>${brl(m.emp||0)}</td><td>${brl(m.pago||0)}</td><td>${m.saldo!==''&&m.saldo!==undefined?brl(m.saldo):'—'}</td>`:'';
+     const regCell=`<td>${m.registros}</td>`;
+     return `<tr>${commonCells}${execCells}${valorCell}${execTailCells}${regCell}</tr>${parcelasHtml}`;
     }).join('');
-    return `<div class="print-base-group"><div class="print-base-title">${esc(g.base)} <span>${g.count.toLocaleString('pt-BR')} registro${g.count===1?'':'s'} · ${g.mapps.length.toLocaleString('pt-BR')} MAPP${g.mapps.length===1?'':'s'}</span></div><table><thead><tr><th>MAPP</th><th>SACC</th><th>Convenente</th><th>Município</th><th>Status</th><th>Valor Atualizado</th><th>Reg.</th></tr></thead><tbody>${rowsHtml}</tbody></table></div>`;
+    return `<div class="print-base-group"><div class="print-base-title">${esc(g.base)} <span>${g.count.toLocaleString('pt-BR')} registro${g.count===1?'':'s'} · ${g.mapps.length.toLocaleString('pt-BR')} MAPP${g.mapps.length===1?'':'s'}</span></div><table><thead><tr>${headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rowsHtml}</tbody></table></div>`;
   }).join('');
   return sections?`<div class="print-section"><div class="section-title">Resumo por MAPP e por base${selected.parcelas?' — com parcelas (APDAs)':''}</div>${sections}</div>`:'';
  })():'';
