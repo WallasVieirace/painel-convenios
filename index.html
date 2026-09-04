@@ -1791,16 +1791,40 @@ function openConfigExportModal(){
   onConfirm: async ()=>{}
  });
 }
+// "Fontes de Dados" usava nomes de arquivo e data de importação FIXOS no
+// código (ex.: "Todas as Bases 14.08.xlsx"), que ficavam desatualizados a
+// cada nova importação real. Agora lê DATA_ORIGIN — já preenchido de verdade
+// por handleBaseImport()/markOrigin() a cada importação, mas até aqui só
+// usado na barra de status do modal de importar — para mostrar o arquivo e a
+// data/hora reais da última importação de cada grupo de base.
+const CONFIG_IMPORT_GROUPS=[
+ ['EXECUÇÃO + CELEBRAÇÃO + FISCALIZAÇÃO + PRESTAÇÃO + PCF',['FISCALIZAÇÃO','PRESTAÇÃO DE CONTAS','CELEBRAÇÃO','EXECUÇÃO','PCF']],
+ ['Contratos',['CONTRATOS']],
+ ['Lei 360 - Com Parcelas',['LEI 360']],
+ ['Demonstrativo de Despesas Empenhadas (SIAFI)',['PAGAMENTOS SIAFI']],
+ ['Planos de Aplicação 2026 + Base Geral Ações',['PLANOS DE APLICAÇÃO','BASE GERAL AÇÕES']]
+];
+function configDataSourcesRows(){
+ return CONFIG_IMPORT_GROUPS.map(([conteudo,keys])=>{
+  const infos=keys.map(k=>DATA_ORIGIN[k]).filter(Boolean);
+  const registros=keys.reduce((a,k)=>a+(stats[k]||(DATA[k]||[]).length||0),0);
+  if(!infos.length)return {arquivo:'—',conteudo,registros,quando:null,via:null};
+  const latest=infos.sort((a,b)=>new Date(b.at)-new Date(a.at))[0];
+  return {arquivo:latest.label,conteudo,registros,quando:latest.at,via:latest.source};
+ });
+}
 function config(){
  const identity=loadSystemIdentity();
- const src=[['Todas as Bases 14.08.xlsx','EXECUÇÃO + CELEBRAÇÃO + FISCALIZAÇÃO + PRESTAÇÃO + PCF',Object.values(stats).slice(0,5).reduce((a,v)=>a+v,0)],['Lei 360 24.08.xlsx','Lei 360 - Com Parcelas',stats['LEI 360']],['Pagamentos Seafi 14.08.xlsx','Demonstrativo Despesas Empenhad',stats['PAGAMENTOS SIAFI']],['Base Planos e Ações.xls','Planos de Aplicação 2026 + Base Geral Ações',stats['PLANOS DE APLICAÇÃO']+stats['BASE GERAL AÇÕES']]];
+ const fontes=configDataSourcesRows();
+ const importadas=fontes.filter(f=>f.quando);
+ const ultimaImportacao=importadas.length?importadas.map(f=>f.quando).sort((a,b)=>new Date(b)-new Date(a))[0]:null;
  const cards=[
   ['Identidade do Sistema',`${identity.nome} — ${identity.unidades.replace(/\s*·\s*/g,' / ')}`,'Versão V2','openConfigIdentityModal()'],
-  ['Dados e Importação','Fontes anexadas e processadas','Atualização: 26/08/2026','openImportModal()'],
+  ['Dados e Importação','Fontes anexadas e processadas',ultimaImportacao?`Última importação: ${new Date(ultimaImportacao).toLocaleString('pt-BR')}`:'Nenhuma importação nesta sessão ainda','openImportModal()'],
   ['Segurança','Controle de usuários e permissões','Auditoria ativa',`setPage('acessos')`],
   ['Exportação','CSV, impressão e estrutura para PDF','Disponível nos módulos','openConfigExportModal()']
  ];
- return `<div class="row" style="grid-template-columns:repeat(2,1fr)">${cards.map(x=>`<div class="panel"><div class="ptitle">${x[0]}</div><div style="font-size:14px;font-weight:750">${esc(x[1])}</div><div class="sub" style="margin-top:5px">${esc(x[2])}</div><button class="btn secondary" style="margin-top:12px" type="button" onclick="${x[3]}">Configurar</button></div>`).join('')}</div><div class="panel" style="margin-top:14px"><div class="ptitle">Fontes de Dados</div><div class="tablewrap"><table class="table"><thead><tr><th>Arquivo</th><th>Conteúdo</th><th>Registros</th><th>Status</th></tr></thead><tbody>${src.map(x=>`<tr><td><b>${x[0]}</b></td><td>${x[1]}</td><td>${x[2].toLocaleString('pt-BR')}</td><td><span class="badge">Processado</span></td></tr>`).join('')}</tbody></table></div></div><div class="panel" style="margin-top:14px"><div class="ptitle">Parâmetros</div><div class="detailgrid"><div class="detail"><small>Nome</small><b>${esc(identity.nome)}</b></div><div class="detail"><small>Versão</small><b>2.0</b></div><div class="detail"><small>Órgão</small><b>${esc(identity.orgao)}</b></div><div class="detail"><small>Unidades</small><b>${esc(identity.unidades)}</b></div></div></div>`}
+ return `<div class="row" style="grid-template-columns:repeat(2,1fr)">${cards.map(x=>`<div class="panel"><div class="ptitle">${x[0]}</div><div style="font-size:14px;font-weight:750">${esc(x[1])}</div><div class="sub" style="margin-top:5px">${esc(x[2])}</div><button class="btn secondary" style="margin-top:12px" type="button" onclick="${x[3]}">Configurar</button></div>`).join('')}</div><div class="panel" style="margin-top:14px"><div class="ptitle">Fontes de Dados</div><div class="notice" style="margin-bottom:10px">Arquivo e data/hora refletem a última importação feita nesta sessão do navegador — recarregar a página ou usar outro computador reinicia essa informação (mostra "—" até uma nova importação).</div><div class="tablewrap"><table class="table"><thead><tr><th>Arquivo</th><th>Conteúdo</th><th>Registros</th><th>Atualizado em</th><th>Status</th></tr></thead><tbody>${fontes.map(f=>`<tr><td><b>${esc(f.arquivo)}</b></td><td>${esc(f.conteudo)}</td><td>${f.registros.toLocaleString('pt-BR')}</td><td>${f.quando?esc(new Date(f.quando).toLocaleString('pt-BR')):'—'}</td><td>${f.quando?`<span class="badge">Processado${f.via==='api'?' (API)':''}</span>`:'<span class="badge orange">Não importado</span>'}</td></tr>`).join('')}</tbody></table></div></div><div class="panel" style="margin-top:14px"><div class="ptitle">Parâmetros</div><div class="detailgrid"><div class="detail"><small>Nome</small><b>${esc(identity.nome)}</b></div><div class="detail"><small>Versão</small><b>2.0</b></div><div class="detail"><small>Órgão</small><b>${esc(identity.orgao)}</b></div><div class="detail"><small>Unidades</small><b>${esc(identity.unidades)}</b></div></div></div>`}
 function advNormalizeDisplay(v){return String(v??'').trim()}
 function advUniqueValues(rows,keys){
  const seen=new Map();
