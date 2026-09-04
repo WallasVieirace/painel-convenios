@@ -1348,9 +1348,11 @@ let serverUsersCache=null;
 let serverUsersLoading=false;
 let accessLogsCache=null;
 let accessLogsLoading=false;
-// Histórico de acessos (tabela access_logs no Supabase — ver sql/access_logs.sql).
-// A política de leitura (RLS) já restringe o SELECT ao usuário MASTER; um
-// usuário comum simplesmente recebe uma lista vazia, sem erro.
+// Histórico de acessos: reaproveita a tabela audit_log já existente no
+// Supabase, filtrando pelas linhas com action='login' (usuário e perfil vêm
+// de details, um jsonb). A política de leitura (RLS) já deixa cada usuário
+// ver as próprias linhas e só o MASTER ver todas — aqui só é exibido para o
+// MASTER mesmo assim, então um usuário comum nunca chega a ver este painel.
 async function refreshAccessLogs(force=false){
  if(accessLogsLoading)return accessLogsCache||[];
  if(!force && Array.isArray(accessLogsCache))return accessLogsCache;
@@ -1358,12 +1360,13 @@ async function refreshAccessLogs(force=false){
  if(state.page==='usuarios')render();
  try{
   if(!window.supabaseClient?.from)throw new Error('Serviço do Supabase indisponível.');
-  const {data,error}=await window.supabaseClient.from('access_logs')
-    .select('id,user_id,username,role,logged_in_at')
-    .order('logged_in_at',{ascending:false})
+  const {data,error}=await window.supabaseClient.from('audit_log')
+    .select('id,user_id,action,details,created_at')
+    .eq('action','login')
+    .order('created_at',{ascending:false})
     .limit(500);
   if(error)throw error;
-  accessLogsCache=Array.isArray(data)?data:[];
+  accessLogsCache=(Array.isArray(data)?data:[]).map(l=>({id:l.id,user_id:l.user_id,username:l.details?.username||'',role:l.details?.role||'',logged_in_at:l.created_at}));
  }catch(e){
   console.warn('Falha ao carregar histórico de acessos:',e);
   accessLogsCache=accessLogsCache||[];
@@ -1525,7 +1528,7 @@ function usuarios(){
    if(!Array.isArray(accessLogsCache)&&!accessLogsLoading)refreshAccessLogs();
    const logs=Array.isArray(accessLogsCache)?accessLogsCache:[];
    const logSummary=acessosLogSummary(logs);
-   accessPanel=`<div class="panel" style="margin-top:14px"><div class="toolbar"><div class="ptitle" style="margin:0;flex:1">Histórico de Acessos</div><button class="btn secondary" type="button" onclick="refreshAccessLogs(true)">Atualizar</button></div><div class="notice" style="margin:10px 0">${accessLogsLoading?'Carregando histórico de acessos...':`Cada login (senha, Google ou primeiro acesso) grava um registro. Mostrando os ${logs.length.toLocaleString('pt-BR')} acessos mais recentes.`}</div>${logSummary.length?`<div class="tablewrap"><table class="table"><thead><tr><th>Usuário</th><th>Perfil</th><th>Total de acessos</th><th>Último acesso</th></tr></thead><tbody>${logSummary.map(u=>`<tr><td><b>${esc(u.username||'—')}</b></td><td>${esc(u.role||'—')}</td><td>${u.count.toLocaleString('pt-BR')}</td><td>${fmtAccessDate(u.last)}</td></tr>`).join('')}</tbody></table></div>`:''}<div class="ptitle" style="margin-top:16px;font-size:13px">Acessos recentes (detalhado)</div><div class="tablewrap" style="margin-top:8px">${logs.length?`<table class="table"><thead><tr><th>Usuário</th><th>Perfil</th><th>Data/Hora</th></tr></thead><tbody>${logs.slice(0,100).map(l=>`<tr><td>${esc(l.username||'—')}</td><td>${esc(l.role||'—')}</td><td>${fmtAccessDate(l.logged_in_at)}</td></tr>`).join('')}</tbody></table>`:`<div class="empty">${accessLogsLoading?'Carregando...':'Nenhum acesso registrado ainda — a tabela access_logs pode ainda não existir no Supabase (ver sql/access_logs.sql).'}</div>`}</div></div>`;
+   accessPanel=`<div class="panel" style="margin-top:14px"><div class="toolbar"><div class="ptitle" style="margin:0;flex:1">Histórico de Acessos</div><button class="btn secondary" type="button" onclick="refreshAccessLogs(true)">Atualizar</button></div><div class="notice" style="margin:10px 0">${accessLogsLoading?'Carregando histórico de acessos...':`Cada login (senha, Google ou primeiro acesso) grava um registro. Mostrando os ${logs.length.toLocaleString('pt-BR')} acessos mais recentes.`}</div>${logSummary.length?`<div class="tablewrap"><table class="table"><thead><tr><th>Usuário</th><th>Perfil</th><th>Total de acessos</th><th>Último acesso</th></tr></thead><tbody>${logSummary.map(u=>`<tr><td><b>${esc(u.username||'—')}</b></td><td>${esc(u.role||'—')}</td><td>${u.count.toLocaleString('pt-BR')}</td><td>${fmtAccessDate(u.last)}</td></tr>`).join('')}</tbody></table></div>`:''}<div class="ptitle" style="margin-top:16px;font-size:13px">Acessos recentes (detalhado)</div><div class="tablewrap" style="margin-top:8px">${logs.length?`<table class="table"><thead><tr><th>Usuário</th><th>Perfil</th><th>Data/Hora</th></tr></thead><tbody>${logs.slice(0,100).map(l=>`<tr><td>${esc(l.username||'—')}</td><td>${esc(l.role||'—')}</td><td>${fmtAccessDate(l.logged_in_at)}</td></tr>`).join('')}</tbody></table>`:`<div class="empty">${accessLogsLoading?'Carregando...':'Nenhum acesso registrado ainda. O histórico começa a partir do próximo login de cada usuário.'}</div>`}</div></div>`;
  }
  return `<div class="row cards">${card('Usuários',total.toLocaleString('pt-BR'),'green','Cadastrados no servidor','Quantidade total de contas cadastradas no Supabase Auth para este sistema.')}${card('Ativos',active.toLocaleString('pt-BR'),'blue','Status','Usuários com status ATIVO — contas suspensas ou pendentes não são contadas aqui.')}${card('Master',masterCount.toLocaleString('pt-BR'),'orange','Administrador principal','Contas com perfil MASTER, o único que pode criar, editar ou excluir usuários.')}${card('Perfis',profiles.toLocaleString('pt-BR'),'','Perfis cadastrados','Quantidade de perfis distintos (MASTER, Gestor, Analista, Consulta...) em uso entre os usuários.')}${card('Seu acesso',isMaster?'MASTER':(currentProfile?.role||users.find(x=>String(x.id)===String(currentServerId))?.role||'Consulta'),'green','Usuário atual','O perfil da sua sessão atual, confirmado diretamente pelo servidor.')}${card('Servidor',serverUsersLoading?'Sincronizando…':'Sincronizado','blue','Fonte oficial','Indica se a lista de usuários exibida já foi confirmada com o Supabase ou ainda está carregando.')}</div><div class="panel" style="margin-top:14px"><div class="toolbar"><div class="ptitle" style="margin:0;flex:1">Usuários do Sistema</div>${btn}</div><div class="notice" style="margin:10px 0"><b>Fonte oficial:</b> os usuários são mantidos no <b>Supabase Auth</b> e no cadastro de perfis do servidor. O navegador mantém apenas um espelho de metadados.</div><div class="tablewrap"><table class="table"><thead><tr><th>Usuário</th><th>Perfil</th><th>Status</th><th>Cadastro</th><th>Ações</th></tr></thead><tbody>${rowsHtml}</tbody></table></div></div>${accessPanel}`;
 }
@@ -2892,16 +2895,20 @@ function finishLogin(result){
             window.__supabaseIsMaster=String(pr.data?.role||'').trim().toUpperCase()==='MASTER' && String(pr.data?.status||'').trim().toUpperCase()==='ATIVO';
             applyAdminVisibility();
           }
-          // Registra este login no histórico de acessos (tabela access_logs).
-          // Ponto único para as 3 formas de entrar no sistema (senha, Google,
-          // primeiro acesso), já que todas passam por finishLogin(). Nunca
-          // bloqueia o login: se a tabela ainda não existir no Supabase ou a
+          // Registra este login no histórico de acessos, reaproveitando a
+          // tabela audit_log que já existe no Supabase (user_id + action +
+          // details jsonb), com action='login'. Ponto único para as 3 formas
+          // de entrar no sistema (senha, Google, primeiro acesso), já que
+          // todas passam por finishLogin(). Nunca bloqueia o login: se a
           // gravação falhar por qualquer motivo, só registra um aviso no console.
           try{
-            await window.supabaseClient.from('access_logs').insert({
+            await window.supabaseClient.from('audit_log').insert({
               user_id:uid,
-              username:pr?.data?.username||window.__currentSupabaseProfile?.username||'',
-              role:pr?.data?.role||window.__currentSupabaseProfile?.role||''
+              action:'login',
+              details:{
+                username:pr?.data?.username||window.__currentSupabaseProfile?.username||'',
+                role:pr?.data?.role||window.__currentSupabaseProfile?.role||''
+              }
             });
           }catch(logErr){console.warn('Não foi possível registrar o acesso no histórico:',logErr)}
           serverUsersCache=null;
