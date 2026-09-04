@@ -416,6 +416,14 @@ html, body {
 .home-dot-warn{width:6px;height:6px;border-radius:50%;background:#c27a16;margin-top:4px;flex:0 0 6px}
 .home-dot-danger{width:6px;height:6px;border-radius:50%;background:#c6473f;margin-top:4px;flex:0 0 6px}
 .home-dot-ok{width:6px;height:6px;border-radius:50%;background:#168258;margin-top:4px;flex:0 0 6px}
+.home-atencao-text{flex:1;min-width:0}
+.home-atencao-toggle{border:0;background:none;color:var(--muted);cursor:pointer;font-size:10px;padding:0 2px;margin-top:1px;flex:0 0 auto;line-height:1}
+.home-atencao-toggle:hover{color:var(--green)}
+.home-atencao-detail{padding:2px 0 8px 12px;margin:-2px 0 2px;display:flex;flex-direction:column;gap:3px;max-height:180px;overflow:auto}
+.home-atencao-detail-row{display:flex;gap:8px;font-size:9.5px;color:#45585d;padding:4px 7px;background:#f7fafa;border-radius:5px}
+.home-atencao-detail-row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+.home-atencao-detail-row span:first-child{flex:1.4}
+.home-atencao-detail-more{font-size:9px;color:var(--muted);padding:2px 7px;font-style:italic}
 .home-item-vencimento{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:10.5px;padding:5px 0;border-bottom:1px dashed #eef2f2}
 .home-item-vencimento:last-child{border-bottom:0}
 .home-venc-nome{color:#264449;overflow:visible;text-overflow:clip;white-space:normal;max-width:none;flex:1;min-width:0}
@@ -742,7 +750,16 @@ function dashboard(){
    <div class="home-welcome-stat"><b>${pagF.length.toLocaleString('pt-BR')}</b><span>Lançamentos SIAFE</span></div>
   </div>
  </div>`;
- const homeAtencaoHtml=(items)=>items.length?items.map(it=>`<div class="home-item-atencao"><span class="home-dot-${it.cls}"></span>${esc(it.text)}</div>`).join(''):`<div class="home-item-atencao"><span class="home-dot-ok"></span>Nenhum ponto de atenção identificado</div>`;
+ const homeAtencaoCellVal=(r,c)=>{const raw=typeof c[1]==='function'?c[1](r):val(r,c[1]);return c[2]?c[2](raw,r):(raw||'—')};
+ const homeAtencaoHtml=(items)=>items.length?items.map(it=>{
+   const hasDetail=it.id&&Array.isArray(it.rows)&&it.rows.length&&Array.isArray(it.cols)&&it.cols.length;
+   // O botão só alterna a exibição via DOM (toggleHomeAtencaoDetail) — nunca chama
+   // render(), pois isso reconstruiria a Home e fecharia o quadro que o usuário
+   // acabou de expandir para poder ver este detalhe (mesma lógica de selecionarQuadroHome).
+   const toggleBtn=hasDetail?`<button type="button" class="home-atencao-toggle" data-atencao-toggle="${it.id}" onclick="event.stopPropagation();toggleHomeAtencaoDetail('${it.id}')" aria-label="Ver itens deste ponto de atenção">▾</button>`:'';
+   const detailHtml=hasDetail?`<div class="home-atencao-detail" id="atencaoDetail_${it.id}" style="display:none">${it.rows.slice(0,50).map(r=>`<div class="home-atencao-detail-row">${it.cols.map(c=>{const v=homeAtencaoCellVal(r,c);return `<span title="${esc(v)}">${esc(v)}</span>`}).join('')}</div>`).join('')}${it.rows.length>50?`<div class="home-atencao-detail-more">+ ${(it.rows.length-50).toLocaleString('pt-BR')} não exibido(s) — abra a base para ver todos</div>`:''}</div>`:'';
+   return `<div class="home-item-atencao"><span class="home-dot-${it.cls}"></span><span class="home-atencao-text">${esc(it.text)}</span>${toggleBtn}</div>${detailHtml}`;
+ }).join(''):`<div class="home-item-atencao"><span class="home-dot-ok"></span>Nenhum ponto de atenção identificado</div>`;
  const homeVencHtml=(items,emptyMsg)=>items.length?items.map(it=>`<div class="home-item-vencimento"><span class="home-venc-nome" title="${esc(it.nome)}">${esc(it.nome)}</span><span class="home-venc-prazo ${it.risk}">${esc(it.prazoLabel)}</span></div>`).join(''):`<div class="home-item-vencimento"><span class="home-venc-nome">${esc(emptyMsg||'Nenhum registro identificado')}</span></div>`;
  const homeRisk=d=>d<0?'danger':d<=30?'danger':d<=60?'warn':'safe';
  const homePrazoLabel=d=>d<0?'Vencido':d+' dias';
@@ -764,10 +781,11 @@ function dashboard(){
  const homeExpiryExecucao=[];execVencRows.forEach(r=>{const raw=(r?.__DASHBOARD_VENCIMENTO_EXECUCAO!==undefined?r.__DASHBOARD_VENCIMENTO_EXECUCAO:r?.['Data de término após aditivo/apostilamento']);if(raw===undefined||raw===null||String(raw).trim()==='')return;const d=dashboardExpiryDate(raw);if(d)homeExpiryExecucao.push({r,d})});
  homeExpiryExecucao.sort((a,b)=>a.d-b.d);
  const homeVencExecucao=homeExpiryExecucao.filter(x=>days(x.d)>=0).slice(0,3).map(x=>({nome:String(x.r?.__DASHBOARD_CONVENENTE_EXECUCAO!==undefined?x.r.__DASHBOARD_CONVENENTE_EXECUCAO:x.r?.['Convenente']??'').trim()||'Execução',prazoLabel:homePrazoLabel(days(x.d)),risk:homeRisk(days(x.d))}));
+ const homeContratosIdentCols=[['Convenente',['Convenente','CONVENENTE','CONVENENTE CONTRATADO']],['SACC',['SACC','N° SACC']]];
  const homeContratosAtencao=[];
- if(homeContratosVencidos)homeContratosAtencao.push({cls:'danger',text:`${homeContratosVencidos.toLocaleString('pt-BR')} contrato(s) vencido(s)`});
- if(homeContratosSaldoNeg)homeContratosAtencao.push({cls:'danger',text:`${homeContratosSaldoNeg.toLocaleString('pt-BR')} contrato(s) com saldo negativo`});
- if(homeContratosSemFiscal)homeContratosAtencao.push({cls:'warn',text:`${homeContratosSemFiscal.toLocaleString('pt-BR')} contrato(s) sem fiscal designado`});
+ if(homeContratosVencidos)homeContratosAtencao.push({cls:'danger',text:`${homeContratosVencidos.toLocaleString('pt-BR')} contrato(s) vencido(s)`,id:'contratos-vencidos',rows:ex.filter(r=>canonicalStatus(val(r,['Status','STATUS','SITUAÇÃO DO INSTRUMENTO']))==='VENCIDO'),cols:[...homeContratosIdentCols,['Saldo',['Saldo atual do Convênio','SALDO','Saldo'],v=>brl(num(v))]]});
+ if(homeContratosSaldoNeg)homeContratosAtencao.push({cls:'danger',text:`${homeContratosSaldoNeg.toLocaleString('pt-BR')} contrato(s) com saldo negativo`,id:'contratos-saldoneg',rows:ex.filter(r=>num(val(r,['SALDO','Saldo atual do Convênio','Saldo']))<0),cols:[...homeContratosIdentCols,['Saldo',['Saldo atual do Convênio','SALDO','Saldo'],v=>brl(num(v))]]});
+ if(homeContratosSemFiscal)homeContratosAtencao.push({cls:'warn',text:`${homeContratosSemFiscal.toLocaleString('pt-BR')} contrato(s) sem fiscal designado`,id:'contratos-semfiscal',rows:ex.filter(r=>!String(val(r,['FISCAL'])||'').trim()),cols:[...homeContratosIdentCols,['Gestor',['GESTOR','Gestor']]]});
  const homeQuadroContratos=`<div class="home-quadro home-c-contratos" data-id="contratos" onclick="selecionarQuadroHome('contratos')">
   <div class="home-quadro-head"><div class="home-quadro-head-left"><span class="home-quadro-ico"><svg viewBox="0 0 24 24"><path d="M8 3h8l4 4v14H4V3z"/><path d="M14 3v5h5"/><path d="M8 13h8M8 17h5"/></svg></span><div><div class="home-quadro-titulo">Contratos</div><div class="home-quadro-desc">Monitoramento de contratos vigentes</div></div></div><div class="home-quadro-head-right"><span class="home-quadro-tag">${ex.length.toLocaleString('pt-BR')} registros</span><span class="home-quadro-expand">Detalhes <i>⌄</i></span>${moduleDotsMenu('homeContratos','CONTRATOS')}</div></div>
   <div class="home-kpis-mini"><div class="home-kpi-mini"><span class="home-kpi-mini-label">Valor atualizado</span><span class="home-kpi-mini-value">${compactMoney(contratosValor)}</span></div><div class="home-kpi-mini"><span class="home-kpi-mini-label">Saldo</span><span class="home-kpi-mini-value">${compactMoney(contratosSaldo)}</span></div><div class="home-kpi-mini"><span class="home-kpi-mini-label">Gestores</span><span class="home-kpi-mini-value">${homeContratosGestores.toLocaleString('pt-BR')}</span></div></div>
@@ -786,9 +804,10 @@ function dashboard(){
  const homeLeiVenc=[];leiF.forEach(r=>{searchParcels(r).forEach(p=>{if(/a\s*pagar/i.test(String(p.st||''))&&p.da){const d=parseExpiryDate(p.da);if(d)homeLeiVenc.push({r,d})}})});
  homeLeiVenc.sort((a,b)=>a.d-b.d);
  const homeLeiVencTop=homeLeiVenc.filter(x=>days(x.d)>=-3).slice(0,3).map(x=>({nome:val(x.r,['Convenente'])||'Convênio',prazoLabel:homePrazoLabel(days(x.d)),risk:homeRisk(days(x.d))}));
+ const homeLeiIdentCols=[['Convenente',['Convenente','CONVENENTE']],['SACC',['SACC','N° SACC']]];
  const homeLeiAtencao=[];
- if(homeLeiPendencias)homeLeiAtencao.push({cls:'warn',text:`${homeLeiPendencias.toLocaleString('pt-BR')} convênio(s) com pendências registradas`});
- if(homeLeiSaldoAberto)homeLeiAtencao.push({cls:'warn',text:`${homeLeiSaldoAberto.toLocaleString('pt-BR')} convênio(s) ainda com saldo a pagar`});
+ if(homeLeiPendencias)homeLeiAtencao.push({cls:'warn',text:`${homeLeiPendencias.toLocaleString('pt-BR')} convênio(s) com pendências registradas`,id:'lei-pendencias',rows:leiF.filter(r=>String(val(r,['Pndências'])||'').trim()),cols:[...homeLeiIdentCols,['Pendência',['Pndências']]]});
+ if(homeLeiSaldoAberto)homeLeiAtencao.push({cls:'warn',text:`${homeLeiSaldoAberto.toLocaleString('pt-BR')} convênio(s) ainda com saldo a pagar`,id:'lei-saldoaberto',rows:leiF.filter(r=>num(val(r,['SALDO A PAGAR']))>0),cols:[...homeLeiIdentCols,['Saldo a Pagar',['SALDO A PAGAR'],v=>brl(num(v))]]});
  const homeQuadroLei=`<div class="home-quadro home-c-lei360" data-id="lei360" onclick="selecionarQuadroHome('lei360')">
   <div class="home-quadro-head"><div class="home-quadro-head-left"><span class="home-quadro-ico"><svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4z"/></svg></span><div><div class="home-quadro-titulo">Lei 360</div><div class="home-quadro-desc">Convênios sob a Lei Complementar 360/2025</div></div></div><div class="home-quadro-head-right"><span class="home-quadro-tag">${leiF.length.toLocaleString('pt-BR')} convênios</span><span class="home-quadro-expand">Detalhes <i>⌄</i></span>${moduleDotsMenu('homeLei','LEI 360')}</div></div>
   <div class="home-kpis-mini"><div class="home-kpi-mini"><span class="home-kpi-mini-label">Valor total</span><span class="home-kpi-mini-value">${compactMoney(leiTotals.total)}</span></div><div class="home-kpi-mini"><span class="home-kpi-mini-label">Saldo a pagar</span><span class="home-kpi-mini-value">${compactMoney(leiTotals.open)}</span></div><div class="home-kpi-mini"><span class="home-kpi-mini-label">Vigentes</span><span class="home-kpi-mini-value">${homeLeiVigentes.toLocaleString('pt-BR')}</span></div></div>
@@ -806,7 +825,8 @@ function dashboard(){
  const homeCeLocalCount={};ce.forEach(r=>{const s=String(val(r,['LOCAL ATUAL'])||'').trim();if(s)homeCeLocalCount[s]=(homeCeLocalCount[s]||0)+1});
  const homeCeLocalEntries=Object.entries(homeCeLocalCount).sort((a,b)=>b[1]-a[1]).slice(0,3);
  const homeCeValorTotal=sum(ce,['VALOR DO MAPP']);
- const homeCeAtencao=homeCeStatusEntries.slice(1,3).map(([n,c])=>({cls:'warn',text:`${c.toLocaleString('pt-BR')} processo(s) em "${n}"`}));
+ const homeCeIdentCols=[['MAPP',['MAPP']],['Município/Instituição',['MUNICÍPIO/ INSTITUIÇÃO']],['Observação',['OBSERVAÇÃO'],v=>v||'—']];
+ const homeCeAtencao=homeCeStatusEntries.slice(1,3).map(([n,c],i)=>({cls:'warn',text:`${c.toLocaleString('pt-BR')} processo(s) em "${n}"`,id:'celebracao-status-'+i,rows:ce.filter(r=>String(val(r,['STATUS','Status'])||'').trim()===n),cols:homeCeIdentCols}));
  const homeCeLocalItems=homeCeLocalEntries.map(([n,c])=>({nome:n,prazoLabel:`${c.toLocaleString('pt-BR')}`,risk:'safe'}));
  const homeQuadroCelebracao=`<div class="home-quadro home-c-celebracao" data-id="celebracao" onclick="selecionarQuadroHome('celebracao')">
   <div class="home-quadro-head"><div class="home-quadro-head-left"><span class="home-quadro-ico"><svg viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M6 20V10l6-6 6 6v10"/><path d="M10 20v-6h4v6"/></svg></span><div><div class="home-quadro-titulo">Celebração</div><div class="home-quadro-desc">Convênios/contratos em fase de celebração</div></div></div><div class="home-quadro-head-right"><span class="home-quadro-tag">${ce.length.toLocaleString('pt-BR')} processos</span><span class="home-quadro-expand">Detalhes <i>⌄</i></span>${moduleDotsMenu('homeCelebracao','CELEBRAÇÃO')}</div></div>
@@ -821,9 +841,10 @@ function dashboard(){
 
  /* -- Execução (financeiro, mesma base de Contratos) -- */
  const homeExecAPagar=Math.max(0,contratosEmp-contratosPago);
+ const homeExecAbaixo50Rows=ex.filter(r=>{const e=num(val(r,['VALOR EMPENHADO','Valor empenhado','Empenhado']));const p=num(val(r,['VALOR PAGO','Valor pago','Valor Pago','PAGO']));return e>0&&(p/e)<0.5});
  const homeExecAtencao=[];
  if(homeExecAPagar)homeExecAtencao.push({cls:'warn',text:`${compactMoney(homeExecAPagar)} empenhados ainda não pagos`});
- if(homeContratosAbaixo50)homeExecAtencao.push({cls:'danger',text:`${homeContratosAbaixo50.toLocaleString('pt-BR')} contrato(s) com execução abaixo de 50%`});
+ if(homeContratosAbaixo50)homeExecAtencao.push({cls:'danger',text:`${homeContratosAbaixo50.toLocaleString('pt-BR')} contrato(s) com execução abaixo de 50%`,id:'exec-abaixo50',rows:homeExecAbaixo50Rows,cols:[['Convenente',['Convenente','CONVENENTE','CONVENENTE CONTRATADO']],['SACC',['SACC','N° SACC']],['% Executado',r=>{const e=num(val(r,['VALOR EMPENHADO','Valor empenhado','Empenhado']));const p=num(val(r,['VALOR PAGO','Valor pago','Valor Pago','PAGO']));return e>0?Math.round(p/e*1000)/10:0},v=>v.toLocaleString('pt-BR')+'%']]});
  const homeQuadroExecucao=`<div class="home-quadro home-c-execucao" data-id="execucao" onclick="selecionarQuadroHome('execucao')">
   <div class="home-quadro-head"><div class="home-quadro-head-left"><span class="home-quadro-ico"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M21 7v6h-6"/></svg></span><div><div class="home-quadro-titulo">Execução</div><div class="home-quadro-desc">Execução financeira dos contratos</div></div></div><div class="home-quadro-head-right"><span class="home-quadro-tag">${execPct.toLocaleString('pt-BR',{maximumFractionDigits:1})}% pago/empenhado</span><span class="home-quadro-expand">Detalhes <i>⌄</i></span>${moduleDotsMenu('homeExecucao','CONTRATOS')}</div></div>
   <div class="home-kpis-mini"><div class="home-kpi-mini"><span class="home-kpi-mini-label">Empenhado</span><span class="home-kpi-mini-value">${compactMoney(contratosEmp)}</span></div><div class="home-kpi-mini"><span class="home-kpi-mini-label">A pagar</span><span class="home-kpi-mini-value">${compactMoney(homeExecAPagar)}</span></div><div class="home-kpi-mini"><span class="home-kpi-mini-label">Saldo a empenhar</span><span class="home-kpi-mini-value">${compactMoney(contratosSaldoEmpenhar)}</span></div></div>
@@ -841,9 +862,10 @@ function dashboard(){
  const homeSiafiPct=siafiEmp?Math.min(100,(siafiPago/siafiEmp)*100):0;
  const homeSiafiTopUG={};pagF.forEach(r=>{const ug=String(val(r,['Unidade Gestora / Credor'])||'').trim();if(!ug)return;const v=num(val(r,['Despesas Orçamentárias Pagas']));homeSiafiTopUG[ug]=(homeSiafiTopUG[ug]||0)+v});
  const homeSiafiTopUGItems=Object.entries(homeSiafiTopUG).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([n,v])=>({nome:n,prazoLabel:compactMoney(v),risk:'safe'}));
+ const homeSiafiIdentCols=[['UG/Credor',['Unidade Gestora / Credor']],['Processo',['Processo']]];
  const homeSiafiAtencao=[];
- if(homeSiafiDivergentes)homeSiafiAtencao.push({cls:'danger',text:`${homeSiafiDivergentes.toLocaleString('pt-BR')} lançamento(s) com divergência entre liquidado e pago`});
- if(homeSiafiSemOB)homeSiafiAtencao.push({cls:'warn',text:`${homeSiafiSemOB.toLocaleString('pt-BR')} lançamento(s) sem Ordem Bancária emitida`});
+ if(homeSiafiDivergentes)homeSiafiAtencao.push({cls:'danger',text:`${homeSiafiDivergentes.toLocaleString('pt-BR')} lançamento(s) com divergência entre liquidado e pago`,id:'siafi-divergentes',rows:pagF.filter(r=>{const liq=num(val(r,['Liquidado']));const pg=num(val(r,['Despesas Orçamentárias Pagas']));return liq>0&&Math.abs(liq-pg)>0.01}),cols:[...homeSiafiIdentCols,['Liquidado',['Liquidado'],v=>brl(num(v))],['Pago',['Despesas Orçamentárias Pagas'],v=>brl(num(v))]]});
+ if(homeSiafiSemOB)homeSiafiAtencao.push({cls:'warn',text:`${homeSiafiSemOB.toLocaleString('pt-BR')} lançamento(s) sem Ordem Bancária emitida`,id:'siafi-semob',rows:pagF.filter(r=>!String(val(r,['Ordem Bancária','Ordem Bancáia'])||'').trim()),cols:[...homeSiafiIdentCols,['Empenhado',['Empenhado'],v=>brl(num(v))]]});
  const homeQuadroSiafi=`<div class="home-quadro home-c-siafe" data-id="siafe" onclick="selecionarQuadroHome('siafe')">
   <div class="home-quadro-head"><div class="home-quadro-head-left"><span class="home-quadro-ico"><svg viewBox="0 0 24 24"><path d="M3 7h18v10H3z"/><path d="M3 10h18"/><path d="M7 14h4"/></svg></span><div><div class="home-quadro-titulo">Pagamentos SIAFE</div><div class="home-quadro-desc">Repasses processados no SIAFE</div></div></div><div class="home-quadro-head-right"><span class="home-quadro-tag">${esc(df.periodo||'2026')}</span><span class="home-quadro-expand">Detalhes <i>⌄</i></span>${moduleDotsMenu('homeSiafe','PAGAMENTOS SIAFI')}</div></div>
   <div class="home-kpis-mini"><div class="home-kpi-mini"><span class="home-kpi-mini-label">Empenhado</span><span class="home-kpi-mini-value">${compactMoney(siafiEmp)}</span></div><div class="home-kpi-mini"><span class="home-kpi-mini-label">Liquidado</span><span class="home-kpi-mini-value">${compactMoney(siafiLiq)}</span></div><div class="home-kpi-mini"><span class="home-kpi-mini-label">Pago</span><span class="home-kpi-mini-value">${compactMoney(siafiPago)}</span></div></div>
@@ -980,6 +1002,17 @@ function searchPage(){
 
 let moduleFiltersOpen={};
 function toggleModuleFiltersOpen(key){moduleFiltersOpen[key]=!moduleFiltersOpen[key];render()}
+function toggleHomeAtencaoDetail(id){
+  // Alterna via DOM direto (sem render()), pelo mesmo motivo de selecionarQuadroHome:
+  // um render() aqui reconstruiria a Home do zero e fecharia o quadro que o usuário
+  // acabou de expandir para poder clicar neste botão.
+  const el=document.getElementById('atencaoDetail_'+id);
+  const btn=document.querySelector('[data-atencao-toggle="'+id+'"]');
+  if(!el)return;
+  const open=el.style.display!=='none';
+  el.style.display=open?'none':'';
+  if(btn){btn.textContent=open?'▾':'▴';btn.setAttribute('aria-label',open?'Ver itens deste ponto de atenção':'Ocultar itens deste ponto de atenção')}
+}
 function genericTable(title,key,cols,filters=true){let rs=DATA[key]||[];const f=moduleFilters[key]||{};const defs=baseFilterDefs(key);const filtered=applyNamedFilters(rs,f);window.__defs=window.__defs||{};window.__defs[key]=cols;
  // Só o campo de busca ampla fica sempre visível. Os filtros específicos da base
  // (que podem passar de 8 campos, como em Contratos) ficam recolhidos atrás do
