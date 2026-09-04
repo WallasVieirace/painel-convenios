@@ -1546,8 +1546,9 @@ function showSesaToast(msg,ok=true){
  setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),250);},3200);
 }
 function userModalFieldHtml(f){
- if(f.type==='select')return `<div class="field"><label>${esc(f.label)}</label><select id="${f.id}" class="select">${(f.options||[]).map(o=>`<option value="${esc(o)}" ${o===f.value?'selected':''}>${esc(o)}</option>`).join('')}</select></div>`;
- return `<div class="field"><label>${esc(f.label)}</label><input id="${f.id}" class="input" type="${f.type||'text'}" placeholder="${esc(f.placeholder||'')}" value="${esc(f.value||'')}" autocomplete="${f.autocomplete||'off'}"></div>`;
+ const hint=f.hintId?`<small id="${f.hintId}" class="sub" style="display:block;margin-top:4px">${esc(f.hintDefault||'')}</small>`:'';
+ if(f.type==='select')return `<div class="field"><label>${esc(f.label)}</label><select id="${f.id}" class="select">${(f.options||[]).map(o=>`<option value="${esc(o)}" ${o===f.value?'selected':''}>${esc(o)}</option>`).join('')}</select>${hint}</div>`;
+ return `<div class="field"><label>${esc(f.label)}</label><input id="${f.id}" class="input" type="${f.type||'text'}" placeholder="${esc(f.placeholder||'')}" value="${esc(f.value||'')}" autocomplete="${f.autocomplete||'off'}" ${f.oninputPreview?`oninput="${f.oninputPreview}"`:''}>${hint}</div>`;
 }
 function openUserFormModal({title,subtitle,bodyHtml='',fields=[],confirmLabel='Confirmar',danger=false,onConfirm}){
  closeUserModal();
@@ -1595,7 +1596,13 @@ async function openNewUserModal(){
   title:'Novo usuário',
   subtitle:'Cadastre um novo acesso ao sistema. O usuário é criado diretamente no Supabase.',
   fields:[
-   {id:'newUserUsername',label:'Usuário',placeholder:'ex.: nome.sobrenome',type:'text'},
+   // Prévia ao vivo do e-mail de login (mesma normalização que a função
+   // admin-create-user aplica no servidor) — evita repetir o bug de
+   // 04/09/2026, em que um "Usuário" digitado com espaço/acento (ex.:
+   // "Catharina Mesquita") virava um e-mail sem espaço, mas a tela seguia
+   // mostrando o texto original: quem tentasse entrar com o que via nunca
+   // conseguia acessar.
+   {id:'newUserUsername',label:'Usuário',placeholder:'ex.: nome.sobrenome',type:'text',hintId:'newUserLoginPreview',hintDefault:'Sem espaços ou acentos — vira o login de acesso.',oninputPreview:"document.getElementById('newUserLoginPreview').textContent=this.value.trim()?('Login de acesso: '+sesaLoginEmail(this.value)):'Sem espaços ou acentos — vira o login de acesso.'"},
    {id:'newUserPassword',label:'Senha inicial',placeholder:'mínimo 6 caracteres',type:'password'},
    {id:'newUserRole',label:'Perfil',type:'select',options:['Consulta','Analista','Gestor'],value:'Consulta'},
    {id:'newUserFullName',label:'Nome completo',placeholder:'Nome completo do usuário',type:'text'}
@@ -2999,6 +3006,20 @@ function finishLogin(result){
   }catch(_){}
   bootAuthenticatedApp();
 }
+// Reconstrói o e-mail de login exatamente como a função admin-create-user do
+// Supabase monta o e-mail ao criar o usuário (mesma limpeza: minúsculas, sem
+// espaço/acento). Sem isso, digitar o usuário com espaço ou acento (como
+// aparecia mostrado antes da correção de 04/09/2026 — ex.: "Catharina
+// Mesquita") nunca batia com o e-mail real da conta.
+function sesaLoginEmail(raw){
+ const s=String(raw||'').trim();
+ if(!s)return '';
+ if(s.includes('@')){
+  const [local,domain]=s.split('@');
+  return `${String(local||'').toLowerCase().replace(/[^a-z0-9._-]/g,'')}@${String(domain||'').toLowerCase()}`;
+ }
+ return `${s.toLowerCase().replace(/[^a-z0-9._-]/g,'')}@saude.ce.gov.br`;
+}
 function setupLogin(){
   const form=document.getElementById('loginForm');
   const user=document.getElementById('loginUser');
@@ -3017,7 +3038,7 @@ function setupLogin(){
     const rawPass=String(pass?.value||'');
     if(!rawUser||!rawPass){if(status){status.className='login-status err';status.textContent='Informe o usuário e a senha de acesso.';}if(submit){submit.disabled=false;submit.innerHTML='↪ &nbsp; Entrar no Painel';}return;}
     try{
-      const email=rawUser.includes('@')?rawUser:rawUser+'@saude.ce.gov.br';
+      const email=sesaLoginEmail(rawUser);
       if(window.supabaseClient){
         const {data,error}=await window.supabaseClient.auth.signInWithPassword({email,password:rawPass});
         if(!error && data?.session){
@@ -3174,10 +3195,10 @@ async function ensureSupabaseMasterSession(interactive=true){
   if(!interactive)return null;
   const remembered=String(localStorage.getItem('sesa_gestao_session_v2')||'').trim();
   let login=remembered || String(window.__currentSupabaseProfile?.username||'').trim();
-  if(login && !login.includes('@')) login+='@saude.ce.gov.br';
+  if(login && !login.includes('@')) login=sesaLoginEmail(login);
   if(!login) login=String(prompt('Usuário MASTER do Supabase:')||'').trim();
   if(!login)return null;
-  if(!login.includes('@'))login+='@saude.ce.gov.br';
+  if(!login.includes('@'))login=sesaLoginEmail(login);
   const pwd=prompt('A sessão do Supabase expirou ou foi revogada. Digite a senha da conta MASTER para reautenticar:');
   if(pwd===null)return null;
   if(!String(pwd))throw new Error('Informe a senha da conta MASTER do Supabase.');
