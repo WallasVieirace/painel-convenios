@@ -1742,7 +1742,10 @@ function detailEntries(r){
 }
 function detailMoney(k){
  const s=String(k);
- if(/status/i.test(s))return false;
+ // "JUSTIFICATIVA DESPESA" e afins são texto livre, não valores — sem essa
+ // exclusão, a palavra "despesa" no nome do campo fazia o texto ser tratado
+ // como dinheiro e exibido como "R$ 0,00".
+ if(/status|justificativa|descri[cç][aã]o|observ/i.test(s))return false;
  return /valor|saldo|empenhad|liquid|pag[oa]|despesa|recurso|repasse|parcela|montante|custo|preço|preco/i.test(s);
 }
 function detailHistory(k){return /data|vig[eê]ncia|status|situa[cç][aã]o|monitor|hist[oó]r|atualiza|assinatura|publica[cç][aã]o|tramita|prazo|parecer|empenho|pagamento/i.test(String(k))}
@@ -1813,9 +1816,35 @@ function renderDetailDrawer(){
  } else {
    content=detailTabContent(r,activeKey==='Resumo'?'Resumo':activeKey);
  }
- $('#drawer').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:start"><div><div class="title" style="font-size:17px">${esc(val(r,['Convenente','MUNICÍPIO/ INSTITUIÇÃO','CONVENENTE'])||'Registro')}</div><div class="sub">MAPP ${esc(val(r,['MAPP','MAPP '])||'—')} · ${esc(val(r,['N° SACC','INSTRUMENTO (SACC)','SACC'])||'—')}</div></div><button class="btn secondary" onclick="event.stopPropagation();closeDetail()">Fechar</button></div><div class="tabs" style="margin-top:16px">${labels}</div>${content}`;
+ $('#drawer').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:start;gap:10px"><div><div class="title" style="font-size:17px">${esc(val(r,['Convenente','MUNICÍPIO/ INSTITUIÇÃO','CONVENENTE'])||'Registro')}</div><div class="sub">MAPP ${esc(val(r,['MAPP','MAPP '])||'—')} · ${esc(val(r,['N° SACC','INSTRUMENTO (SACC)','SACC'])||'—')}</div></div><div style="display:flex;gap:8px;flex-shrink:0"><button class="btn secondary" onclick="event.stopPropagation();generateDetailPdfReport()">Gerar PDF</button><button class="btn secondary" onclick="event.stopPropagation();closeDetail()">Fechar</button></div></div><div class="tabs" style="margin-top:16px">${labels}</div>${content}`;
 }
 function openDetail(r){state.detailRecord=r;state.detailTabKey='Resumo';state.tab='Resumo';renderDetailDrawer();$('#overlay').classList.add('open');$('#drawer').classList.add('open')}
+// Gera um PDF com TODOS os campos do registro aberto no drawer de detalhes —
+// disponível em qualquer tela que use esse mesmo drawer (Pesquisa, Consultas
+// Avançadas, Contratos, Lei 360, Pagamentos SIAFI, Saúde Digital etc.), para
+// o usuário poder mostrar o detalhamento completo a um gestor quando precisar.
+function generateDetailPdfReport(){
+ const r=state.detailRecord;
+ if(!r){alert('Nenhum registro selecionado.');return}
+ const entries=detailEntries(r);
+ if(!entries.length){alert('Nenhuma informação disponível para gerar o PDF.');return}
+ const titulo=val(r,['Convenente','MUNICÍPIO/ INSTITUIÇÃO','CONVENENTE','CONVENENTE CONTRATADO'])||'Registro';
+ const mapp=val(r,['MAPP','MAPP '])||'—';
+ const sacc=val(r,['N° SACC','INSTRUMENTO (SACC)','SACC'])||'—';
+ const base=r.__m||state.page&&{contratos:'CONTRATOS',lei:'LEI 360',pagamentos:'PAGAMENTOS SIAFI',saude:'PLANOS DE APLICAÇÃO'}[state.page]||'';
+ const crest=document.querySelector('.crest')?.src||'';
+ const user=window.sesaAuth?.current?.()||'Administrador';
+ const generated=new Date().toLocaleString('pt-BR');
+ const gridHtml=`<div class="detail-print-grid">${entries.map(([k,v])=>`<div class="detail-print-item"><small>${esc(k)}</small><b>${esc(detailFormattedValue(k,v))}</b></div>`).join('')}</div>`;
+ const headerHtml=`<div class="corp-header"><div class="corp-brand">${crest?`<img src="${crest}" alt="Brasão do Ceará" class="corp-crest-big">`:'<div class="state-name">CEARÁ</div>'}<div><div class="gov">GOVERNO DO ESTADO</div><div class="org">SECRETARIA DA SAÚDE</div></div></div><div class="corp-unit"><b>CECOC</b><span>|</span><b>COGCO</b><span>|</span><b>SEAFI</b></div><div class="corp-doc"><b>Detalhamento do Registro</b><small>${esc(base||'Sistema SESA Gestão Pública')}</small></div></div>`;
+ const metaHtml=`<div class="meta-line"><span><b>Usuário:</b> ${esc(user)}</span><span><b>Data de impressão:</b> ${esc(generated)}</span><span><b>Campos:</b> ${entries.length.toLocaleString('pt-BR')}</span></div>`;
+ const titleHtml=`<div class="print-section"><div class="section-title" style="font-size:15px">${esc(titulo)}</div><div class="result-count">MAPP ${esc(mapp)} · ${esc(sacc)}</div></div>`;
+ const footerHtml=`<div class="corp-footer"><span>SESA — CECOC | COGCO | SEAFI</span><span>Documento gerado pelo Sistema SESA Gestão Pública</span><span>Impresso em ${esc(generated)}</span></div>`;
+ const html=`<!doctype html><html><head><meta charset="utf-8"><title>Detalhamento — ${esc(titulo)}</title><style>
+body{font-family:Inter,Segoe UI,Arial,sans-serif;margin:0;color:#173238;background:#fff;font-size:10px}.page{padding:18mm 14mm 16mm}.corp-header{display:grid;grid-template-columns:1fr auto;gap:8px 18px;border-bottom:2px solid #087a59;padding-bottom:12px;margin-bottom:12px}.corp-brand{display:flex;align-items:center;gap:10px}.corp-brand img.corp-crest-big{width:64px;height:74px;object-fit:contain}.state-name{font-size:19px;font-weight:900;letter-spacing:.5px}.gov{font-size:9px;font-weight:800;letter-spacing:.5px}.org{font-size:9px;color:#557177;margin-top:2px}.corp-unit{grid-column:1;display:flex;gap:7px;font-size:9px;color:#087a59;letter-spacing:.7px}.corp-doc{grid-column:2;grid-row:1/3;text-align:right;align-self:center}.corp-doc b{display:block;font-size:15px}.corp-doc small{display:block;color:#6c7d82;margin-top:3px}.meta-line{display:flex;justify-content:space-between;gap:12px;background:#f2f7f6;border:1px solid #d8e7e3;border-radius:6px;padding:7px 9px;margin-bottom:10px;font-size:9px}.print-section{margin-top:4px;margin-bottom:12px}.section-title{font-weight:850;color:#123e46}.result-count{color:#6c7d82;font-size:9px;margin-top:3px}.detail-print-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.detail-print-item{border:1px solid #dce6e8;border-radius:7px;padding:8px;break-inside:avoid}.detail-print-item small{display:block;color:#6c7d82;font-size:8px;text-transform:uppercase;letter-spacing:.3px}.detail-print-item b{display:block;font-size:10px;margin-top:4px;font-weight:700;word-break:break-word;white-space:pre-wrap}.corp-footer{display:flex;justify-content:space-between;gap:10px;border-top:1px solid #dce6e8;margin-top:18px;padding-top:7px;color:#6c7d82;font-size:8px}@media print{body{font-size:9px}.page{padding:8mm}.detail-print-item{break-inside:avoid}.corp-footer{position:fixed;bottom:0;left:8mm;right:8mm}}
+</style></head><body><div class="page">${headerHtml}${metaHtml}${titleHtml}${gridHtml}${footerHtml}</div></body></html>`;
+ openReportPrintDocument(html,'Detalhamento — '+titulo);
+}
 function closeDetail(){$('#overlay').classList.remove('open');$('#drawer').classList.remove('open');state.detailRecord=null}
 $('#overlay').onclick=function(e){if(e.target===this)closeDetail()};
 function csvCell(v){return `"${String(v??'').replace(/"/g,'""').replace(/\r?\n/g,' ')}"`}
