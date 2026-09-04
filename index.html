@@ -1746,6 +1746,39 @@ function detailMoney(k){
  return /valor|saldo|empenhad|liquid|pag[oa]|despesa|recurso|repasse|parcela|montante|custo|preço|preco/i.test(s);
 }
 function detailHistory(k){return /data|vig[eê]ncia|status|situa[cç][aã]o|monitor|hist[oó]r|atualiza|assinatura|publica[cç][aã]o|tramita|prazo|parecer|empenho|pagamento/i.test(String(k))}
+// Campos de data chegam do Excel como número de série (ex.: 45477) — sem essa
+// detecção, o drawer de detalhes exibia o número cru em vez da data formatada.
+function detailDate(k){
+ const s=String(k);
+ if(/status|situa[cç][aã]o/i.test(s))return false;
+ return /data|vig[eê]ncia|vencimento|assinatura|public|celebra[cç][aã]o|t[eé]rmino|in[ií]cio|prazo/i.test(s);
+}
+// Formatador de data "seguro": só converte quando reconhece de fato um serial do
+// Excel (faixa 20000-70000) ou um texto já no padrão DD/MM/AAAA. Não cai no
+// `new Date(string)` genérico — esse fallback interpreta número/texto curto como
+// ANO (ex.: "90" virava 01/01/1990), o mesmo bug já corrigido no relatório de
+// Contratos. Retorna null quando o valor não é reconhecível como data, e nesse
+// caso o campo mantém o valor original em vez de arriscar uma data inventada.
+function detailFormatDate(v){
+ if(v instanceof Date&&!isNaN(v))return v.toLocaleDateString('pt-BR');
+ const n=Number(v);
+ if(Number.isFinite(n)&&n>20000&&n<70000){
+  const d=new Date(Date.UTC(1899,11,30)+n*86400000);
+  return new Date(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()).toLocaleDateString('pt-BR');
+ }
+ const s=String(v??'').trim();
+ const m=s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);
+ if(m){const d=new Date(+m[3],+m[2]-1,+m[1]);if(!isNaN(d))return d.toLocaleDateString('pt-BR');}
+ return null;
+}
+function detailFormattedValue(k,v){
+ if(detailMoney(k))return brl(v);
+ if(detailDate(k)){
+  const formatted=detailFormatDate(v);
+  if(formatted)return formatted;
+ }
+ return v;
+}
 // Um botão discreto de copiar por campo — útil quando o usuário precisa colar um
 // valor (MAPP, SACC, CNPJ...) em outro sistema sem digitar à mão.
 function copyDetailValue(btn,text){
@@ -1754,7 +1787,7 @@ function copyDetailValue(btn,text){
  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(text).then(done).catch(fallback);else fallback();
 }
 function detailBox(k,v){
- const display=detailMoney(k)?brl(v):v;
+ const display=detailFormattedValue(k,v);
  const safe=JSON.stringify(String(display??'')).replace(/'/g,'&#39;');
  return `<div class="detail"><small>${esc(k)}</small><div class="detail-row"><b>${esc(display)}</b><button type="button" class="detail-copy" title="Copiar valor" onclick='event.stopPropagation();copyDetailValue(this,${safe})'>⧉</button></div></div>`;
 }
