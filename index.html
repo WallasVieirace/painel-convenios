@@ -1824,7 +1824,7 @@ function config(){
   ['Segurança','Controle de usuários e permissões','Auditoria ativa',`setPage('acessos')`],
   ['Exportação','CSV, impressão e estrutura para PDF','Disponível nos módulos','openConfigExportModal()']
  ];
- return `<div class="row" style="grid-template-columns:repeat(2,1fr)">${cards.map(x=>`<div class="panel"><div class="ptitle">${x[0]}</div><div style="font-size:14px;font-weight:750">${esc(x[1])}</div><div class="sub" style="margin-top:5px">${esc(x[2])}</div><button class="btn secondary" style="margin-top:12px" type="button" onclick="${x[3]}">Configurar</button></div>`).join('')}</div><div class="panel" style="margin-top:14px"><div class="ptitle">Fontes de Dados</div><div class="notice" style="margin-bottom:10px">Arquivo e data/hora refletem a última importação feita nesta sessão do navegador — recarregar a página ou usar outro computador reinicia essa informação (mostra "—" até uma nova importação).</div><div class="tablewrap"><table class="table"><thead><tr><th>Arquivo</th><th>Conteúdo</th><th>Registros</th><th>Atualizado em</th><th>Status</th></tr></thead><tbody>${fontes.map(f=>`<tr><td><b>${esc(f.arquivo)}</b></td><td>${esc(f.conteudo)}</td><td>${f.registros.toLocaleString('pt-BR')}</td><td>${f.quando?esc(new Date(f.quando).toLocaleString('pt-BR')):'—'}</td><td>${f.quando?`<span class="badge">Processado${f.via==='api'?' (API)':''}</span>`:'<span class="badge orange">Não importado</span>'}</td></tr>`).join('')}</tbody></table></div></div><div class="panel" style="margin-top:14px"><div class="ptitle">Parâmetros</div><div class="detailgrid"><div class="detail"><small>Nome</small><b>${esc(identity.nome)}</b></div><div class="detail"><small>Versão</small><b>2.0</b></div><div class="detail"><small>Órgão</small><b>${esc(identity.orgao)}</b></div><div class="detail"><small>Unidades</small><b>${esc(identity.unidades)}</b></div></div></div>`}
+ return `<div class="row" style="grid-template-columns:repeat(2,1fr)">${cards.map(x=>`<div class="panel"><div class="ptitle">${x[0]}</div><div style="font-size:14px;font-weight:750">${esc(x[1])}</div><div class="sub" style="margin-top:5px">${esc(x[2])}</div><button class="btn secondary" style="margin-top:12px" type="button" onclick="${x[3]}">Configurar</button></div>`).join('')}</div><div class="panel" style="margin-top:14px"><div class="ptitle">Fontes de Dados</div><div class="notice" style="margin-bottom:10px">Arquivo e data/hora vêm do servidor (Supabase) quando a importação foi sincronizada com sucesso — por isso aparecem igual em qualquer computador e continuam após recarregar a página. Uma importação feita sem sincronizar (ex.: sem estar logado como MASTER) só reflete nesta tela até você recarregar; mostra "—" quando nenhuma importação bem-sucedida foi registrada ainda.</div><div class="tablewrap"><table class="table"><thead><tr><th>Arquivo</th><th>Conteúdo</th><th>Registros</th><th>Atualizado em</th><th>Status</th></tr></thead><tbody>${fontes.map(f=>`<tr><td><b>${esc(f.arquivo)}</b></td><td>${esc(f.conteudo)}</td><td>${f.registros.toLocaleString('pt-BR')}</td><td>${f.quando?esc(new Date(f.quando).toLocaleString('pt-BR')):'—'}</td><td>${f.quando?`<span class="badge">Processado${f.via==='api'?' (API)':''}</span>`:'<span class="badge orange">Não importado</span>'}</td></tr>`).join('')}</tbody></table></div></div><div class="panel" style="margin-top:14px"><div class="ptitle">Parâmetros</div><div class="detailgrid"><div class="detail"><small>Nome</small><b>${esc(identity.nome)}</b></div><div class="detail"><small>Versão</small><b>2.0</b></div><div class="detail"><small>Órgão</small><b>${esc(identity.orgao)}</b></div><div class="detail"><small>Unidades</small><b>${esc(identity.unidades)}</b></div></div></div>`}
 function advNormalizeDisplay(v){return String(v??'').trim()}
 function advUniqueValues(rows,keys){
  const seen=new Map();
@@ -3230,7 +3230,7 @@ function hideSyncBanner(){
 async function hydrateFromSupabase(){
  if(!window.supabaseClient)return false;
  try{
-  const {data:sources,error}=await window.supabaseClient.from('data_sources').select('id,source_key,row_count,last_imported_at').eq('active',true);
+  const {data:sources,error}=await window.supabaseClient.from('data_sources').select('id,source_key,row_count,last_imported_at,last_file_name').eq('active',true);
   if(error||!sources)return false;
   const invMap={}; Object.entries(SUPABASE_KEY_MAP).forEach(([k,v])=>invMap[v]=k);
   const pending=sources.filter(src=>invMap[src.source_key]&&src.row_count);
@@ -3247,7 +3247,10 @@ async function hydrateFromSupabase(){
    const appKey=invMap[src.source_key];
    if(rows.length){
     DATA[appKey]=rows;
-    DATA_ORIGIN[appKey]={source:'nuvem',label:'Servidor',at:src.last_imported_at||new Date().toISOString()};
+    // Arquivo/data reais da última importação, persistidos no servidor — assim
+    // a tela Configurações mostra a mesma informação em qualquer computador,
+    // não só na sessão do navegador em que a importação foi feita.
+    DATA_ORIGIN[appKey]={source:'nuvem',label:src.last_file_name||'Servidor',at:src.last_imported_at||new Date().toISOString()};
     any=true;
    }
   });
@@ -3275,7 +3278,7 @@ async function pushDatasetToSupabase(appKey,rows){
    const {error:eIns}=await window.supabaseClient.from('data_rows').insert(chunk);
    if(eIns)return {ok:false,reason:'Falha ao enviar dados (linha '+(i+1)+'): '+eIns.message};
   }
-  const {error:eUpd}=await window.supabaseClient.from('data_sources').update({row_count:rows.length,last_imported_at:new Date().toISOString(),last_imported_by:user.id}).eq('id',src.id);
+  const {error:eUpd}=await window.supabaseClient.from('data_sources').update({row_count:rows.length,last_imported_at:new Date().toISOString(),last_imported_by:user.id,last_file_name:DATA_ORIGIN[appKey]?.label||null}).eq('id',src.id);
   if(eUpd)return {ok:false,reason:'Falha ao atualizar metadados: '+eUpd.message};
   return {ok:true,user};
  }catch(e){return {ok:false,reason:e.message||String(e)}}
