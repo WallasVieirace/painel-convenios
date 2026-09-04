@@ -1745,7 +1745,62 @@ function acessos(){
  }
  return `<div class="panel"><div class="ptitle">Matriz de Permissões</div><div class="notice">Controle granular por módulo. Ajuste o padrão de cada perfil ou personalize um usuário específico quando o acesso dele precisar fugir do perfil padrão.</div>${tabsHtml}${matrixHtml}</div><div class="row panels" style="margin-top:14px"><div class="panel"><div class="ptitle">Políticas de segurança</div><div class="detailgrid"><div class="detail"><small>Autenticação</small><b>Obrigatória</b></div><div class="detail"><small>Auditoria</small><b>Ativa</b></div><div class="detail"><small>Expiração de sessão</small><b>30 minutos</b></div><div class="detail"><small>Exportação</small><b>Controlada por perfil</b></div></div></div><div class="panel"><div class="ptitle">Ações</div><button class="btn">Salvar permissões</button> <button class="btn secondary">Restaurar padrão</button></div></div>`}
 function relatorios(){const items=[['Relatório Geral','Todas as bases','5 bases principais','Pesquisa integrada'],['Execução','EXECUÇÃO',(DATA['EXECUÇÃO']||[]).length+' registros','Situação dos convênios e execução financeira'],['Contratos','CONTRATOS',(DATA['CONTRATOS']||[]).length+' registros','Valores, empenho, pagamento e saldo'],['Celebração','CELEBRAÇÃO',(DATA['CELEBRAÇÃO']||[]).length+' registros','MAPPs e status de celebração'],['Fiscalização','FISCALIZAÇÃO',(DATA['FISCALIZAÇÃO']||[]).length+' registros','Fiscalizações e atrasos'],['Prestação de Contas','PRESTAÇÃO DE CONTAS',(DATA['PRESTAÇÃO DE CONTAS']||[]).length+' registros','Prazos, pareceres e pendências'],['PCF','PCF',(DATA['PCF']||[]).length+' registros','Tramitação e pagamentos'],['Lei 360','LEI 360',(DATA['LEI 360']||[]).length+' registros','Parcelas e execução financeira'],['Pagamentos SIAFI','PAGAMENTOS SIAFI',(DATA['PAGAMENTOS SIAFI']||[]).length+' lançamentos','Empenhado, liquidado e pago'],['Saúde Digital','PLANOS DE APLICAÇÃO',(DATA['PLANOS DE APLICAÇÃO']||[]).length.toLocaleString('pt-BR')+' registros','Planos de aplicação 2026']];return `<div class="row" style="grid-template-columns:repeat(3,1fr)">${items.map(x=>{const isGeral=x[0]==='Relatório Geral';const hasReport=isGeral||!!MODULE_REPORT_CONFIGS[x[1]];const noData=!isGeral&&!(DATA[x[1]]||[]).length;return `<div class="panel"><div class="ptitle">${x[0]}</div><div class="sub">Fonte: ${x[1]}</div><div style="font-size:18px;font-weight:800;margin-top:10px">${x[2]}</div><div class="sub" style="margin-top:5px">${x[3]}</div><div class="actions" style="margin-top:12px;justify-content:space-between;align-items:center">${hasReport?`<button type="button" class="btn" onclick="${isGeral?'generateGeneralReport()':x[1]==='CONTRATOS'?'generateContractsDirectReport()':`generateModuleReport('${x[1]}')`}" ${noData?'disabled title="Nenhum dado importado ainda"':''}>Gerar PDF</button>`:`<button class="btn" onclick="setPage('pesquisa')">Relatório na Pesquisa</button>`}<button class="btn-link" onclick="setPage('${isGeral?'dashboard':x[1]==='EXECUÇÃO'?'pesquisa':x[1]==='CONTRATOS'?'contratos':x[1]==='LEI 360'?'lei':x[1]==='PAGAMENTOS SIAFI'?'pagamentos':x[1]==='PLANOS DE APLICAÇÃO'?'saude':'pesquisa'}')">Abrir base →</button></div></div>`}).join('')}</div><div class="panel" style="margin-top:14px"><div class="ptitle">Sobre os relatórios em PDF</div><div class="sub">Cada relatório traz os indicadores reais da base no momento da geração, um alerta com o principal ponto de atenção (quando houver) e os registros mais relevantes daquele achado — nada é pré-calculado ou fictício.</div></div>`}
-function config(){const src=[['Todas as Bases 14.08.xlsx','EXECUÇÃO + CELEBRAÇÃO + FISCALIZAÇÃO + PRESTAÇÃO + PCF',Object.values(stats).slice(0,5).reduce((a,v)=>a+v,0)],['Lei 360 24.08.xlsx','Lei 360 - Com Parcelas',stats['LEI 360']],['Pagamentos Seafi 14.08.xlsx','Demonstrativo Despesas Empenhad',stats['PAGAMENTOS SIAFI']],['Base Planos e Ações.xls','Planos de Aplicação 2026 + Base Geral Ações',stats['PLANOS DE APLICAÇÃO']+stats['BASE GERAL AÇÕES']]];return `<div class="row" style="grid-template-columns:repeat(2,1fr)">${[['Identidade do Sistema','SESA Gestão Pública — CECOC / COGCO / SEAFI','Versão V2'],['Dados e Importação','Fontes anexadas e processadas','Atualização: 26/08/2026'],['Segurança','Controle de usuários e permissões','Auditoria ativa'],['Exportação','CSV, impressão e estrutura para PDF','Disponível nos módulos']].map(x=>`<div class="panel"><div class="ptitle">${x[0]}</div><div style="font-size:14px;font-weight:750">${x[1]}</div><div class="sub" style="margin-top:5px">${x[2]}</div><button class="btn secondary" style="margin-top:12px">Configurar</button></div>`).join('')}</div><div class="panel" style="margin-top:14px"><div class="ptitle">Fontes de Dados</div><div class="tablewrap"><table class="table"><thead><tr><th>Arquivo</th><th>Conteúdo</th><th>Registros</th><th>Status</th></tr></thead><tbody>${src.map(x=>`<tr><td><b>${x[0]}</b></td><td>${x[1]}</td><td>${x[2].toLocaleString('pt-BR')}</td><td><span class="badge">Processado</span></td></tr>`).join('')}</tbody></table></div></div><div class="panel" style="margin-top:14px"><div class="ptitle">Parâmetros</div><div class="detailgrid"><div class="detail"><small>Nome</small><b>SESA Gestão Pública</b></div><div class="detail"><small>Versão</small><b>2.0</b></div><div class="detail"><small>Órgão</small><b>Secretaria da Saúde do Ceará</b></div><div class="detail"><small>Unidades</small><b>CECOC · COGCO · SEAFI</b></div></div></div>`}
+// Identidade exibida no painel "Parâmetros" desta própria tela — editável pelo
+// card "Identidade do Sistema". Fica salva neste navegador: os cabeçalhos do
+// menu lateral e dos relatórios em PDF são textos fixos espalhados por várias
+// funções do sistema e não foram tornados dinâmicos (mudar isso teria um
+// alcance bem maior do que o pedido de conserto destes cards).
+const SESA_IDENTITY_DEFAULTS={nome:'SESA Gestão Pública',orgao:'Secretaria da Saúde do Ceará',unidades:'CECOC · COGCO · SEAFI'};
+function loadSystemIdentity(){
+ try{return {...SESA_IDENTITY_DEFAULTS,...JSON.parse(localStorage.getItem('sesa_gestao_identity_v1')||'{}')}}
+ catch(_){return {...SESA_IDENTITY_DEFAULTS}}
+}
+function saveSystemIdentity(v){try{localStorage.setItem('sesa_gestao_identity_v1',JSON.stringify(v))}catch(_){ }}
+function openConfigIdentityModal(){
+ const cur=loadSystemIdentity();
+ openUserFormModal({
+  title:'Identidade do Sistema',
+  subtitle:'Esses dados aparecem no painel "Parâmetros" logo abaixo, nesta mesma tela.',
+  fields:[
+   {id:'cfgNome',label:'Nome do sistema',value:cur.nome},
+   {id:'cfgOrgao',label:'Órgão',value:cur.orgao},
+   {id:'cfgUnidades',label:'Unidades',value:cur.unidades}
+  ],
+  confirmLabel:'Salvar',
+  onConfirm: async (v)=>{
+   const nome=String(v.cfgNome||'').trim()||cur.nome;
+   const orgao=String(v.cfgOrgao||'').trim()||cur.orgao;
+   const unidades=String(v.cfgUnidades||'').trim()||cur.unidades;
+   saveSystemIdentity({nome,orgao,unidades});
+   showSesaToast('Identidade do sistema atualizada.');
+   render();
+  }
+ });
+}
+// Lista informativa de onde exportação/impressão já funcionam hoje — não existe
+// nenhum parâmetro de exportação para ajustar (formato, colunas etc.), então o
+// botão "Configurar" deste card mostra isso em vez de abrir uma tela vazia.
+function openConfigExportModal(){
+ const pages=[['Dashboard'],['Pesquisa de Convênios'],['Consultas Avançadas'],['Contratos'],['Lei 360'],['Cadastro Manual'],['Pagamentos SIAFI'],['Saúde Digital']];
+ openUserFormModal({
+  title:'Exportação',
+  subtitle:'CSV e Imprimir/PDF já ficam disponíveis direto em cada módulo de dados — não há um parâmetro de exportação para configurar hoje.',
+  bodyHtml:`<div class="detailgrid">${pages.map(([label])=>`<div class="detail"><small>${esc(label)}</small><b>Exportar dados + Imprimir/PDF</b></div>`).join('')}</div>`,
+  fields:[],
+  confirmLabel:'Entendi',
+  onConfirm: async ()=>{}
+ });
+}
+function config(){
+ const identity=loadSystemIdentity();
+ const src=[['Todas as Bases 14.08.xlsx','EXECUÇÃO + CELEBRAÇÃO + FISCALIZAÇÃO + PRESTAÇÃO + PCF',Object.values(stats).slice(0,5).reduce((a,v)=>a+v,0)],['Lei 360 24.08.xlsx','Lei 360 - Com Parcelas',stats['LEI 360']],['Pagamentos Seafi 14.08.xlsx','Demonstrativo Despesas Empenhad',stats['PAGAMENTOS SIAFI']],['Base Planos e Ações.xls','Planos de Aplicação 2026 + Base Geral Ações',stats['PLANOS DE APLICAÇÃO']+stats['BASE GERAL AÇÕES']]];
+ const cards=[
+  ['Identidade do Sistema',`${identity.nome} — ${identity.unidades.replace(/\s*·\s*/g,' / ')}`,'Versão V2','openConfigIdentityModal()'],
+  ['Dados e Importação','Fontes anexadas e processadas','Atualização: 26/08/2026','openImportModal()'],
+  ['Segurança','Controle de usuários e permissões','Auditoria ativa',`setPage('acessos')`],
+  ['Exportação','CSV, impressão e estrutura para PDF','Disponível nos módulos','openConfigExportModal()']
+ ];
+ return `<div class="row" style="grid-template-columns:repeat(2,1fr)">${cards.map(x=>`<div class="panel"><div class="ptitle">${x[0]}</div><div style="font-size:14px;font-weight:750">${esc(x[1])}</div><div class="sub" style="margin-top:5px">${esc(x[2])}</div><button class="btn secondary" style="margin-top:12px" type="button" onclick="${x[3]}">Configurar</button></div>`).join('')}</div><div class="panel" style="margin-top:14px"><div class="ptitle">Fontes de Dados</div><div class="tablewrap"><table class="table"><thead><tr><th>Arquivo</th><th>Conteúdo</th><th>Registros</th><th>Status</th></tr></thead><tbody>${src.map(x=>`<tr><td><b>${x[0]}</b></td><td>${x[1]}</td><td>${x[2].toLocaleString('pt-BR')}</td><td><span class="badge">Processado</span></td></tr>`).join('')}</tbody></table></div></div><div class="panel" style="margin-top:14px"><div class="ptitle">Parâmetros</div><div class="detailgrid"><div class="detail"><small>Nome</small><b>${esc(identity.nome)}</b></div><div class="detail"><small>Versão</small><b>2.0</b></div><div class="detail"><small>Órgão</small><b>${esc(identity.orgao)}</b></div><div class="detail"><small>Unidades</small><b>${esc(identity.unidades)}</b></div></div></div>`}
 function advNormalizeDisplay(v){return String(v??'').trim()}
 function advUniqueValues(rows,keys){
  const seen=new Map();
