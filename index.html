@@ -1417,7 +1417,10 @@ async function refreshServerUsers(force=false){
    return serverUsersCache||[];
  }finally{
    serverUsersLoading=false;
-   if(state.page==='usuarios')render();
+   // Acessos também depende da lista real de usuários (seleção por usuário
+   // na Matriz de Permissões), então precisa re-renderizar quando a busca
+   // termina, igual à tela de Usuários.
+   if(state.page==='usuarios'||state.page==='acessos')render();
  }
 }
 
@@ -1623,13 +1626,73 @@ async function changeMasterPassword(){
  });
 }
 
-function acessos(){const mods=['Dashboard','Pesquisa','Consultas Avançadas','Contratos','Lei 360','Cadastro Manual','Pagamentos SIAFI','Saúde Digital','Relatórios','Configurações'];const profiles=[['Administrador','Acesso total'],['Gestor','Gestão e relatórios'],['Analista','Operação e consultas'],['Consulta','Somente leitura']];
+// Permissão padrão de cada perfil, na mesma ordem/índice de ACESSOS_MODS —
+// é a mesma regra que já existia na Matriz de Permissões (por perfil), só
+// extraída para função porque agora também serve de base para a aba "Por
+// usuário" (o checkbox de um usuário começa marcado conforme o perfil dele).
+const ACESSOS_MODS=['Dashboard','Pesquisa','Consultas Avançadas','Contratos','Lei 360','Cadastro Manual','Pagamentos SIAFI','Saúde Digital','Relatórios','Configurações'];
+const ACESSOS_GROUPS=[{label:'VISÃO GERAL',count:1},{label:'CONSULTAS',count:2},{label:'GESTÃO',count:5},{label:'ADMINISTRAÇÃO',count:2}];
+function acessosRoleDefaults(role){
+ const r=String(role||'').trim().toUpperCase();
+ const pi=r==='MASTER'||r==='ADMINISTRADOR'?0:r==='GESTOR'?1:r==='ANALISTA'?2:3;
+ return ACESSOS_MODS.map((m,mi)=>pi===0||pi===1&&![5,9].includes(mi)||pi===2&&[0,1,2,3,4,6,7,8].includes(mi)||pi===3&&[0,1,2,3,4,6,7,8].includes(mi));
+}
+// Personalização por usuário individual — complementa a matriz por perfil
+// para quando o acesso de uma pessoa específica precisa fugir do padrão do
+// perfil dela (ex.: um Analista que também cuida de Configurações). Fica
+// salva neste navegador (não há coluna própria para isso no Supabase ainda),
+// da mesma forma que a matriz por perfil já era só ilustrativa.
+function loadAcessosUserOverrides(){try{return JSON.parse(localStorage.getItem('sesa_gestao_user_module_overrides_v1')||'{}')}catch(_){return {}}}
+function saveAcessosUserOverrides(all){try{localStorage.setItem('sesa_gestao_user_module_overrides_v1',JSON.stringify(all))}catch(_){ }}
+function setAcessosView(view){state.acessosView=view;render()}
+function setAcessosUser(id){state.acessosUserId=id;render()}
+function salvarPermissoesUsuario(userId){
+ const grid=document.getElementById('acessosUserGrid');
+ if(!grid)return;
+ const mods=Array.from(grid.querySelectorAll('input[type=checkbox]')).sort((a,b)=>Number(a.dataset.modIdx)-Number(b.dataset.modIdx)).map(c=>c.checked);
+ const all=loadAcessosUserOverrides();
+ all[userId]=mods;
+ saveAcessosUserOverrides(all);
+ showSesaToast('Permissões salvas para este usuário.');
+ render();
+}
+function restaurarPermissoesUsuario(userId){
+ const all=loadAcessosUserOverrides();
+ delete all[userId];
+ saveAcessosUserOverrides(all);
+ showSesaToast('Permissões deste usuário voltaram ao padrão do perfil.');
+ render();
+}
+function acessos(){
+ const mods=ACESSOS_MODS,profiles=[['Administrador','Acesso total'],['Gestor','Gestão e relatórios'],['Analista','Operação e consultas'],['Consulta','Somente leitura']];
  // Mesmo agrupamento do menu lateral (VISÃO GERAL / CONSULTAS / GESTÃO / ADMINISTRAÇÃO),
  // aplicado como cabeçalho hierárquico da matriz — só organização visual, os índices
  // de módulo (mi) e a lógica de marcação abaixo continuam exatamente os mesmos.
- const groups=[{label:'VISÃO GERAL',count:1},{label:'CONSULTAS',count:2},{label:'GESTÃO',count:5},{label:'ADMINISTRAÇÃO',count:2}];
+ const groups=ACESSOS_GROUPS;
  const groupStarts=new Set();let acc=0;groups.forEach(g=>{groupStarts.add(acc);acc+=g.count});
- return `<div class="panel"><div class="ptitle">Matriz de Permissões</div><div class="notice">Controle granular por módulo. As marcações abaixo representam a configuração inicial da V2.</div><div class="tablewrap" style="margin-top:12px"><table class="table acc-matrix"><thead><tr><th rowspan="2" style="vertical-align:bottom">Perfil</th>${groups.map(g=>`<th colspan="${g.count}" class="acc-group-th">${g.label}</th>`).join('')}</tr><tr>${mods.map((m,mi)=>`<th${groupStarts.has(mi)?' class="acc-group-start"':''}>${m}</th>`).join('')}</tr></thead><tbody>${profiles.map((p,pi)=>`<tr><td><b>${p[0]}</b><br><small>${p[1]}</small></td>${mods.map((m,mi)=>`<td${groupStarts.has(mi)?' class="acc-group-start"':''}><input type="checkbox" ${pi===0||pi===1&&![5,9].includes(mi)||pi===2&&[0,1,2,3,4,6,7,8].includes(mi)||pi===3&&[0,1,2,3,4,6,7,8].includes(mi)?'checked':''}></td>`).join('')}</tr>`).join('')}</tbody></table></div></div><div class="row panels" style="margin-top:14px"><div class="panel"><div class="ptitle">Políticas de segurança</div><div class="detailgrid"><div class="detail"><small>Autenticação</small><b>Obrigatória</b></div><div class="detail"><small>Auditoria</small><b>Ativa</b></div><div class="detail"><small>Expiração de sessão</small><b>30 minutos</b></div><div class="detail"><small>Exportação</small><b>Controlada por perfil</b></div></div></div><div class="panel"><div class="ptitle">Ações</div><button class="btn">Salvar permissões</button> <button class="btn secondary">Restaurar padrão</button></div></div>`}
+ const groupHeaderRow=`<tr><th rowspan="2" style="vertical-align:bottom">${'{{FIRST_COL}}'}</th>${groups.map(g=>`<th colspan="${g.count}" class="acc-group-th">${g.label}</th>`).join('')}</tr><tr>${mods.map((m,mi)=>`<th${groupStarts.has(mi)?' class="acc-group-start"':''}>${m}</th>`).join('')}</tr>`;
+ const view=state.acessosView==='usuario'?'usuario':'perfil';
+ const tabsHtml=`<div class="acc-view-tabs" style="display:flex;gap:8px;margin:12px 0"><button type="button" class="btn ${view==='perfil'?'':'secondary'}" onclick="setAcessosView('perfil')">Por perfil</button><button type="button" class="btn ${view==='usuario'?'':'secondary'}" onclick="setAcessosView('usuario')">Por usuário</button></div>`;
+ let matrixHtml;
+ if(view==='perfil'){
+   matrixHtml=`<div class="tablewrap" style="margin-top:4px"><table class="table acc-matrix"><thead>${groupHeaderRow.replace('{{FIRST_COL}}','Perfil')}</thead><tbody>${profiles.map((p,pi)=>{const checked=ACESSOS_MODS.map((m,mi)=>pi===0||pi===1&&![5,9].includes(mi)||pi===2&&[0,1,2,3,4,6,7,8].includes(mi)||pi===3&&[0,1,2,3,4,6,7,8].includes(mi));return `<tr><td><b>${p[0]}</b><br><small>${p[1]}</small></td>${checked.map((c,mi)=>`<td${groupStarts.has(mi)?' class="acc-group-start"':''}><input type="checkbox" ${c?'checked':''}></td>`).join('')}</tr>`}).join('')}</tbody></table></div>`;
+ }else{
+   const localUsers=(window.sesaAuth?.loadUsers?.()||[]);
+   const users=(Array.isArray(serverUsersCache)?serverUsersCache:localUsers).filter(u=>String(u.role||'').trim().toUpperCase()!=='MASTER');
+   if(!Array.isArray(serverUsersCache)&&!serverUsersLoading)refreshServerUsers(true);
+   const selectedId=state.acessosUserId||'';
+   const selectedUser=users.find(u=>String(u.id)===String(selectedId))||null;
+   const overrides=loadAcessosUserOverrides();
+   const hasOverride=selectedUser&&Array.isArray(overrides[selectedUser.id]);
+   const checked=selectedUser?(hasOverride?overrides[selectedUser.id]:acessosRoleDefaults(selectedUser.role)):[];
+   const selectHtml=`<div class="field" style="max-width:420px"><label>Selecione o usuário</label><select class="select" onchange="setAcessosUser(this.value)">${!users.length?`<option value="">${serverUsersLoading?'Carregando usuários...':'Nenhum usuário encontrado'}</option>`:`<option value="">Selecione...</option>${users.map(u=>`<option value="${esc(u.id)}" ${String(u.id)===String(selectedId)?'selected':''}>${esc(u.username||u.full_name||u.id)} — ${esc(u.role||'—')}</option>`).join('')}`}</select></div>`;
+   const gridHtml=!selectedUser?`<div class="empty" style="margin-top:12px">Selecione um usuário acima para ver e ajustar os módulos específicos dele — útil quando o acesso de uma pessoa precisa fugir do padrão do perfil, conforme a área que ela realmente atende.</div>`:`
+    <div class="notice" style="margin:12px 0">Perfil padrão de <b>${esc(selectedUser.username||selectedUser.full_name||'')}</b>: <b>${esc(selectedUser.role||'—')}</b>. ${hasOverride?'Este usuário já tem uma personalização salva, diferente do padrão do perfil.':'Ainda usando os módulos padrão do perfil — marque/desmarque abaixo para personalizar.'}</div>
+    <div class="tablewrap"><table class="table acc-matrix"><thead>${groupHeaderRow.replace('{{FIRST_COL}}','Usuário')}</thead><tbody><tr id="acessosUserGrid" data-user-id="${esc(selectedUser.id)}"><td><b>${esc(selectedUser.username||selectedUser.full_name||'')}</b><br><small>${esc(selectedUser.role||'—')}</small></td>${checked.map((c,mi)=>`<td${groupStarts.has(mi)?' class="acc-group-start"':''}><input type="checkbox" data-mod-idx="${mi}" ${c?'checked':''}></td>`).join('')}</tr></tbody></table></div>
+    <div class="actions" style="margin-top:12px"><button type="button" class="btn" onclick="salvarPermissoesUsuario('${esc(selectedUser.id)}')">Salvar permissões deste usuário</button> ${hasOverride?`<button type="button" class="btn secondary" onclick="restaurarPermissoesUsuario('${esc(selectedUser.id)}')">Restaurar padrão do perfil</button>`:''}</div>`;
+   matrixHtml=`${selectHtml}${gridHtml}`;
+ }
+ return `<div class="panel"><div class="ptitle">Matriz de Permissões</div><div class="notice">Controle granular por módulo. Ajuste o padrão de cada perfil ou personalize um usuário específico quando o acesso dele precisar fugir do perfil padrão.</div>${tabsHtml}${matrixHtml}</div><div class="row panels" style="margin-top:14px"><div class="panel"><div class="ptitle">Políticas de segurança</div><div class="detailgrid"><div class="detail"><small>Autenticação</small><b>Obrigatória</b></div><div class="detail"><small>Auditoria</small><b>Ativa</b></div><div class="detail"><small>Expiração de sessão</small><b>30 minutos</b></div><div class="detail"><small>Exportação</small><b>Controlada por perfil</b></div></div></div><div class="panel"><div class="ptitle">Ações</div><button class="btn">Salvar permissões</button> <button class="btn secondary">Restaurar padrão</button></div></div>`}
 function relatorios(){const items=[['Relatório Geral','Todas as bases','5 bases principais','Pesquisa integrada'],['Execução','EXECUÇÃO',(DATA['EXECUÇÃO']||[]).length+' registros','Situação dos convênios e execução financeira'],['Contratos','CONTRATOS',(DATA['CONTRATOS']||[]).length+' registros','Valores, empenho, pagamento e saldo'],['Celebração','CELEBRAÇÃO',(DATA['CELEBRAÇÃO']||[]).length+' registros','MAPPs e status de celebração'],['Fiscalização','FISCALIZAÇÃO',(DATA['FISCALIZAÇÃO']||[]).length+' registros','Fiscalizações e atrasos'],['Prestação de Contas','PRESTAÇÃO DE CONTAS',(DATA['PRESTAÇÃO DE CONTAS']||[]).length+' registros','Prazos, pareceres e pendências'],['PCF','PCF',(DATA['PCF']||[]).length+' registros','Tramitação e pagamentos'],['Lei 360','LEI 360',(DATA['LEI 360']||[]).length+' registros','Parcelas e execução financeira'],['Pagamentos SIAFI','PAGAMENTOS SIAFI',(DATA['PAGAMENTOS SIAFI']||[]).length+' lançamentos','Empenhado, liquidado e pago'],['Saúde Digital','PLANOS DE APLICAÇÃO',(DATA['PLANOS DE APLICAÇÃO']||[]).length.toLocaleString('pt-BR')+' registros','Planos de aplicação 2026']];return `<div class="row" style="grid-template-columns:repeat(3,1fr)">${items.map(x=>{const isGeral=x[0]==='Relatório Geral';const hasReport=isGeral||!!MODULE_REPORT_CONFIGS[x[1]];const noData=!isGeral&&!(DATA[x[1]]||[]).length;return `<div class="panel"><div class="ptitle">${x[0]}</div><div class="sub">Fonte: ${x[1]}</div><div style="font-size:18px;font-weight:800;margin-top:10px">${x[2]}</div><div class="sub" style="margin-top:5px">${x[3]}</div><div class="actions" style="margin-top:12px;justify-content:space-between;align-items:center">${hasReport?`<button type="button" class="btn" onclick="${isGeral?'generateGeneralReport()':x[1]==='CONTRATOS'?'generateContractsDirectReport()':`generateModuleReport('${x[1]}')`}" ${noData?'disabled title="Nenhum dado importado ainda"':''}>Gerar PDF</button>`:`<button class="btn" onclick="setPage('pesquisa')">Relatório na Pesquisa</button>`}<button class="btn-link" onclick="setPage('${isGeral?'dashboard':x[1]==='EXECUÇÃO'?'pesquisa':x[1]==='CONTRATOS'?'contratos':x[1]==='LEI 360'?'lei':x[1]==='PAGAMENTOS SIAFI'?'pagamentos':x[1]==='PLANOS DE APLICAÇÃO'?'saude':'pesquisa'}')">Abrir base →</button></div></div>`}).join('')}</div><div class="panel" style="margin-top:14px"><div class="ptitle">Sobre os relatórios em PDF</div><div class="sub">Cada relatório traz os indicadores reais da base no momento da geração, um alerta com o principal ponto de atenção (quando houver) e os registros mais relevantes daquele achado — nada é pré-calculado ou fictício.</div></div>`}
 function config(){const src=[['Todas as Bases 14.08.xlsx','EXECUÇÃO + CELEBRAÇÃO + FISCALIZAÇÃO + PRESTAÇÃO + PCF',Object.values(stats).slice(0,5).reduce((a,v)=>a+v,0)],['Lei 360 24.08.xlsx','Lei 360 - Com Parcelas',stats['LEI 360']],['Pagamentos Seafi 14.08.xlsx','Demonstrativo Despesas Empenhad',stats['PAGAMENTOS SIAFI']],['Base Planos e Ações.xls','Planos de Aplicação 2026 + Base Geral Ações',stats['PLANOS DE APLICAÇÃO']+stats['BASE GERAL AÇÕES']]];return `<div class="row" style="grid-template-columns:repeat(2,1fr)">${[['Identidade do Sistema','SESA Gestão Pública — CECOC / COGCO / SEAFI','Versão V2'],['Dados e Importação','Fontes anexadas e processadas','Atualização: 26/08/2026'],['Segurança','Controle de usuários e permissões','Auditoria ativa'],['Exportação','CSV, impressão e estrutura para PDF','Disponível nos módulos']].map(x=>`<div class="panel"><div class="ptitle">${x[0]}</div><div style="font-size:14px;font-weight:750">${x[1]}</div><div class="sub" style="margin-top:5px">${x[2]}</div><button class="btn secondary" style="margin-top:12px">Configurar</button></div>`).join('')}</div><div class="panel" style="margin-top:14px"><div class="ptitle">Fontes de Dados</div><div class="tablewrap"><table class="table"><thead><tr><th>Arquivo</th><th>Conteúdo</th><th>Registros</th><th>Status</th></tr></thead><tbody>${src.map(x=>`<tr><td><b>${x[0]}</b></td><td>${x[1]}</td><td>${x[2].toLocaleString('pt-BR')}</td><td><span class="badge">Processado</span></td></tr>`).join('')}</tbody></table></div></div><div class="panel" style="margin-top:14px"><div class="ptitle">Parâmetros</div><div class="detailgrid"><div class="detail"><small>Nome</small><b>SESA Gestão Pública</b></div><div class="detail"><small>Versão</small><b>2.0</b></div><div class="detail"><small>Órgão</small><b>Secretaria da Saúde do Ceará</b></div><div class="detail"><small>Unidades</small><b>CECOC · COGCO · SEAFI</b></div></div></div>`}
 function advNormalizeDisplay(v){return String(v??'').trim()}
